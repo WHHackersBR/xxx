@@ -37,6 +37,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     //widget: widget that published the topic
 		if(document.getElementById("inputPOS").value==""){
 		alert("请输入子板位置");
+		}else if(document.getElementById("inputFailCode").value=="9999"){
+		alert("请选择错误代码");
 		}else{
 	    closeNoChanges();
 	    }
@@ -58,7 +60,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<s:textfield id="inputPOS" key="failureReportData.positionNr" />
 				<s:textfield key="formData.operatorID" readonly="true"  />
 				<s:select 	key="failureReportData.failureCode" list="failureReportData.failureCodes" 
-							listKey="failureCodeAbbr" listValue="failurCodeName"/>
+							listKey="failureCodeAbbr" listValue="failurCodeName" headerKey="9999" headerValue="请选择错误代码" id="inputFailCode"/>
 				<s:textarea key="failureReportData.failureDescription" />
 			    <tr>				    				    
 				    <td><sx:submit key="buttonSave" afterNotifyTopics="/afterAddedReport"  /></td>

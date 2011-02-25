@@ -51,10 +51,6 @@ public class FailureReportData {
 				//get data
 				ResultSet rs = (ResultSet) coll.getObject(1);
 				//and process it
-				FailureCode failure=new FailureCode();
-				failure.setFailureCodeAbbr("9999");
-				failure.setFailurCodeName("9999 - 请选择错误代码...");
-				failureCodes.add(failure);
 				while (rs.next()) {
 					String codeAbbr=rs.getString(1);
 					String codeDefinition=rs.getString(2);
@@ -62,7 +58,7 @@ public class FailureReportData {
 					//System.out.println(codeAbbr + " - " + codeDefinition); // code - description matching code	
 					
 					// add the values
-					//FailureCode failureCode=new FailureCode();
+					FailureCode failure=new FailureCode();
 					failure.setFailureCodeAbbr(codeAbbr);
 					failure.setFailurCodeName(codeAbbr + " - " + codeDefinition);
 					failureCodes.add(failure);
