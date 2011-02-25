@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 指定Struts2配置文件的DTD信息 -->
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+	"http://struts.apache.org/dtds/struts-2.0.dtd">
+<!-- Struts2配置文件的根元素 -->
+<struts>
+	<constant name="struts.multipart.maxSize" value="1048576000" />
+
+	<package name="admin" namespace="/" extends="struts-default">
+		<action name="*_Interface" class="com.vi.action.ShowInterfaceAction" method="{1}">					  
+  			<result name="success">/interface.jsp</result>
+		</action>
+		
+		<action name="fillItemList" class="com.vi.action.ShowInterfaceAction" method="fillItemList">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getItemNrAndVersion.jsp</result>
+  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+		</action>
+		<action name="fillWorkstationDescription" class="com.vi.action.ShowInterfaceAction" method="fillWorkstationDescription">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getWorkstationDescription.jsp</result>
+  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+		</action>
+		<action name="changeSide" class="com.vi.action.ShowInterfaceAction" method="changeSide">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getSide.jsp</result>
+		</action>				
+		<action name="changeOperatorID" class="com.vi.action.ShowInterfaceAction" method="changeOperatorID">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getOperatorID.jsp</result>
+		</action>
+		<action name="fillCurrentFID" class="com.vi.action.ShowInterfaceAction" method="fillCurrentFID">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getCurrentFID.jsp</result>
+  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+		</action>		
+		<action name="startPO" class="com.vi.action.ShowInterfaceAction" method="startPO">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getSvg.jsp</result>
+  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+		</action>
+		
+		<action name="saveFailureReportData" class="com.vi.action.FailureReportAction" method="saveFailureReportData">					  
+  			<result name="success">/failureReport.jsp</result>
+		</action>
+		
+		
+		<action name="goToFailureReport" class="com.vi.action.FailureReportAction" method="goToFailureReport">					  
+  			<result name="success">/failureReport.jsp</result>
+		</action>
+		
+		<action name="*_ItemFailureList" class="com.vi.action.ItemFailureListAction" method="{1}">					  
+  			<result name="success">/itemFailureList.jsp</result>
+		</action>
+		
+		<action name="goToEditFailureReport" class="com.vi.action.ItemFailureListAction" method="goToEditFailureReport">					  
+  			<result name="success">/editFailureReport.jsp</result>
+		</action>
+
+		<action name="openPoInformation" class="com.vi.action.PoInformationAction" method="openPoInformation">					  
+  			<result name="success">/poHistory.jsp</result>
+		</action>			
+		
+		<action name="openShowUnconfirmed" class="com.vi.action.GetUnconfirmed" method="openShowUnconfirmed">					  
+  			<result name="success">/showUnconfirmed.jsp</result>
+		</action>
+		
+		<action name="*_AllTestsOverview" class="com.vi.action.AllTestsOveriewAction" method="{1}">					  
+  			<result name="success">/poAllTestsOverview.jsp</result>
+		</action>
+		<action name="goToEditFailureInformation" class="com.vi.action.AllTestsOveriewAction" method="goToEditFailureInformation">					  
+  			<result name="success">/editFailureInformation.jsp</result>
+		</action>
+		
+		<action name="goToStoreSvgInDB" class="com.vi.action.ShowInterfaceAction" method="goToStoreSvgInDB">					  
+  			<result name="success">/storeSvgInDB.jsp</result>
+		</action>
+		<action name="doStoreSvgInDB" class="com.vi.action.StoreSvginDBAction" method="doStoreSvgInDB">					  
+  			<result name="success">/storeSvgInDB.jsp</result>
+		</action>
+		
+	</package>
+</struts>

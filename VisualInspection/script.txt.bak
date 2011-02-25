@@ -1,0 +1,3297 @@
+<!-- Sicht Pruefungs Funktionsbaustein 15.12.09 Kraus SNC V5.03-->
+
+<g onload="pcInit(evt)">
+</g>
+
+<g>
+ <data> <value>
+
+
+     <!-- Sichtpruefungs menue -->
+     <menu id="Sicht">
+
+      <header>Adobe SVG Viewer</header>
+      <item onactivate="Schieben()">Move                      (Alt + Mouse left)</item>
+      <item action="ZoomIn">Zoom +  (Strg + Mouse left expand)</item>
+      <item action="ZoomOut">Zoom -                          (Strg + shift)</item>
+      <item id="OriginalView" action="OriginalView">Original view</item>
+
+
+      
+
+               <menu id="Dreh">
+               <header>Rotate</header>
+               <item id="Drehen0" enabled="no" onactivate="Drehen('0')" >rotate     0</item>
+               <item id="Drehen90" enabled="yes" onactivate="Drehen('90')">rotate   90</item>
+               <item id="Drehen180" enabled="yes" onactivate="Drehen('180')">rotate 180</item>
+               <item id="Drehen270" enabled="yes" onactivate="Drehen('270')">rotate 270</item>
+               
+               </menu>
+               
+       <separator/>
+
+               <menu id="layerv">
+               <header>Preselection :</header>
+               <item id="Lv_neutr" checked="yes" onactivate="Voreinst('Lv_neutr')">  Basic view</item>
+               <item id="LV_alleein" checked="no" onactivate="Voreinst('LV_alleein')">  all views on</item>
+               <separator/>
+
+               </menu>
+
+      <separator/>
+
+               <menu id="layerg" display="none">
+               <header >Layer :  AKZ</header>
+               <item id="alleaus" checked="no" onactivate="onoffa('alleaus')">  Alle aus</item>
+               <item id="alleein" checked="no" onactivate="onoffa('alleein')">  Alle ein</item>
+               <separator/>
+               </menu>
+
+       <separator/>
+
+               <menu id="layer">
+               <header>Layer :  special u. additional</header>
+              <item id="alleausz" checked="no" onactivate="onoffaz('alleaus')">  All off</item>
+               <item id="alleeinz" checked="no" onactivate="onoffaz('alleein')">  All on</item>
+               <separator/>
+                </menu>
+
+
+       <separator/>
+               <menu id="action">
+               <header>Search :</header>
+      <item onactivate="GruppenMark('10000000')">Component not assembled </item>
+      <item onactivate="GruppenMark('?')" >Component no data </item>
+               </menu>
+      <item onactivate="suchenEP()">  RefDes            (S)</item>
+      <item onactivate="GruppenMark('+')">  Attribute         (A)</item>
+      <item onactivate="reseten()">  Reset              (Esc)</item>
+
+
+       <separator/>
+      <menu display="none">
+      <header>Anzeigen :</header>
+      <item id="anzers" onactivate="onofff('anzers')">Ersatztypen   (leer)</item>
+      </menu>
+      <item >Show :</item>
+      <item onactivate="Beztausch('gkz1')">  Ref.-Designator (E)</item>
+      <item onactivate="Beztausch('label1')">  Label                  (W)</item>
+      <item onactivate="Beztauschb()">  Ref and Label    (Z)</item>
+      <item id="Sgross" checked="no" onactivate="Schriftgross()" >  Font size            (G)</item>
+
+
+       <separator/>
+      <item id="Tstepm" checked="no" onactivate="suchen('84')" >Section step           (T)</item>
+      <item onactivate="suchen('40')" >Step all on             (Arrow ->)</item>
+      <item id="br" onactivate="PosiLoopresetall()" >Step reset</item>
+
+
+      <separator/>
+      <item id="Masters" onactivate="Masters()">New open            (F)</item>
+      <item onactivate="HilfeText()">Quick help            (H)</item>
+      <item id="Mastersd" onactivate="Drucken()">Print Original view</item>
+      <item action='CopySVG'>Copy SVG</item>
+      <item action="About">About Adobe SVG Viewer...</item>
+      </menu>
+
+</value></data>
+</g>
+
+
+<script type="text/ecmascript"><![CDATA[
+var doc;
+var svg0;
+var svg1;
+var eingabe = " ";
+var seingabea = " ";
+var EP = " ";
+var cfill = "yellow";
+var cstroke = "red";
+var EPA = "S";
+var REP1 = "S";
+var ueberga = "+";
+var siy = 0;
+var Layerss = "a";
+var rota = 0;
+var layaerst2 = "Drehen0";
+var nbstatus = "inline" ;
+var boxfills = "none1";
+var boxfills1 = "none";
+var schriftgr = 1;
+var loopc = 0;
+var EPloop = 0;
+var LoopMark = 0;
+var rectstroke ="red";
+var Ersatzein = 0;
+var Voreinsts = "Lv_neutr";
+var Gerber = 0;
+var Einstellr = " ";
+var AeLage = 0;
+var Vorauswahl = 0;
+var nutzenpref =" ";
+var anzahlpref = 0;
+var MessenOn = "Off";
+var erwsuche = "";
+var Tstep = 0;
+var Skip2 = "nein"
+var ruekmeld = null;
+
+// add by thom, 2010-06-08
+var tx = 0, ty = 0
+var lastX, lastY
+var down = false
+var g = document.getElementById( "luck" )
+// end add
+
+
+
+// Initialisation function
+function pcInit(evt) {
+  var svg_pc = evt.getTarget();
+  doc = evt.getTarget().getOwnerDocument();
+  svg1 = doc.getDocumentElement();
+    g.addEventListener( "mousedown", Down, false )
+	g.addEventListener( "mouseup", Up, false )
+g.addEventListener( "mousemove", Move, false )
+
+
+
+RenameLayer();
+
+
+  // to set Event at SVG-Doc 
+  svg1.setAttribute("onkeydown", "suchen(evt)");
+  svg1.setAttribute("onmousemove", "pcb_locate_drag(evt)");
+  svg1.setAttribute("width", "100%");
+  svg1.setAttribute("height", "100%");
+  svg1Viewbox = ""+svg1.getAttribute("viewBox");
+
+
+
+  // to detect Pixel of Viewbox
+  var vbox = svg1Viewbox.split( ' ' );
+  svg1Vx = Number(vbox[0]);
+  svg1Vy = Number(vbox[1]);
+  svg1Vwidth = Number(vbox[2]);
+  svg1Vheight = Number(vbox[3]);
+
+
+  //to set mouse over function for EB 
+        var gover = doc.getElementsByTagName("g");
+        var anzahlid = gover.getLength();
+
+      //EB mouse over
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,20);
+                    if  (gkz == "_") {
+                    EP = gkz+gkz1;
+                    textvar = "displaydata('"+gkz1+"')";
+                    rtextvar = "resetdata('"+gkz1+"')";
+                    qdataev = "QDaten()";
+                    setzt = doc.getElementById(goverid);
+                    setzt.setAttribute("onmouseout", rtextvar);
+                    setzt.setAttribute("onmouseover", textvar );
+                    setzt.setAttribute("onmouseup", qdataev );
+                    gkzt = "r"+EP;
+                    setztt = doc.getElementById(gkzt);
+                    setztl = "!"+setztt+"!"
+                    if (setztl != "!null!" && setztl != "" ){
+                    setztt.setAttribute("fill-opacity", '0.75' );
+                    }
+                }
+     // Layer readout
+                lkz = goverid.substr(0,2);
+                 if  (lkz == "Ae") {Lage = goverid.substr(3,20);
+                    if  (Lage > 0 || Lage == "Pruefung"){
+                        setztl = doc.getElementById(goverid);
+                        setztl.setAttribute("id", "L_"+Lage+"-Ae" );
+                        setztl.setAttribute("display", "none");
+                        setztl.setAttribute("visibility", "");
+                        LayerMenu(Lage+"-Ae");
+                        AeLage = 1
+                        }else{
+                        setztl = doc.getElementById(goverid);
+                        setztl.setAttribute("id", "L_"+Lage );
+                        setztl.setAttribute("visibility", "");
+                        LayerMenu(Lage);
+                        }
+                    }
+                    if  (lkz == "L_") {Lage = goverid.substr(2,20);
+                    LayerMenu(Lage);
+                    }
+                lkzg = goverid.substr(0,3);
+                if  (lkzg == "L_G") {Gerber = 1;};
+                }
+        }
+
+  //pictures mouse over
+        var gover = doc.getElementsByTagName("image");
+        var anzahlid = gover.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,10);
+                    if  (gkz == "_") {
+                    EP = gkz+gkz1;
+                    textvar = "displaydata('"+gkz1+"')";
+                    rtextvar = "resetdata('"+gkz1+"')";
+                    setzt = doc.getElementById(goverid);
+                    setzt.setAttribute("onmouseout", rtextvar);
+                    setzt.setAttribute("onmouseover", textvar );
+                    }
+                }
+        }
+
+
+
+  // color set for each Pos 
+        var goverf = doc.getElementsByTagName("data");
+        var anzahlidf = goverf.getLength();
+        var h1 = 2
+        var h2 = 2
+        var h3 = 2
+        var h4 = 1
+        var h5 = 1
+        var h6 = 1
+
+
+        for (var i=0;i<anzahlidf;i++){
+        var aktidf = goverf.item(i);
+        goveridf = aktidf.getAttribute("id");
+                if  (goveridf == "") {} else {
+                gkzf = goveridf.substr(0,2);
+                    if  (gkzf == "P_") {
+
+  // color calculate
+                    if (h1<12){h1 = h1 + 6;}else{
+                    if (h2<12){h2 = h2 + 6;h1 = 2;}else{
+                    if (h3<12){h3 = h3 + 6;h2 = 2;h1 = 2;}else{
+                    if (h4<12){h4 = h4 + 7;h3 = 2;h2 = 2;h1 = 2;}else{
+                    if (h5<12){h5 = h5 + 7;h4 = 1;h3 = 2;h2 = 2;h1 = 2;}else{
+                    if (h6<12){h6 = h6 + 7;h5 = 1;h4 = 1;h3 = 2;h2 = 2;h1 = 2;}
+                    }
+                    }
+                    }
+                    }
+                    }
+                    var hh1 = h1.toString(16);
+                    var hh2 = h2.toString(16);
+                    var hh3 = h3.toString(16);
+                    var hh4 = h4.toString(16);
+                    var hh5 = h5.toString(16);
+                    var hh6 = h6.toString(16);
+
+                    cfills = "#"+hh1+hh2+hh3;
+                    cstrokes = "#"+hh4+hh5+hh6;
+
+  // color set
+                    setzt = doc.getElementById(goveridf);
+                    setzt.setAttribute("cfill", cfills);
+                    setzt.setAttribute("cstroke", cstrokes);
+                    }
+                }
+        }
+
+
+  // set text for open attribute
+  if (name == "x"){
+  sText = doc.getElementById("Masters");
+   var Texts = "Close"
+   var Childz = sText.getFirstChild();
+   var Inhaltz3 = Childz.setData(Texts);
+   }
+
+
+
+
+  //set Text for attribute print
+  if (name == "y"){
+  svg1.setAttribute("width", "845");
+  svg1.setAttribute("height", "600");
+  sText = doc.getElementById("Mastersd");
+   var Texts = "Close"
+   var Childz = sText.getFirstChild();
+   var Inhaltz3 = Childz.setData(Texts);
+   }
+
+
+
+
+
+  //readout values for mirror 
+              spiegel1 = doc.getElementById("Funktion_Layer1");
+              sdata = spiegel1.getAttribute("transform");
+              var sbox1 = sdata.split(" ");
+              si = Number(sbox1[3]);
+              siy1 = String(sbox1[5]);
+              var siy11 = siy1.split(")");
+              siy = Number(siy11[0]);
+
+
+  // set ContextMenu 
+   setMenu("Sicht");
+
+
+  //  centering rotate by Bs drawing
+   Lsdrehen = doc.getElementById("Seite");
+   Lsdrehen1 = Lsdrehen.getFirstChild();
+   Lsdrehen2 = Lsdrehen1.getData()
+   if (Lsdrehen2 == "Ls"){Drehen("180");
+   }else {
+   Drehen("0");
+   }
+
+
+
+  // InfoBox position
+  infobox = doc.getElementById("L_Info");
+  leerinfobox = "!"+infobox+"!";
+  if (leerinfobox != "!null!"){
+  infobox.setAttribute('transform', "translate("+(svg1Vx+5)+" "+(svg1Vy+5)+")");
+  }
+
+  // not for SNC: Schrift fuer Gerber
+  if (Gerber == 1){Schriftgross("2")}
+
+  //message AKZ preselection
+  //Meldung1("Preselection : Basic view", "#000")
+   
+  //readout Panal values 
+  nutzend = doc.getElementById("Nutzen");
+  leer4 = "!"+nutzend+"!";
+  if (leer4 == "!null!"){anzahlpref = 0 }else{
+  nutzend1 = nutzend.getFirstChild();
+  nutzenpref = nutzend1.getData();
+  anzahlpref = (Number (nutzenpref.length))/2;
+  }
+
+  // Layer without data off
+
+   if (anzahlpref == 0) { onoffg("Lg_111");
+       }else {
+        prefni = nutzenpref.split(',');
+           for (var i=0;i<anzahlpref;i++){
+               onoffg("Lg_111/"+prefni[i])
+           }
+       }
+
+ Hilfe ();
+
+
+DefaultLayer()
+
+
+}
+
+
+// insert ContextMenu 
+function setMenu(menuid)
+         {
+           var ver=getSVGViewerVersion();
+           if(ver.indexOf("Adobe")!=-1)
+           {
+             var newMenu=parseXML(printNode(getDocument().getElementById(menuid)),getContextMenu());
+             if(ver.indexOf("6.0")!=-1)
+             {
+               getContextMenu().replaceChild(newMenu.firstChild,getContextMenu().firstChild);
+             }
+             else
+             {
+               getContextMenu().replaceChild(newMenu,getContextMenu().firstChild);
+             }
+           }
+         }
+
+
+
+//all AKZ Layer  on off
+function onoffa(alle){
+     var onoffastat = alle.split("_");
+    var alle = String(onoffastat[0]);
+    var allestat = String(onoffastat[1]);
+    if (allestat == "posi") {allestat = "Lo"}else{allestat = "Lg"}
+    if (onoffastat[1] == "Ae") {var allestatAe = "_Ae"; allestat = "Lg"}else{var allestatAe = ""}
+        if  (alle == "alleaus") {aeinaus = "inline";
+            nbstatus = "inline"}
+            else {aeinaus = "none"
+            nbstatus = "none"};
+        var goverla = doc.getElementsByTagName("item");
+        var anzahlidla = goverla.getLength();
+        for (var i=0;i<anzahlidla;i++){
+        var aktidla = goverla.item(i);
+        goveridla = aktidla.getAttribute("id");
+                if  (goveridla == "") {} else {
+                    layerla1 = goveridla.substr(3,20);
+                    var leerlgla = doc.getElementById("Lg_"+layerla1);
+  //Layer nonexistent
+                    leerlgla2 = "!"+leerlgla+"!";
+                    if (leerlgla2 == "!null!"){}else{
+                    cbox =  leerlgla.getAttribute("display");
+                         if (cbox == aeinaus) {
+                         gkzla = goveridla.substr(0,3);
+                         gkz1la = goveridla.substr(3,20);
+                                if  (gkzla == "Ls_") {
+                                    onoffg(allestat+"_"+gkz1la+allestatAe)
+
+                                }
+                         }
+                    }
+               }
+        }
+}
+
+// all singel Layer on off
+function onoffaz(alle){
+        if  (alle == "alleaus") {aeinaus = "inline";
+            nbstatus = "inline"}
+            else {aeinaus = "none"
+            nbstatus = "none"};
+        var goverla = doc.getElementsByTagName("item");
+        var anzahlidla = goverla.getLength();
+        for (var i=0;i<anzahlidla;i++){
+        var aktidla = goverla.item(i);
+        goveridla = aktidla.getAttribute("id");
+                if  (goveridla == "") {} else {
+                    layerla1 = goveridla.substr(3,20);
+                    var leerlgla = doc.getElementById("L_"+layerla1);
+  //Layer nonexistent
+                    leerlgla2 = "!"+leerlgla+"!";
+                    if (leerlgla2 == "!null!"){}else{
+                    cbox =  leerlgla.getAttribute("display");
+                    if (cbox == ""){cbox = "inline"}
+                         if (cbox == aeinaus) {
+                         gkzla = goveridla.substr(0,3);
+                         gkz1la = goveridla.substr(3,20);
+                                if  (gkzla == "Ls_") {
+                                onoff("L_"+gkz1la);
+                                }
+                         }
+                    }
+               }
+        }
+}
+
+
+// Layergroup on off
+function onoffg(Layeri){
+     PosiLoopreset()
+
+    var lbox = Layeri.split("_");
+    layaersto = String(lbox[0]);
+    layaerstg = String(lbox[1]);
+    layaerstAe = String(lbox[2]);
+    if (Vorauswahl == 1){layaersto = "Lo"}
+    if (layaersto == "Lo"){Layeri = "Lg_"+layaerstg}
+    layer = doc.getElementById(Layeri);
+
+  //Layer nonexistent
+    leerlg = "!"+layer+"!";
+       if (leerlg == "!null!"){return;}
+
+
+    Layers = layer.getAttribute("display");
+    Layerss = Layers
+    if  (Layers == "none")
+    {layer.setAttribute("display", "inline");
+    }
+    else
+    {layer.setAttribute("display", "none");
+    }
+    Layers = layer.getAttribute("display");
+    Layerss = Layers
+
+    Layeri1 = "L_"+layaerstg + "-Ae";
+    onoff(Layeri1);
+
+    if (layaerstAe != "Ae"){
+    Layeri1 = "L_"+layaerstg + "-EP";
+    onoff(Layeri1);
+    }
+    
+    if (layaerstAe != "Ae"){
+    Layeri1 = "L_"+layaerstg + "-POL";
+    onoff(Layeri1);
+    }
+
+    if (layaerstAe != "Ae"){
+    if (layaerstg == "111"||layaersto == "Lg"){
+    Layeri1 = "L_"+layaerstg + "-POSI";
+    onoff(Layeri1);  
+    }
+    }
+
+    Layeri1 = "L_"+layaerstg ;
+    onoff(Layeri1);
+   
+    layaerst1g = "Ls_"+layaerstg;
+    UpdateMenu(null, layaerst1g, 'checked', 'layerg', false);
+    Layerss = "a";
+}
+
+// single Layer on off
+function onoff(Layeri){
+
+  // singel Layer
+   layer = doc.getElementById(Layeri);
+   leer4 = "!"+layer+"!";
+   //alert (Layeri) ;   
+
+   if (leer4== "!null!"){return;}
+
+    var lbox = Layeri.split("_");
+    layaerst = String(lbox[1]);
+
+    layaerst1 = "Ls_"+layaerst;
+    var Layers = "";
+
+    Layers = layer.getAttribute("display");
+    if (Layerss == Layers){return;}
+    if  (Layers == "none")
+    {layer.setAttribute("display", "inline");
+    UpdateMenu(null, layaerst1, 'checked', 'layer', false);
+    }
+    else
+    {layer.setAttribute("display", "none");
+    UpdateMenu(null, layaerst1, 'checked', 'layer', false);
+    }
+
+}
+
+
+
+// substituteLayer on off
+function onofff(Layeri){
+    UpdateMenu(null, Layeri, 'checked', 'layerg', false);
+     if (Layeri == "anzers"){
+        if (Ersatzein == 0){Ersatzein = 1;return;}
+        if (Ersatzein == 1){Ersatzein = 0;return;}
+     }
+}
+
+
+
+
+// drawing rotate
+function Drehen(rotein){
+reseten()
+rota =  rotein;
+
+  //calculate  and rotate image position 
+  Zgross = doc.getElementById("Hinter");
+  Zgrossf = "resetdatar()";
+  Zgrossx  = Zgross.getAttribute('x');
+  Zgrossy  = Zgross.getAttribute('y');
+  Zgrossw  = Zgross.getAttribute('width');
+  Zgrossh  = Zgross.getAttribute('height');
+  //calculate image center 
+  krotax = ((svg1Vwidth)-(Zgrossw*1))/2;
+  krotay = ((svg1Vheight)-(Zgrossh*1))/2;
+ //rotate position
+  rotx =  (Zgrossw/2) + (Zgrossx*1);
+  roty =  (Zgrossh/2) + (Zgrossy*1);
+  //rotate image
+  rott = doc.getElementById("Drehen");
+  rott.setAttribute('transform', "translate("+(krotax)+" "+(krotay)+") rotate("+(rota)+" "+(rotx)+" "+(roty)+")");
+
+  //LabelWinkel customize
+        var gover = doc.getElementsByTagName("g");
+        var anzahlid = gover.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,10);
+                gkz2 = goverid.substr(1,1);
+                if  (gkz2 <= "9") {continue;}
+                    if  (gkz == "_") {
+                   EP = gkz+gkz1;
+
+                   setzt = doc.getElementById(goverid);
+                   rottag=setzt.getFirstChild();
+                   rottrans = rottag.getAttribute("transform");
+
+              var rottrans = rottrans.split(" ");
+              rottransw1 = String(rottrans[6]);
+              var rottransw2 = rottransw1.split("(");
+              rottransw = Number(rottransw2[1]);
+              rottransx = String(rottrans[7]);
+              rottransw1 = String(rottrans[8]);
+              var rottransw2 = rottransw1.split(")");
+              rottransy = Number(rottransw2[0]);
+              rottransue = ((rottrans[0])+" "+(rottrans[1])+" "+(rottrans[2])+" "+(rottrans[3])+" "+(rottrans[4])+" "+(rottrans[5]));
+
+              if (rota == 0)    {if (rottransw == 270){rottransw = 90}; if (rottransw == 180){rottransw = 0}  }
+              if (rota == 90)   {if (rottransw == 90){rottransw = 270}; if (rottransw == 180){rottransw = 0}   }
+              if (rota == 180)  {if (rottransw == 90){rottransw = 270}; if (rottransw == 0){rottransw = 180}   }
+              if (rota == 270)  {if (rottransw == 270){rottransw = 90}; if (rottransw == 0){rottransw = 180}   }
+
+              rottag.setAttribute("transform",""+rottransue+" rotate("+rottransw+" "+rottransx+" "+rottransy+")");
+                    }
+                }
+        }
+
+
+  //calculate scale 
+        rotscale1 = svg1Vheight/Zgrossw;
+        rotscale2 = svg1Vwidth/Zgrossh;
+        if (rotscale1 <= rotscale2) {rotscale = rotscale1} else {rotscale = rotscale2}
+        if  (rotscale > 1.1) {krotv = "-"}
+        if  (rotscale < 0.9) {krotv = "+"}
+        if  (rotscale >= 0.9 && rotscale <= 1.1){krotv = "-";}
+
+  //customize view window 
+      if (rotscale == 1){}else{
+         
+       if (rota == 90 || rota == 270){
+       var deltaf = (svg1Vwidth-svg1Vheight)/2
+       svg1.setCurrentScale(rotscale*0.95);
+       trans1 =  svg1.getCurrentTranslate();
+       trans1.setX(krotv+deltaf*rotscale);
+       trans1.setY(krotv+deltaf*rotscale);
+       }
+       if (rota == 0 || rota == 180){
+       
+        if (AeLage == 1){
+           svg1.setCurrentScale(0.9);
+           trans1 =  svg1.getCurrentTranslate();
+           trans1.setX((Zgrossw-Zgrossw*0.9)/2 );
+           trans1.setY((Zgrossh-Zgrossh*0.9)/2 );
+           }else{
+           svg1.setCurrentScale(1);
+           trans1 =  svg1.getCurrentTranslate();
+           trans1.setX(0);
+           trans1.setY(0);
+           }
+       }
+      }
+
+
+  //edit kontext menue 
+        layaerst1 = ("Drehen"+rota);
+        UpdateMenu(null, layaerst1, 'enabled', 'Dreh', false);
+        UpdateMenu(null, layaerst2, 'enabled', 'Dreh', false);
+        layaerst2 = layaerst1;
+
+
+}
+
+
+
+
+// key events
+function suchen(evt){
+
+  if (evt == "[object KeyEvent]"){
+     var key = evt.getKeyCode();
+     }else{key = evt}
+    //alert("key"+key);
+
+    // key W call lable
+    if (key == 87){
+       Beztausch("label1")};
+
+    // key E call refdes
+    if (key == 69){
+      Beztausch("gkz1")};
+
+    // key Z call refdes
+    if (key == 90){
+    Beztausch("gkz2")};
+
+    // key P search same BOMPos
+    if (key == 80){
+      GruppenMark('P')};
+
+    // key A search Attributen a. same BE
+    if (key == 65){
+      GruppenMark('+')};
+
+    // key T call Teil-Step
+    if (key == 84){
+        if (Tstep == 0){Tstep = 1;
+        Meldung2('Section-Step on','#f00',2500)
+        }else {
+        Tstep = 0;
+        Meldung2('Section-Step off','#0f0',2500)
+        } 
+        UpdateMenu(null, 'Tstepm', 'checked', null, false);
+        PosiLoopresetall()
+        if (Tstep == 1){
+          for (var i=0;i<1000;i++){
+          loopct = loopc + 1;
+          suchidmd = doc.getElementById("P_"+loopct);
+          leer4 = "!"+suchidmd+"!";
+            if (leer4 == "!null!"){
+            loopc = 0;
+            suchen (40);
+              break;
+            }
+          suchen (40);
+          }
+       }
+     }  
+    // key S BE-search
+    if (key == 83){
+       suchenEP(evt)};
+
+    //key Esc reset
+    if (key == 27){
+      reseten()};
+
+    //Loop +
+    if (key == 40){
+       suchidmd = doc.getElementById("Infomeld");
+       leer4 = "!"+suchidmd+"!";
+       if (leer4 != "!null!"){
+       suchidmd1 = suchidmd.getFirstChild();
+       suchidmd2 = suchidmd1.getData();
+       if (suchidmd2=="P: Letzte "){
+       return;
+       }
+       }
+      Skip2 = "ja"
+      PosiLoop('+')};
+
+    //Loop -
+    if (key == 38){
+      LoopMark = LoopMark-2;
+      PosiLoop('-')};
+
+     //Loop ++
+    if (key == 39){
+       suchidmd = doc.getElementById("Infomeld");
+       leer4 = "!"+suchidmd+"!";
+       if (leer4 != "!null!"){
+       suchidmd1 = suchidmd.getFirstChild();
+       suchidmd2 = suchidmd1.getData();
+       if (suchidmd2=="P: Letzte "){
+       PosiLoopresetall();
+       }else{
+       PosiLoop('++');}
+       return;}
+       PosiLoop('+');
+       PosiLoop('++')};
+
+    //Loop --
+    if (key == 37){
+      PosiLoop('--')};
+
+    //key F fixieren
+    if (key == 70){
+      Masters()};
+
+    //key G font size
+    if (key == 71){
+      Schriftgross()};
+      
+    //not for SNC key Leer Ersatztypen
+    if (key == 32){
+    // Ersatz()
+    };
+      
+    //key Q QData
+    if (key == 81){
+     // QDaten("0")
+     };
+
+    //key M measure
+    if (key == 77){
+      Drehen(0);
+      reseten();
+      Meldung1("Measure ! - only rotate 0 -","#000");
+      MessenOn = "On";}
+      
+    //key H help
+    if (key == 72){
+      Hilfe()};
+
+
+      
+}
+
+// reset scale
+function reseten(evt){
+       deMark();
+       trans2 =  svg1.getCurrentTranslate();
+       trans2.setX(0);
+       trans2.setY(0);
+       svg1.setCurrentScale(1);
+
+       if  (seingabea == " "){}else{
+       suchid2 = doc.getElementById(seingabea);
+       suchid2.setAttribute("stroke", "none");
+       }
+}
+
+//input search refdes
+function suchenEP(evt){
+        eingabe = " ";
+        eingabe = prompt("Reference designator:\nAdvancd Search  ....* e.g. c3* like CC30 or all C like C*"," ");
+        Drehen(rota);
+        svg1.setCurrentScale(2);
+        leer4 = "!"+eingabe+"!";
+        if (leer4 == "!null!"){Drehen(rota);return;}
+
+
+        
+       erwsuche = ""; 
+       if (eingabe.indexOf("*")!= -1) { 
+       eingabe =  String(eingabe).substring(0,(String(eingabe).indexOf("*")));
+       erwsuche = "*"; 
+       reseten();
+        GruppenMark(eingabe+"_*");
+       }else{
+        eingabe=eingabe.toUpperCase();        
+        suchenEP1(eingabe);
+        }
+}
+
+// search refdes
+function suchenEP1(eingabe){
+       seingabea = " ";
+       var EPLs = eingabe.split('_');
+       EPs = String(EPLs[0]);
+       LStat = String(EPLs[1]);
+       seingabe = ("_"+EPs);
+       suchid = doc.getElementById(seingabe);
+       leers = "!"+suchid+"!"
+       if (leers == "!null!"){
+          if (Einstellr != "run"){
+             alert (eingabe+": non results");Drehen(rota)
+          }
+       } else {
+       suchid.setAttribute("stroke", "#F08");
+         if (LStat == "M"){
+            suchid2 = doc.getElementById("r"+seingabe);
+            rectidfill = suchid2.getAttribute("fill")
+            rectidfillc = suchid2.getAttribute("fillc")
+            rectidfillc1 = "!"+rectidfillc+"!";
+              if (rectidfillc1 == "!!"){
+                 suchid2.setAttribute("fillc", rectidfill);
+              }
+            suchid2.setAttribute("fill", EPLs[2]);
+            suchid2.setAttribute("fills", EPLs[2]);
+            suchid3 = doc.getElementById("Mark"+seingabe);
+            leers3 = "!"+suchid3+"!"
+                if (leers3 != "!null!"){
+                   suchid3.setAttribute("stroke", "gray");
+                }
+         }
+         if  (seingabea == " "){}else{
+             suchid1 = doc.getElementById(seingabea);
+             suchid1.setAttribute("stroke", "none");
+         }
+       seingabea = seingabe;
+       resetdata("S");
+       displaydata(EPs,LStat);
+       }
+}
+
+
+
+
+
+
+// Info-Text display
+function displaydata(EP,LStat){
+
+        resetdata(EPA);
+  // EP values readout
+       DEP1 = ("D_"+EP);
+       
+               line0 = " ";
+               DEP2 = " ";
+               pos1 = " ";
+               fil1 = " ";
+               label1 = " ";
+               akz1 = " ";
+               tol1 = " ";
+               bauform1 = " ";
+       
+       
+       DEP2 = doc.getElementById(DEP1);
+            leer = "!"+DEP2+"!";
+            if (leer == "!null!"){Infotext = EP+" non attributes";pos1 =""; fil1 = ""} else {
+               DEP2c = DEP2.getFirstChild();
+               line0 = DEP2c.getData();
+               DEP2 = DEP2.getParentNode();
+               pos1 = DEP2.getAttribute("id")
+               fil1 = DEP2.getAttribute("fil");
+               label1 = DEP2.getAttribute("label");
+               akz1 = DEP2.getAttribute("akz");
+               tol1 = DEP2.getAttribute("tol");
+               bauform1 = DEP2.getAttribute("bauform");
+
+            if (LStat == "M"){
+               Infotext = line0+" | "+label1+" "+tol1+" | "+fil1 ;
+               }else{
+               Infotext =" "+ line0+" | Comp.Nr.: "+fil1+" | Label: "+label1+" "+tol1+" ";
+  //message box off
+               Infom = doc.getElementById("Infomeld");
+               leer = "!"+Infom+"!";
+                    if (leer == "!null!"){
+                    } else {
+                      Infom.setAttribute('display', "none");
+                    }
+               }
+            }
+
+  // mark EP
+       EP1 = ("_"+EP);
+       suchid8 = doc.getElementById(EP1);
+           leer4 = "!"+suchid8+"!";
+       if (leer4 == "!null!"){return;}
+       if (EP>10000){return;}
+       suchid8.setAttribute("stroke", "#000"); //"#c66"
+       suchid8.setAttribute("text-decoration", "underline"); //"#6A8"
+
+       if (LoopMark > 0){suchid8.setAttribute("onclick", "suchenEP1('"+EP+"_M_gray')");
+       }
+
+  //determine EP Pos-Daten 
+              textm15 = suchid8.getElementsByTagName("text");
+             xyz = suchid8.getFirstChild();
+             textm15s = suchid8.getElementsByTagName("tspan");
+                          xyzt = textm15s.item(0);
+                          leer4 = "!"+xyzt+"!";
+                          if (leer4 == "!null!"){return;}
+                          fonth = xyzt.getExtentOfChar(1).height;
+                          var TScaleid = doc.getElementById("SCALE");
+                          var TScaleid = TScaleid.getFirstChild();
+                          var TScalei = Number (TScaleid.getData());
+                          TScalei =  TScalei/1.5
+                          if (TScalei > fonth){fonth = TScalei}
+
+              var tagt15 = textm15.item(0)
+              leer4 = "!"+tagt15+"!";
+              if (leer4 == "!null!"){tagt15 = suchid8;}
+              trans = tagt15.getAttribute("transform");
+              var vbox1 = trans.split(" ");
+              ix = Number(vbox1[4]);
+              ix = (ix) + (Number (tagt15.getAttribute("x")));
+               ixr = Number(vbox1[7]);
+               iyra = String(vbox1[8]);
+               var vboxr = iyra.split(")");
+               iyr = Number(vboxr[0]);
+              iy1 = String(vbox1[5]);
+              var iy11 = iy1.split(")");
+              iy = Number(iy11[0]);
+              ixr = (ixr) ;
+              iyr = (iyr) ;
+              iy = (iy) + Number (tagt15.getAttribute("y"));
+              if (si == "-1"){iy = iy/3*(-1) + siy;}
+              iy = iy - 3;
+
+
+       if (rota == 0)      {cix= ix; ciy=iy}
+       if (rota == 90)     {cix= ix; ciy=iy; ix = ix-1/fonth - 2}
+       if (rota == 180)    {cix= ix; ciy=iy; iy = iy+1/fonth + 6}
+       if (rota == 270)    {cix= ix; ciy=iy; ix = ix+1/fonth + 2}
+
+  // EP value-Text set
+      var texta = doc.createElement('text');
+      texta.setAttribute('y', iy -fonth*2);
+      texta.setAttribute('id', "Infoep");
+      texta.setAttribute('pos1', pos1);
+      texta.setAttribute('fil1', fil1);
+  /* CSS set */
+      texta.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;text-anchor:middle;fill:#000");
+  /* Text set */
+      textai = doc.createTextNode(Infotext);
+      texta.appendChild(textai);
+
+  // EP value-rotate set
+       if (rota == 0){    cix1= cix;        ciy1=ciy + 2 }
+       if (rota == 90){   cix1= cix-2;      ciy1=ciy }
+       if (rota == 180){  cix1= cix;        ciy1=ciy-4 }
+       if (rota == 270){  cix1= cix+3;      ciy1=ciy }
+      
+
+      var textam = doc.createElement('circle');
+      textam.setAttribute('cy', ciy1);
+      textam.setAttribute('cx', cix1);
+      textam.setAttribute('r', fonth*2 );
+      textam.setAttribute('id',  "Ani"+EP);
+  /* CSS set */
+      textam.setAttribute('style', "fill:none;stroke:#c66;stroke-width:1");
+      textam.setAttribute('transform', "rotate(-"+(rota)+" "+(cix)+"   "+(ciy)+")");
+
+
+  // position am EP
+   //calculate position  
+
+      hoehe1 = texta.getExtentOfChar(0).height;
+      laenge1 = texta.getComputedTextLength();
+      laenge12 = (laenge1 / 2 + 4);
+      if (rota == 0 || rota == 180) {
+
+         lpos = ix - laenge12;
+         rpos = ix + laenge12;
+         if (lpos < svg1Vx){ix = ix + svg1Vx - lpos + 5}
+         if (rpos > (svg1Vx + Zgrossw*1)){ix = ix - (rpos - (svg1Vx + Zgrossw*1)) -5}
+
+      };
+
+      if (rota == 90 || rota == 270){
+         lpos = iy - laenge12;
+         rpos = iy + laenge12;
+         if (lpos < svg1Vy){iy = iy + svg1Vy - lpos + 5};
+         if (rpos > (svg1Vy + Zgrossh*1)){iy = iy - (rpos - (svg1Vy + Zgrossh*1)) -5};
+         texta.setAttribute('y', iy-fonth*2 );
+       
+      };
+
+      texta.setAttribute('x', ix);
+      texta.setAttribute('transform', "rotate(-"+(Number (rota)+90)+" "+(ix)+"   "+(iy)+")");
+
+
+
+      
+  //set rectangle 
+      var rect = doc.createElement('rect');
+      rect.setAttribute('x', ix - (laenge1 +15) / 2);
+      rect.setAttribute('y', iy - 2 - fonth*2 -7/svg1.getCurrentScale()*1.1 );
+      rect.setAttribute('width', (laenge1  +15));
+      rect.setAttribute('height', (hoehe1 +3));
+      rect.setAttribute('id', "Rectep");
+      rect.setAttribute('fill', "#Fe5");
+      rect.setAttribute("stroke", "#ccc");
+      rect.setAttribute('transform', "rotate(-"+(rota)+" "+(ix)+"   "+(iy)+")");
+      var parent = doc.getElementById("Funktion_Layer2");
+      parent.appendChild(rect);
+      parent.appendChild(textam);
+      parent.appendChild(texta);
+      
+            EPA = EP;
+
+
+
+  // readout Info arry lineninfo 
+
+            leer = "!"+DEP2+"!";
+  // nono values CSS set
+            if (leer == "!null!"){
+               texta.setAttribute('style', "font-family:Arial;font-size:"+ 11/svg1.getCurrentScale()+" pt;text-anchor:middle;fill:#F00");
+  //move by mark image   
+               anzzeichens = Number (Infotext.length) ;
+               anzzeich2 = Math.round (anzzeichens/2)
+               anzzeich4 = Math.round (anzzeichens/8*svg1.getCurrentScale())
+               texta.selectSubString((anzzeich2-anzzeich4),(anzzeich4*2));
+               texta.setAttribute('transform', "rotate(-"+(rota)+" "+(ix)+"   "+(iy)+")");
+               texta.selectSubString(0,anzzeichens);
+               svg1.deselectAll();
+               return;
+            }
+            var line = DEP2.getElementsByTagName("value");
+            var anzahlline = line.getLength();
+            var lineges = "";
+            for (var i=1;i<anzahlline;i++){
+            var aktline = line.item(i);
+            idl = aktline.getAttribute("id");
+            var vbox1 = idl.split("_");
+            idls = String(vbox1[2]);
+             if (idls == "" ){idls = "undefined"} 
+             if (idls != "undefined" ){
+            DEP2c = aktline.getFirstChild();
+            line0 = DEP2c.getData();
+
+
+  //construct Info attribute 
+
+      if  (line0 != "") {
+      var texti = doc.createElement('text');
+      texti.setAttribute('id', "Infoep");
+  /* CSS set */
+      texti.setAttribute('style', "font-family:Arial;font-size:"+ 10/svg1.getCurrentScale()+" pt;fill:#f22");
+      texti.setAttribute('x', ix);
+      textai = doc.createTextNode(line0);
+      texti.appendChild(textai);
+      hoehei = texti.getExtentOfChar(0).height;
+      rect.setAttribute('height', (3+(hoehei +3)*(1 + i)));
+      texti.setAttribute('y', iy  - 6 +((hoehei +3)* i));
+      }
+
+      var parent = doc.getElementById("Funktion_Layer2");
+      parent.appendChild(texti);
+         }
+      } 
+      rtextvar = "";
+      setzt = doc.getElementById("_"+EP);
+            if (LStat == "M"){setzt.setAttribute("onmouseout", rtextvar);}
+            
+            if (Ersatzein == 1){
+               texta.setAttribute('transform', "rotate(-"+(rota)+" "+(ix)+"   "+(iy)+")");
+               Ersatz();
+               }
+
+      
+  //move by mark image 
+      anzzeichens = Number (Infotext.length) ;
+      anzzeich2 = Math.round (anzzeichens/2)
+      anzzeich4 = Math.round (anzzeichens/8*svg1.getCurrentScale())
+      texta.selectSubString((anzzeich2-anzzeich4),(anzzeich4*2));
+      texta.setAttribute('transform', "rotate(-"+(rota)+" "+(ix)+"   "+(iy)+")");
+      texta.selectSubString(0,anzzeichens);
+      svg1.deselectAll();
+      
+  // INFO Discribtion 
+
+       IEP1 = ("I_"+EP);
+       IEP2 = doc.getElementById(IEP1);
+       leer4 = "!"+IEP2+"!";
+       if (leer4 != "!null!"){
+       IEP2c = IEP2.getFirstChild();
+       InfoEP = IEP2c.getData();
+       Ersatz("INFO:"+InfoEP,"#C00")
+       }else{
+       
+       
+       IEP1 = ("REP_"+EP);
+       IEP2 = doc.getElementById(IEP1);
+       leer4 = "!"+IEP2+"!";
+       if (leer4 != "!null!"){
+       IEP2c = IEP2.getFirstChild();
+       InfoEP = IEP2c.getData();
+       Ersatz("REP :"+InfoEP,"#C00")
+       }
+      
+       }
+       
+       
+       
+       
+  //call display Pruefschwerpkt
+      Pruefschwerpkt(EP)
+
+}
+
+//Reset Info
+function resetdatar(){
+         resetdata(EPA)
+  if (svg1.getCurrentScale() != 1){
+  Schieben()
+  }
+}
+
+//Reset Info text 
+function resetdata(REP){
+    rtextvar = "resetdata('"+REP+"')";
+    setzt = doc.getElementById("_"+REP);
+    leer4 = "!"+setzt+"!";
+    if (leer4 == "!null!"){return;}
+    setzt.setAttribute("onmouseout", rtextvar);
+    
+  //message box on
+    Infom = doc.getElementById("Infomeld");
+    leer = "!"+Infom+"!";
+    if (leer == "!null!"){} else {
+       Infom.setAttribute('display', "inline");
+       }
+
+
+   Ersatzreset();
+   
+   for (var i=0;i<5;i++){
+
+     if (REP == "S"){}else {
+       REP1 = ("_"+REP);}
+       suchid9 = doc.getElementById(REP1);
+       leer4 = "!"+suchid9+"!";
+       if (leer4 == "!null!"){}else{
+       suchid9.setAttribute("stroke", "none");
+       suchid9.setAttribute("onclick"," ");
+       }
+
+
+       suchidan = doc.getElementById("Ani"+REP);
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){}else{
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+       }
+
+       for (var f=0;f<20;f++){
+        suchid10 = doc.getElementById("Infoep");
+        leer4 = "!"+suchid10+"!";
+        if (leer4 == "!null!"){}else{
+        Knoten = suchid10.getParentNode();
+        Knoten.removeChild(suchid10);
+        }
+      }
+
+        suchid10 = doc.getElementById("Rectep");
+        leer4 = "!"+suchid10+"!";
+        if (leer4 == "!null!"){}else{
+        Knoten = suchid10.getParentNode();
+        Knoten.removeChild(suchid10);
+        }
+    }
+}
+
+//display EP and Label 
+function Beztauschb(){
+         Beztausch('gkz1');
+         Beztausch('gkz2');
+}
+
+//swap Text  EP / Label
+function Beztausch(neuwerta){
+        reseten();
+
+  //readoutText Scale
+        var TScaleid = doc.getElementById("SCALE");
+        var TScaleid = TScaleid.getFirstChild();
+        var TScalei = TScaleid.getData();
+        var minfont = TScalei/2*schriftgr;
+        var lspacing  = TScalei/16*schriftgr;
+        var maxfont =  TScalei*5;
+
+
+
+        var gover = doc.getElementsByTagName("g");
+        var anzahlid = gover.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,10);
+                    if  (gkz == "_") {
+                   EP = gkz+gkz1;
+                   
+
+  //search new value
+            DEP1 = ("D_"+gkz1);
+            DEP2 = doc.getElementById(DEP1);
+            leer = "!"+DEP2+"!" ;
+            if (leer == "!null!"){} else {
+            DEP2 = DEP2.getParentNode();
+            fil1 = DEP2.getAttribute("fil");
+            pos1 = DEP2.getAttribute("id")
+            label1 = DEP2.getAttribute("label");
+            akz1 = DEP2.getAttribute("akz");
+            tol1 = DEP2.getAttribute("tol");
+            bauform1 = DEP2.getAttribute("bauform");
+
+                   if (neuwerta == "label1"){neuwert = label1;}
+                   if (neuwerta == "gkz2"){neuwert = gkz1;}
+                   if (neuwerta == "gkz1"){neuwert = gkz1;}
+                   leer1 = "!"+neuwert+"!" ;
+                   if (leer1 == "!!"){neuwert = "?";}
+                   if (leer1 == "! !"){neuwert = "?";}
+  //set value
+                   setzt = doc.getElementById(goverid);
+                   textm15 = setzt.getElementsByTagName("tspan");
+                    var tagt15 = textm15.item(0);
+                    tagt15.selectSubString(0,10);
+                    laenge = tagt15.getComputedTextLength();
+                    dx = tagt15.getAttribute("x");
+                    if (dx == "0") {dx = laenge / 2};
+                    if (neuwerta == "label1"){tagt15.setAttribute('style', "font-size:"+minfont+"pt;font-family:Arial;text-anchor:middle;letter-spacing:-"+lspacing+";fill:#663300");}
+                       else {tagt15.setAttribute('style', "font-family:Arial;text-anchor:middle");}
+                    tagt15.setAttribute('x', dx);
+                    var setzt1 = tagt15.getFirstChild();
+                    setzt1.setData(neuwert);
+
+  // second line
+  // delete
+                            for (var f=0;f<2;f++){
+                            suchid10 = doc.getElementById("Z2"+gkz1);
+                            leer4 = "!"+suchid10+"!";
+                            if (leer4 == "!null!"){break;}
+                            Knoten = suchid10.getParentNode();
+                            Knoten.removeChild(suchid10);
+                             }
+  // second line
+  // set
+                      if (neuwerta == "gkz2"){
+                      var stexti = doc.createElement('tspan');
+                      stextai = doc.createTextNode(label1);
+                      stexti.appendChild(stextai);
+                      stexti.setAttribute('style', "letter-spacing:-"+lspacing+";fill:#663300;font-size:"+minfont+"pt");
+                      stexti.setAttribute('id', "Z2"+gkz1);
+                      stexti.setAttribute('dy', "0.8em");
+                      stexti.setAttribute('dx', - laenge);
+                      tagt15.appendChild(stexti);
+                      }
+                    }
+                   }
+                }
+        }
+}
+
+
+
+//search function for mark several EP
+function GruppenMark(ueberga, akzan){
+       var gefunden = "";
+       if (ueberga.substr(0,2)== "P_"){
+          var ubox = ueberga.split("_");
+          ueberga = "P_"+(ubox[1]);
+          nbv = (ubox[2]);
+       }else{
+             var ubox = ueberga.split("_");
+             ueberga = (ubox[0]);
+             nbv = (ubox[1]);
+       }
+
+       
+  //Posi feel
+       if (nbv == "bf" ){UpdateMenu(null, nbv, 'checked', null, false);
+           if  (boxfills != "none1"){
+             if (boxfills == "none"){boxfills = "#FAFAFA";}else   
+             {boxfills = "none";}
+           }
+           else
+           {boxfills = "none";
+           }
+         }
+
+       if (nbv == "nb" ){UpdateMenu(null, nbv, 'checked', 'layerg', false);
+           if  (nbstatus != "none")
+           {nbstatus = "none";
+           }
+           else
+           {nbstatus = "inline";
+           }
+         }
+
+
+       suchid10 = doc.getElementById("Infoep");
+       leer4 = "!"+suchid10+"!";
+       if (leer4 == "!null!"){Matnr="";}else{
+       fil1 = suchid10.getAttribute("fil1")
+       Matnr=fil1;
+       pos1 = suchid10.getAttribute("pos1")
+       if (ueberga == "P"){ ueberga=pos1;}
+       if (ueberga == "+"){ ueberga=fil1;}
+       }
+       if (ueberga == "P"){return;}
+       
+       deMark();
+       resetdata("S");
+       if (ueberga == "+"){
+       eingabe = "";
+       eingabe = prompt("Attribute : Workp. / Comp-Nr. / Label. / Package  insert \nAdvanced Search ....* e.p. 5r3* like 15r37",Matnr);
+       } else {eingabe = ueberga;
+              ueberga="+"};
+       aeingabe = (eingabe);
+       leere = "!"+aeingabe+"!";
+       if (leere == "!null!"){return;}
+       if (aeingabe == "") {
+       alert ("input error !");
+       return;}
+       erwsuche = ""; 
+       if (aeingabe.indexOf("*")!= -1) { 
+       aeingabe =  String(aeingabe).substring(0,(String(aeingabe).indexOf("*")));
+       erwsuche = "*"; 
+       }
+       
+       if (aeingabe == "A5E00000001"){aeingabe = "10000000"}
+
+
+        
+       if (akzan >= "1") {
+          var akzlagenr = "L_"+akzan+"-EP"
+          var akzlage = doc.getElementById(akzlagenr)
+          leer4 = "!"+akzlage+"!";
+          if (leer4 == "!null!"){return;}
+          var gover = akzlage.getElementsByTagName("g")}
+          else {var gover = doc.getElementsByTagName("g")}
+        var anzahlid = gover.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,10);
+                     if  (gkz == "_") {
+                   EP = gkz+gkz1;
+  //rectangle /frame edit
+            if ("boxfill" == aeingabe) {
+            if (nbv == "vor" ){Mark(" "," ","Vor")};
+            if (nbv == "vorr" ){Mark(" "," ","VorR");gefunden = "!";continue;};
+            boxfills1 = boxfills;Mark(" "," ","B");gefunden = "!";
+            if (nbv == "br" ){Mark(" "," ","BR");gefunden = "!";continue;};
+            continue;
+            }
+
+            if ((gkz1.toUpperCase().indexOf(aeingabe.toUpperCase())!= -1) && (nbv == "*")) {Mark("#0F0","red");gefunden = "!";continue;}
+
+  //search new value
+            DEP1 = ("D_"+gkz1);
+            DEP2 = doc.getElementById(DEP1);
+            leer = "!"+DEP2+"!";
+            if (leer == "!null!"){
+               if (leer == "!null!" && aeingabe == "?"){Mark("#fff","red");gefunden = "!";}
+            } else {
+            DEP2 = DEP2.getParentNode();
+            pos1 = DEP2.getAttribute("id")
+            fil1 = DEP2.getAttribute("fil");
+            label1 = DEP2.getAttribute("label");
+            akz1 = DEP2.getAttribute("akz");
+            tol1 = DEP2.getAttribute("tol");
+            bauform1 = DEP2.getAttribute("bauform");
+            cfill1 = DEP2.getAttribute("cfill");
+            cstroke1 = DEP2.getAttribute("cstroke");
+            if (akz1 == aeingabe){
+              Mark(cfill1,cstroke1);gefunden = "!";}
+
+            if (pos1 == aeingabe){
+              Mark("#FF0","#DD0",nbv);gefunden = "!";}
+            if (fil1 == "A5E00000001"){fil1 = "10000000"}
+            if (nbv == "vor" ){if (aeingabe == fil1) {
+                                   Mark(" "," ","Vor")}
+            }
+            if (erwsuche == "*"){
+            
+               if (bauform1.toUpperCase().indexOf(aeingabe.toUpperCase())!= -1) {Mark("#aaa","red");gefunden = "!";}           
+              if (fil1.toUpperCase().indexOf(aeingabe.toUpperCase())!= -1) {if ("10000000" == aeingabe) {
+                                       Mark("#0F0","green",nbv)}else{
+                                       Mark("#FF0","#FF0",nbv)};
+                  gefunden = "!";
+                 }
+                 
+
+                    
+              if (label1.toUpperCase().indexOf(aeingabe.toUpperCase())!= -1) {Mark("#0F0","red");gefunden = "!";}
+            }else{
+            
+            if (bauform1.toUpperCase() == aeingabe.toUpperCase()) {Mark("#aaa","red");gefunden = "!";}            
+            if (fil1.toUpperCase() == aeingabe.toUpperCase()) {if ("10000000" == aeingabe) {
+                                       Mark("#0F0","green",nbv)}else{
+                                       Mark("#FF0","#FF0",nbv)};
+                  gefunden = "!";
+                 }
+
+            if (label1.toUpperCase() == aeingabe.toUpperCase()) {Mark("#0F0","red");gefunden = "!";}
+            }  
+           }
+       }
+     }
+     }
+     if (gefunden != "!") {
+        if (Einstellr != "run"){
+        alert (aeingabe+": non result");
+        }
+     }
+}
+
+
+
+//set color and frame each EP 
+function Mark(cfill, cstroke, Pstatus){
+       var dasharray = "";
+       suchid = doc.getElementById(EP);
+       rectid = doc.getElementById("r"+EP);
+       if (EP == "_PCB"){ 
+       return;}
+       leerrectid = "!"+rectid+"!";
+
+       polid = doc.getElementById("p"+EP);
+       leerpolid = "!"+polid+"!";
+
+       UP = doc.getElementById("UP"+EP);
+       leer1 = "!"+UP+"!";
+       if (leer1 != "!null!"){dasharray = "2,4";}
+
+       TP = doc.getElementById("TP"+EP);
+       leer2 = "!"+TP+"!";
+       if (leer2 != "!null!"){dasharray = "8,4";}
+
+       if (dasharray == "" && Pstatus == "P"){return;}
+
+  //Step mark
+       if (Pstatus =="M"){
+           rectidfill = rectid.getAttribute("fill");
+           rectidfillc = rectid.getAttribute("fillc")
+           rectidfillc1 = "!"+rectidfillc+"!";
+              if (rectidfillc1 == "!!"){
+              rectid.setAttribute("fillc", rectidfill);
+              }
+           if (rectidfill == "none"){
+           rectid.setAttribute('fill', "#ceceef");
+           rectid.setAttribute("fills", "#ceceef");
+           }
+           if (rectidfill == "white"){
+           rectid.setAttribute('fill', "#ceceef");
+           rectid.setAttribute("fills", "#ceceef");
+           }
+           if (rectidfill == "#FAFAFA"){ 
+           rectid.setAttribute('fill', "#ceceef");
+           rectid.setAttribute("fills", "#ceceef");
+           }
+         }
+
+
+
+
+       if (Pstatus =="nb"){
+           Layersn = suchid.getAttribute("display");
+           if  (Layersn != nbstatus)
+           {suchid.setAttribute("display", nbstatus);
+           }
+
+         if (leerrectid != "!null!"){
+           Layersn = rectid.getAttribute("display");
+           if  (Layersn != nbstatus)
+           {rectid.setAttribute("display", nbstatus);
+           }
+         }
+
+         if (leerpolid != "!null!"){
+           Layersn = polid.getAttribute("display");
+           if  (Layersn != nbstatus)
+           {polid.setAttribute("display", nbstatus);
+           }
+         }
+         return;
+       }
+
+
+  //set filling 
+
+       if (Pstatus =="B"){ 
+         if (leerrectid != "!null!"){
+           rectakzsel = rectid.getAttribute("akzsel");
+           rectidfill = rectid.getAttribute("fill");
+           rectidfillc = rectid.getAttribute("fillc");
+           rectidfills = rectid.getAttribute("fills");
+           rectidfillc1 = "!"+rectidfillc+"!";
+           rectakzsel1 = "!"+rectakzsel+"!";
+  //saveing olt coler              
+              if (rectidfillc1 == "!!"){
+              rectid.setAttribute("fillc", rectidfill);
+              }
+      
+         var akzselanz = "x";
+            if (rectakzsel1 != "!!") {
+            var Voreinstss = Voreinsts.split('_');
+                if (Voreinstss[1] == rectakzsel){akzselanz = "on";}
+                if (rectakzsel    == "Alle"){akzselanz = "on";}
+                if (Voreinstss[1] == "sicht" && rectakzsel == "Pruefung"){akzselanz = "on";}
+                if (Voreinstss[1] == "alleein"){akzselanz = "on";}
+            }
+
+          if (boxfills1 == "none"){
+          rectid.setAttribute("fill", boxfills1);
+          }else{
+                rectidfills = rectid.getAttribute("fills");
+                if (rectidfills == ""){
+                rectid.setAttribute("fill", boxfills1);
+                            if (rectidfillc1 != "!none!" && akzselanz == "on"){
+                              rectid.setAttribute("fill", rectidfillc);
+                            }
+                }else{
+                rectid.setAttribute("fill", rectidfills);
+                }
+         }
+        }
+       return;
+       }
+
+
+  //filling reset
+       if (Pstatus =="BR"){
+         if (leerrectid != "!null!"){
+           rectidfillc = rectid.getAttribute("fillc")
+           rectidfillc1 = "!"+rectidfillc+"!";
+              if (rectidfillc1 != "!null!"){
+                rectid.setAttribute("fill", "none"); 
+                rectid.setAttribute("fills", "");
+                }
+          }
+       return;
+       }
+
+
+  //Linencolor set
+       if (Pstatus =="Vor"){
+         if (leerrectid != "!null!"){
+           rectidstroke = rectid.getAttribute("stroke");
+           rectidstrokec = rectid.getAttribute("strokec");
+           rectidstroke1 = "!"+rectidstrokec+"!";
+              if (rectidstroke1 == "!!"){
+              rectid.setAttribute("strokec", rectidstroke);
+              }
+               rectid.setAttribute("stroke", rectstroke);
+                }
+        return;
+       }
+       
+  //Linencolor reset
+       if (Pstatus =="VorR"){
+         if (leerrectid != "!null!"){
+           rectidfillc = rectid.getAttribute("strokec")
+           rectidfillc1 = "!"+rectidfillc+"!";
+              if (rectidfillc1 != "!null!"){
+                rectid.setAttribute("stroke", rectidfillc);
+                rectid.setAttribute("strokec", "");
+                }
+          }
+       return;
+       }
+
+
+
+
+
+  //readout position of EP 
+       var trans = "nix";
+       var tagt3inhalt = "!"+suchid+"!";
+       if (tagt3inhalt == "!null!"){ return;}
+       var textm3 = suchid.getElementsByTagName("text");
+       var tagt3 = textm3.item(0);
+       var tagt3inhalt = "!"+tagt3+"!";
+       if (tagt3inhalt == "!null!"){ return;}
+       trans = tagt3.getAttribute("transform");
+       tyt =  Number (tagt3.getAttribute("y"));
+
+  //read out text properties 
+       var textm2 = suchid.getElementsByTagName("tspan");
+       var tagt = textm2.item(0);
+       var tagtinhalt = "!"+tagt +"!";
+       if (tagtinhalt == "!null!"){ return;}
+       tagt.selectSubString(0,10);
+       laenge = tagt.getComputedTextLength();
+       hoehe = tagt.getExtentOfChar(0).height;
+       var tagt1 = tagt.getFirstChild();
+       var inhalt = tagt1.getData();
+       var tx =tagt.getStartPositionOfChar(0).x;
+       tx = tx - 2;
+       ty = hoehe * -1 - 2;
+       ty = tyt + ty;
+       laenge = laenge + 4;
+       hoehe = hoehe + 4;
+
+
+
+
+
+
+  // rectangle set
+      var rect = doc.createElement('rect');
+      rect.setAttribute('transform', trans);
+      rect.setAttribute('x', tx);
+      rect.setAttribute('y', ty);
+      rect.setAttribute('width', laenge);
+      rect.setAttribute('height', hoehe);
+      rect.setAttribute('fill', cfill);
+      rect.setAttribute('stroke', cstroke);
+      rect.setAttribute('id', 'Mark'+EP);
+      if (dasharray != ""){
+      rect.setAttribute('stroke-dasharray', dasharray);}
+      rect.setAttribute('stroke-width', '2');
+
+      var parent = doc.getElementById("Funktion_Layer1");
+      parent.appendChild(rect);
+     svg1.deselectAll();
+}
+
+
+
+//reset fill color and frame each EP 
+function deMark(){
+
+        var mark = doc.getElementById("Funktion_Layer1");
+        var gover = mark.getElementsByTagName("rect");
+        var anzahlid = gover.getLength();
+        for (var i=anzahlid - 1;i>-1;i--){
+          var aktid = gover.item(i);
+          goverid = aktid.getAttribute("id");
+          gkz = goverid.substr(0,4);
+                if  (gkz == "Mark") {
+                Knoten = aktid.getParentNode();
+                Knoten.removeChild(aktid);
+                }
+         }
+
+         
+}
+
+
+
+
+// mouse position
+function pcb_locate_drag(evt) {
+
+    pcX0 = evt.getClientX() ;
+    pcY0 = evt.getClientY() ;
+
+ 
+ 
+// measure   
+ if (MessenOn == "On" && rota == 0){   
+    
+  //set.svgBox Pixel 
+    svg1.setAttribute("width", svg1Vwidth);
+    svg1.setAttribute("height", svg1Vheight);
+    
+  //readout window data
+    trans3m =  svg1.getCurrentTranslate();
+    getxm = trans3m.getX();
+    getym = trans3m.getY();
+    getsm = svg1.getCurrentScale();
+  //readout scale from DB-Daten  
+    var TScaleid = doc.getElementById("SCALE");
+    var TScaleid = TScaleid.getFirstChild();
+    var TScalei = Number (TScaleid.getData());
+    
+  //recalculate x y data from DB-daten 
+    pcX0m = (svg1Vx+(pcX0-getxm)/getsm-krotax)/TScalei;
+   if (si == 0){
+       pcY0m = ((svg1Vy+(pcY0-getym)/getsm-krotay)/TScalei)-5;
+       }else{ 
+       pcY0m = (((svg1Vy-(pcY0-getym)/getsm-krotay)+svg1Vheight)/TScalei)-5;
+       } 
+       
+  //format x y display  
+    pcX0ma =  String(pcX0m).substring(0,(String(pcX0m).indexOf("."))+4);
+    pcY0ma =  String(pcY0m).substring(0,(String(pcY0m).indexOf("."))+4);
+    
+    
+  //x y display
+    mtext = "x:"+pcX0ma+" y:"+pcY0ma;
+    
+    Meldung(mtext,'#F44')
+      minfo = doc.getElementById("Infomeld");
+      minfo.setAttribute('style', "text-anchor:middle;fill:#F44")
+      minfo.setAttribute('y', (svg1Vy+(pcY0+20-getym)/getsm));
+      minfo.setAttribute('x', (svg1Vx+(pcX0-getxm)/getsm));
+  }
+
+    
+}
+
+
+// move SVG 
+function Schieben(){
+
+       var svgbox,b,h,x,y;
+         svgbox=svg1.getBBox();
+         b=svgbox.width;
+         h=svgbox.height;
+         x=svgbox.x;
+         y=svgbox.y;
+
+       trans3 =  svg1.getCurrentTranslate();
+       getx = trans3.getX();
+       gety = trans3.getY();
+       gets = svg1.getCurrentScale();
+
+          xbox = (b-x)/2/gets;
+          ybox = (h-y)/2/gets;
+
+         setX = (xbox-pcX0);
+         setY = (ybox-pcY0);
+
+         setX = (getx + setX);
+         setY = (gety + setY);
+
+
+       trans4 =  svg1.getCurrentTranslate();
+       trans4.setX(setX);
+       trans4.setY(setY);
+
+
+}
+
+
+
+
+
+
+
+// open a. close new window
+function Masters(evt){
+
+  // close window
+  if (name == "x"){
+  self.close();
+  return;
+  }
+ 
+  // open  new window
+  if (name != "x"){
+  self.open(location,"x", "width=1024,height=748,left=145,top=125,resizable=yes");
+
+  }
+
+
+}
+
+
+
+
+// print this window 
+function Drucken(evt){
+
+  // close window
+  if (name == "y"){
+  self.close();
+  return;
+  }
+
+
+  // open  new window
+
+  if (name != "y"){
+  self.open(location,"y", "width=845,height=600,left=145,top=125,resizable=no,menubar=yes");
+  }
+
+}
+
+
+// edit font size
+function Schriftgross(schriftgru){
+     var schriftgru1 = Number (schriftgru);
+     var labelanz=0;
+     var Z2j = "nein"
+
+        TScaleid = doc.getElementById("SCALE");
+        TScaleid = TScaleid.getFirstChild();
+        TScalei = TScaleid.getData();
+        minfont = TScalei/2;
+        maxfont = TScalei*4;
+     if (schriftgru1 > 0){schriftgrneu = schriftgru;}
+     else{
+     schriftgrneu = prompt("Font size 0.33 -> 5:",schriftgr);
+     schriftgrneu1 = "!"+schriftgrneu+"!";
+       if (schriftgrneu1 == "!null!"){return};
+     }
+        var sgrosk = schriftgrneu.split(",");
+        if (sgrosk[1] != null) {return};
+        if (schriftgrneu < 5.01){
+        if (schriftgrneu > 0.32){
+        var gover = doc.getElementsByTagName("g");
+        var anzahlid = gover.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,10);
+                    if  (gkz1 > 0 ) {continue;}
+                    if  (gkz == "_") {
+                    setzt = aktid.getFirstChild();
+                    sgro = setzt.getAttribute("style");
+                     var sgros = sgro.split(":");
+                      var sgros1 = sgros[1].split("p");
+                      
+                      sgroo = setzt.getAttribute("fonta");
+                      leer4 = "!"+sgroo+"!";
+                      if (leer4 != "!!"){
+                         sgros1[0]=sgroo;
+                      }
+                      sgros2 =  (Number(sgros1[0]))*schriftgrneu/schriftgr;
+                      setzt.setAttribute("fonta",sgros2);
+                             if  (sgros2 > maxfont) {sgros2 = maxfont}
+                             if  (sgros2 < minfont) {sgros2 = minfont}
+                    setzt.setAttribute("style",sgros[0]+":"+sgros2+"pt");
+                    setztl = setzt.getFirstChild();
+                    sgrol = setztl.getAttribute("style");
+                    sgrols = sgrol.split(":");
+                    if (sgrols[0]=="font-size"){labelanz= 1;}
+                   }
+                }
+                     for (var f=0;f<2;f++){
+                            suchid10 = doc.getElementById("Z2"+gkz1);
+                            leer4 = "!"+suchid10+"!";
+                            if (leer4 == "!null!"){break;}
+                     Z2j = 1;
+                             }
+                       
+        }
+        
+        schriftgr = schriftgrneu
+        if (labelanz==1){labelanz=0;
+         Beztausch("label1");
+        return;}
+
+        if (Z2j != "nein"){
+         Beztauschb();
+         }
+      }
+    }
+}
+
+
+
+// edit ContextMenu
+function UpdateMenu(targetElement, optionName, optionType, optionSubmenu, exclusive)
+      {
+      var targetItem;
+      var optionValue;
+      var eachItem;
+      var eachSubItem;
+      var on;
+      var off;
+
+      switch (optionType)
+         {
+         case 'checked':
+         case 'enabled':
+            on = 'yes';
+            off = 'no';
+            break;
+            
+         case 'display':
+            on = 'inline';
+            off = 'none';
+            break;
+         }
+      //get reference to the currentMenu in use
+      var menuItems = contextMenu.childNodes.item(0).childNodes;
+
+      //step through all nodes and get reference to item wanted
+      for (i = 0; i < menuItems.length; i++)
+         {
+         if (1 == menuItems.item(i).nodeType)
+            {
+            eachItem = menuItems.item(i);
+            if (null == optionSubmenu)
+               {
+               if (optionName == eachItem.getAttribute('id'))
+                  {
+                  targetItem = eachItem;
+                  optionValue = targetItem.getAttribute(optionType)
+                  }
+               }
+            else if ((eachItem.nodeName == 'menu') && (optionSubmenu == eachItem.getAttribute('id')))
+               {
+               //get all submenuItems
+               submenuItems = eachItem.childNodes;
+
+               //step through all submenuItems of subMenu
+               for (j = 0; j < submenuItems.length; j++)
+                  {
+                  eachSubItem = submenuItems.item(j)
+                  if (1 == eachSubItem.nodeType)
+                     {
+                     if (true == exclusive)
+                        {
+                        optionValue = off;
+                        eachSubItem.setAttribute(optionType, off)
+                        }
+
+                     if (optionName == eachSubItem.getAttribute('id'))
+                        {
+                        targetItem = eachSubItem;
+                        optionValue = targetItem.getAttribute(optionType)
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      if (on == optionValue)
+         {
+         targetItem.setAttribute(optionType, off);
+         if (null != targetElement)
+            {
+            document.getElementById(targetElement).setAttribute('visibility', 'hidden');
+            }
+         }
+      else if (off == optionValue)
+         {
+         targetItem.setAttribute(optionType, on);
+         if (null != targetElement)
+            {
+            document.getElementById(targetElement).setAttribute('visibility', 'visible');
+            }
+         }
+ }
+
+
+
+
+
+// insert Layercontrol  in contexMenue 
+function LayerMenu(Lage){
+
+
+      var lbox = Lage.split("-");
+
+      MenueL=doc.getElementById("layer");
+      ltext1 = (lbox[1]);
+      if  (ltext1 != "POSI" ){
+          if  (ltext1 != "EP" ){
+              if  (ltext1 != "POL" ){
+                  if  (ltext1 != "Ae" ){
+                   var texti = doc.createElement('item');
+                   texti.setAttribute('id', "Ls_"+Lage);
+                   texti.setAttribute('checked', "yes");
+                   texti.setAttribute("onactivate", "onoff('L_"+Lage+"')");
+                   textai = doc.createTextNode("  "+Lage);
+                   texti.appendChild(textai);
+                   MenueL.appendChild(texti);
+                  }
+              }
+          }
+      }
+
+  // Layer group
+
+      var lboxn = lbox[0].split("/");
+          ltext = Number(lboxn[0]);
+        if  (ltext > 0 || lbox[0] == "Pruefung"){
+          ltext = lbox[0];
+          ltextp = doc.getElementById("Ls_"+ltext);
+          leer4 = "!"+ltextp+"!";
+          if (leer4 != "!null!"){
+             if (leer4 != "![objectSVGElement]!"){return;}
+          }
+          MenueL=doc.getElementById("layerg");
+          var texti = doc.createElement('item');
+          texti.setAttribute('id', "Ls_"+ltext);
+          texti.setAttribute('checked', "yes");
+          texti.setAttribute("onactivate", "onoffg('Lg_"+ltext+"')");
+          
+  
+  
+  
+  
+  
+  
+  
+        var docpara= doc.getElementById("PARAMETER");
+        var gopara = docpara.getElementsByTagName("value");
+        var anzahlid = gopara.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gopara.item(i);
+        goparaid = aktid.getAttribute("id");
+        goparaidch = gopara.item(i).getFirstChild();
+        leer4 = "!"+goparaidch+"!";
+        if (leer4 != "!null!"){        
+        paraakz = goparaidch.getData();
+            if (paraakz == "L_"+ltext){rentext2 = goparaid.substr(3,20); 
+            }else{continue;}
+      }
+      }
+          
+          
+          textai = doc.createTextNode("  "+rentext2);
+          texti.appendChild(textai);
+          MenueL.appendChild(texti);
+
+
+          MenueL=doc.getElementById("layerv");
+          lboxnvor = doc.getElementById("Lv_"+lboxn[0]);
+          leer4 = "!"+lboxnvor+"!";
+          if (leer4 == "!null!"){
+            var texti = doc.createElement('item');
+            if (lbox[0] == "Pruefung"){texti.setAttribute('display', "none")};
+            texti.setAttribute('id', "Lv_"+lboxn[0]);
+            texti.setAttribute('checked', "no");
+            texti.setAttribute("onactivate", "Voreinst('Lv_"+lboxn[0]+"')");
+
+
+
+  
+        var docpara= doc.getElementById("PARAMETER");
+        var gopara = docpara.getElementsByTagName("value");
+        var anzahlid = gopara.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gopara.item(i);
+        goparaid = aktid.getAttribute("id");
+        goparaidch = gopara.item(i).getFirstChild();
+        leer4 = "!"+goparaidch+"!";
+        if (leer4 != "!null!"){        
+        paraakz = goparaidch.getData();
+            if (paraakz == "L_"+lboxn[0]){rentext2 = goparaid.substr(3,20); 
+            }else{continue;}
+      }
+      }
+
+
+
+
+             textai = doc.createTextNode("  "+rentext2);
+             texti.appendChild(textai);
+             MenueL.appendChild(texti);
+          }
+
+
+        var lgi = doc.createElement('g');
+            lgi.setAttribute('id', "Lg_"+ltext);
+            lgi.setAttribute("display", "inline")
+        var parent = doc.getElementById("Funktion_Layer2");
+        parent.appendChild(lgi);
+
+
+     }
+
+
+}
+// not for SNC
+function Pruefschwerpkt(EPC){
+ Schwerpktc=doc.getElementById("r_"+EPC);
+ Schwerpktc1 = Schwerpktc.getAttribute("fill");
+ Schwerpktsel = Schwerpktc.getAttribute("akzsel");
+ Schwerpktc2=doc.getElementById(Schwerpktc1);
+ Schwerpktcl = "!"+Schwerpktc2+"!";
+ if (Schwerpktcl != "!null!"){
+    Schwerpktc3 = Schwerpktc2.getFirstChild();
+    Schwerpktc4 = Schwerpktc3.getData()
+    Ersatz(Schwerpktc4+" "+Schwerpktsel,Schwerpktc1)
+    }else{
+          return;
+          }
+ }
+
+
+// Step 
+function PosiLoop(loopr){
+ var EP = "";
+ var EPok = 0;
+ var Skip = "nein"
+
+ 
+
+ if (loopr == "+"){
+ looprr = loopr ;  
+ loopc = loopc + 1;
+ EPloop = 0;
+ }
+ 
+ if (loopr == "-"){
+ looprr = loopr ;
+ loopc = loopc - 1;
+ if (LoopMark < 1){LoopMark = 0};
+ EPloop = 0;
+ }
+
+ if (loopr == "++"){
+ EPloop = EPloop + 1;
+ }
+ 
+ if (loopr == "--"){
+ EPloop = EPloop - 1;
+ if (EPloop < 1){EPloop = 1};
+ }
+
+ if ((loopc == 1)&&(LoopMark != 1)){
+    LoopMark = 0;
+    if (Tstep == 1){Meldung2('Section-Step on','#f00',1500)}
+    }
+
+
+
+
+  //readout Data 
+ loopd = doc.getElementById("P_"+loopc);
+  //beginn end
+       leer4 = "!"+loopd+"!";
+       if (leer4 == "!null!"){
+          if (loopr == "+"){
+            if (Tstep == 1){Meldung("Section-Step P: last ",'#f00')}else{Meldung("P: last ")}
+          LoopMark = LoopMark +1;
+          }
+          if (loopr == "-"){
+            if (Tstep == 1){Meldung("Section-Step P: first ",'#f00')}else{Meldung("P: first ")}
+          loopc = 0
+          }
+          if (loopr == "++"){PosiLoopresetall();
+          }
+       return;
+       }
+       
+ loopfil = loopd.getAttribute("fil");
+ loopid = loopd.getAttribute("id");
+ loopiakz = loopd.getAttribute("akz");
+ loopcfill = loopd.getAttribute("cfill");
+ loopdc = loopd.getFirstChild();
+ loopdd = loopdc.getData();
+  var VoreinstsC = Voreinsts.split('_')
+ if ((VoreinstsC[1] != "sicht")&&(VoreinstsC[1] != "neutr")){
+ 
+          
+               akzren = doc.getElementById("LL_"+loopiakz)         
+               leer5 = "!"+akzren+"!";
+                 if (leer5 == "!null!"){}else{
+                  akzren1 = akzren.getFirstChild();
+                  akz1 = akzren1.getData();
+                  loopiakz = akz1.substr(2,20)
+                }
+         
+ 
+ 
+ 
+ if (VoreinstsC[1] != loopiakz){ if (loopr != "++"){
+           PosiLoop(looprr);
+           EPok = 0;
+           return;
+           }
+     }}
+
+  //loop Pos
+    var EPloop1 = 1;
+    if  (EPloop == 0){EPloop2 =1}else{
+    var EPloop2 = EPloop;}
+    var gover = loopd.getElementsByTagName("value");
+    var anzahlid = gover.getLength();
+  // EPl loop Data 
+      for (var i=0;i<anzahlid+1;i++){
+        var aktid = gover.item(i);
+        leer5 = "!"+aktid+"!";
+        if (leer5 == "!null!"){
+           EPok = 0;
+           EPloop = EPloop-1;
+   //jump next position
+           PosiLoop('+');
+           Skip2 = "nein";
+           break;
+        }   
+        goverid = aktid.getAttribute("id");
+        var EPL = goverid.split('_');
+        EP = (EPL[1])
+        if (EPL[0]!="D"){
+           EPok = 0;
+           EPloop = EPloop-1;
+  //jump next position
+           PosiLoop('+');
+           PosiLoop('++');
+           break;
+        }   
+        
+        
+        DEP2 = aktid.getParentNode();
+        fil1 = DEP2.getAttribute("fil");
+        label1 = DEP2.getAttribute("label");
+        tol1 = DEP2.getAttribute("tol");
+        id1 = DEP2.getAttribute("id");
+        bauform1 = DEP2.getAttribute("bauform");
+        akz1 = DEP2.getAttribute("akz");
+  //Akz control
+         if (id1 == loopid){
+
+         if (anzahlpref == 0) {
+         
+         
+               akzren = doc.getElementById("LL_"+akz1)         
+               leer5 = "!"+akzren+"!";
+                 if (leer5 == "!null!"){}else{
+                  akzren1 = akzren.getFirstChild();
+                  akz1 = akzren1.getData();
+                  akz1 = akz1.substr(2,20)
+                }
+         
+         
+               akzo = doc.getElementById("L_"+akz1+"-EP");
+               leer5 = "!"+akzo+"!";
+                 if (leer5 == "!null!"){
+                 PosiLoop(looprr);
+                 EPok = 0;
+                 return;
+                 }
+               akzo1 = akzo.getAttribute("display");
+               if (akzo1 == "none"){
+                 PosiLoop(looprr);
+                 EPok = 0;
+                 return;
+                 }
+            } else {
+              var akznull = 0;
+              prefni = nutzenpref.split(',');
+                for (var i=0;i<anzahlpref;i++){
+                akzo = doc.getElementById("L_"+akz1+"/"+prefni[i]+"-EP");
+                leer5 = "!"+akzo+"!";
+                akzo1 = akzo.getAttribute("display");
+                  if ((leer5 == "!null!") || (akzo1 == "none")){
+                  akznull = akznull + 1;
+                  }
+                } 
+                 if (akznull == anzahlpref){
+                   PosiLoop(looprr);
+                   EPok = 0;
+                   return;
+                   }
+            }
+            
+  //EPl control
+            var leerp = "!null!"
+            if (Tstep == 1){
+            var suchidp = doc.getElementById("p_"+EP);
+            leerp = "!"+suchidp+"!"
+            var EPp = EP.substr(0,1)
+            } 
+            suchid = doc.getElementById("_"+EP);
+            leers = "!"+suchid+"!";
+              if ((leers == "!null!")||((leerp == "!null!")&& ((EPp == "R")||(EPp == "C")||(label1 == "nb")))){
+              EPloop2 = EPloop2+1;
+                if ((leers == "!null!")&&(leerp == "!null!")){Skip = "ja";}else{
+                   Skip = "nein";
+                   break;
+                   }
+              }else{
+                    EPok = 1;
+                    if (EPloop1 == EPloop2){
+                    Skip = "nein";
+                    break;
+                     }
+                   }
+          EPloop1 = EPloop1+1
+         }
+       
+     }
+   
+ if (Skip == "nein"){
+  if  (EPok == 1){
+    if  (EPloop == 0){
+        Drehen(rota);
+        LoopMark = LoopMark+1;
+        if (Tstep == 1){
+          Meldung("Section-Step: "+LoopMark+" |Comp.Nr.: "+fil1+" | Label: "+label1+" "+tol1+" |Package: "+bauform1,"#ff0000");
+          }else{
+          Meldung("Step: "+LoopMark+" |Comp.Nr.: "+fil1+" | Lable: "+label1+" "+tol1+" |Package: "+bauform1,"#000000");
+          }
+        GruppenMark(id1+"_M");
+        resetdata(EPA);
+        Ersatzreset();
+        if ((Skip2 == "nein")&&(LoopMark != 1)){PosiLoop('++'); }else{}
+    }else{
+          if ((VoreinstsC[1] != "sicht")&&(VoreinstsC[1] != "neutr")){
+          suchenEP1(EP+"_M"+"_"+loopcfill);
+          }else{
+          suchenEP1(EP+"_M"+"_gray");
+          }
+          }
+  }else{if (loopr != "++"){
+           PosiLoop(looprr);
+           EPok = 0;
+           return;
+           }
+        }
+ }       
+}
+
+
+  //reset step filling
+function PosiLoopresetall(){
+
+   Voreinst(Voreinsts);
+}
+
+
+//reset Step counter 
+function PosiLoopreset(){
+
+ loopc = 0;
+ EPloop = 0;
+ LoopMark = 0;
+ Meldungsreset();
+ deMark();
+ resetdata(EPA);
+}
+
+//display message 
+function Meldung(Infotext,Infotextc){
+      Meldungsreset()
+
+      var texta = doc.createElement('text');
+      texta.setAttribute('y', svg1Vy+10);
+      texta.setAttribute('x', svg1Vx+5);
+      texta.setAttribute('id', "Infomeld");
+  /* CSS set */
+      texta.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;fill:#000;stroke:"+Infotextc+";stroke-width:0.5")
+  /* Text set */
+      textai = doc.createTextNode(Infotext);
+      texta.appendChild(textai);
+  /* Knoten zum Baum hinzufuegen */
+      var parent = doc.getDocumentElement();
+      parent.appendChild(texta);
+}
+
+//reset display message 
+function Meldungsreset(){
+       suchidan = doc.getElementById("Infomeld");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+}
+
+//display message1 
+function Meldung1(Infotext,Infotextc){
+      Meldungsreset1()
+  // message display
+      var texta = doc.createElement('text');
+      texta.setAttribute('y', svg1Vy+10);
+      texta.setAttribute('x', svg1Vx-5+svg1Vwidth);
+      texta.setAttribute('id', "Infomeld1");
+  /* CSS set */
+      texta.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;fill:#000;stroke:"+Infotextc+";stroke-width:0.5;text-anchor:end")
+  /* Text set */
+      textai = doc.createTextNode(Infotext);
+      texta.appendChild(textai);
+  /* Knoten zum Baum hinzufuegen */
+      var parent = doc.getDocumentElement();
+      parent.appendChild(texta);
+}
+
+
+
+
+//reset display message1 
+function Meldungsreset1(){
+       suchidan = doc.getElementById("Infomeld1");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+}
+
+//display message2 
+function Meldung2(Infotext,Infotextc,Dauer){
+      Meldungsreset2()
+  // message display
+      var texta = doc.createElement('text');
+      texta.setAttribute('y', svg1Vy+svg1Vheight/2);
+      texta.setAttribute('x', svg1Vx+svg1Vwidth/2);
+      texta.setAttribute('id', "Infomeld2");
+  /* CSS set */
+      texta.setAttribute('style', "font-family:Times New Roman;font-size:"+ 1.6*11/svg1.getCurrentScale()+" pt;fill:#000;stroke:"+Infotextc+";stroke-width:0.5;text-anchor:middle")
+  /* Text set */
+      textai = doc.createTextNode(Infotext);
+      texta.appendChild(textai);
+  /* Knoten zum Baum hinzufuegen */
+      var parent = doc.getDocumentElement();
+      parent.appendChild(texta);
+      window.setTimeout("Meldungsreset2()",Dauer);
+}
+
+//reset display message2 
+function Meldungsreset2(){
+       suchidan = doc.getElementById("Infomeld2");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+}
+
+
+// not for SNC
+function Ersatz(Infotext,Infotextc){
+
+       trans5 =  svg1.getCurrentTranslate();
+       getx1 = Number( trans5.getX());
+       gety1 = Number( trans5.getY());
+       gets = svg1.getCurrentScale();
+
+  //MatNr. readout
+       suchid10 = doc.getElementById("Infoep");
+       leer4 = "!"+suchid10+"!";
+       if (leer4 == "!null!"){return;}else{Matnr=fil1; Repdev= EPA }
+  //Position der Infoline
+       anztranst = suchid10.getAttribute('transform');
+       suchid11 = doc.getElementById("Rectep");
+       getx = Number(suchid11.getAttribute('x'));
+       gety = Number(suchid11.getAttribute('y'));
+       anztrans = suchid11.getAttribute('transform');
+
+  //Alte Ersetztypeninfo reset
+       Ersatzreset();
+
+
+       Infotextl = "!"+Infotext+"!";
+       if (Infotextl != "!undefined!"){
+       textai = doc.createTextNode(Infotext);
+       taxtaic = Infotextc
+       Matnr= " ";
+       }else{
+       textai = doc.createTextNode(Matnr+": Keine Ersatztypen Daten !");
+       taxtaic = "#f00"
+       }
+       
+  //Datum readout
+       ersatzd = doc.getElementById("Datum");
+       leer4 = "!"+ersatzd+"!";
+       if (leer4 == "!null!"){ersatzd2 = "keine Daten"}else{
+       ersatzd1 = ersatzd.getFirstChild();
+       ersatzd2 = ersatzd1.getData();
+       }
+       
+  //Meldung(MatnrKeine Ersatztypen Daten !");
+       ersatza = doc.getElementById("E_"+Matnr);
+       leer4 = "!"+ersatza+"!";
+       if (leer4 == "!null!"){
+     var texta = doc.createElement('text');
+     texta.setAttribute('y', gety-2);
+     texta.setAttribute('x', getx+2);
+     texta.setAttribute('transform', anztranst);
+     texta.setAttribute('id', "Infomelde");
+     texta.setAttribute('idfil', Matnr);
+     texta.setAttribute('style', "font-family:Courier New;font-weight:bold;font-size:"+ 1.1*10/svg1.getCurrentScale()+" pt;fill:black");
+     texta.appendChild(textai);
+  /* Knoten zum Baum hinzufuegen */
+     var parent = doc.getElementById("Funktion_Layer2");
+     
+  //Berechnung Zeichenmasse
+     hoehe1 = texta.getExtentOfChar(0).height;
+     laenge1 = texta.getComputedTextLength();
+     anzzeichen = textai.length ;
+     zeichenlang = laenge1/anzzeichen
+
+  // rectangle set
+      var rect = doc.createElement('rect');
+      rect.setAttribute('y', gety-4-hoehe1);
+      rect.setAttribute('x', getx);
+      rect.setAttribute('transform', anztrans);
+      rect.setAttribute('width', (laenge1+9));
+      rect.setAttribute('height', (hoehe1+4 ));
+      rect.setAttribute('id', "Infomelder");
+      rect.setAttribute('fill', "#fe5"); //#Fe5
+      rect.setAttribute('fill-opacity', "0.85");
+  //line and rectangle write
+             parent.appendChild(rect);
+             parent.appendChild(texta);
+
+
+  // REP INFO
+
+          ersatzi = "REP_"+Repdev;
+          ersatz = doc.getElementById(ersatzi);
+          leer4 = "!"+ersatz+"!";
+          if (leer4 != "!null!"){
+
+          ersatz1 = ersatz.getFirstChild();
+          ersatz2 = "REP :"+ersatz1.getData();
+          if (ersatz2 != Infotext){          
+  //line construct
+          stexti = doc.createElement('tspan');
+          stextie = doc.createTextNode(ersatz2);
+          stexti.appendChild(stextie);
+          stexti.setAttribute('dy', "1em");
+          stexti.setAttribute('x', getx+2);
+
+  //rectangle customize
+          anzzeichen = ersatz2.length ;
+          laenge1 = anzzeichen*zeichenlang;
+          ersatzt = doc.getElementById("Infomelde");
+          yhoehea = Number (ersatzt.getAttribute('y'));
+          texta.setAttribute('y', (yhoehea-hoehe1*1.7 ));
+          ersatzr = doc.getElementById("Infomelder");
+          hoehea = Number (ersatzr.getAttribute('height'));
+          rect.setAttribute('height', (hoehea+hoehe1*1.7 ));
+          yhoehea = Number (ersatzr.getAttribute('y'));
+          rect.setAttribute('y', (yhoehea-hoehe1*1.7 ));
+          laenge1a = Number (ersatzr.getAttribute('width'));
+          if (laenge1a < laenge1){rect.setAttribute('width', laenge1+9)};
+
+  //line write
+          suchidan = doc.getElementById("Infomelde");
+          suchidan.appendChild(stexti);
+          }
+          }
+
+             return;
+       }
+
+
+  //first line and background
+     var gover = ersatza.getElementsByTagName("value");
+     var anzahlid = gover.getLength();
+     suchidan = doc.getElementById("Infomelde");
+     leer4 = "!"+suchidan+"!";
+     if (leer4 == "!null!"){
+  //Text first line
+     var texta = doc.createElement('text');
+     texta.setAttribute('y', gety-2);
+     texta.setAttribute('x', getx+2);
+     texta.setAttribute('transform', anztranst);
+     texta.setAttribute('id', "Infomelde");
+     texta.setAttribute('idfil', Matnr);
+     texta.setAttribute('style', "font-family:Courier New;font-weight:bold;font-size:"+ 1.1*10/svg1.getCurrentScale()+" pt;fill:black");
+     textai = doc.createTextNode(" "+Matnr+": Ersatztypen vom "+ ersatzd2);
+     texta.appendChild(textai);
+  /* Knoten zum Baum hinzufuegen */
+     var parent = doc.getElementById("Funktion_Layer2");
+     
+  //Berechnung Zeichenmasse
+     hoehe1 = texta.getExtentOfChar(0).height;
+     laenge1 = texta.getComputedTextLength();
+     anzzeichen = textai.length ;
+     zeichenlang = laenge1/anzzeichen
+
+  // rectangle set
+      var rect = doc.createElement('rect');
+      rect.setAttribute('y', gety-4-hoehe1);
+      rect.setAttribute('x', getx);
+      rect.setAttribute('transform', anztrans);
+      rect.setAttribute('width', (laenge1+9));
+      rect.setAttribute('height', (hoehe1+4 ));
+      rect.setAttribute('id', "Infomelder");
+      rect.setAttribute('fill', "#fe5"); //#Fe5
+      rect.setAttribute('fill-opacity', "0.85");
+  //line and rectangle write
+             parent.appendChild(rect);
+             parent.appendChild(texta);
+             suchidan = doc.getElementById("Infomelde");
+     }
+  //Ersatztypen readout and neue line je Type
+       for (var i=0;i<anzahlid;i++){
+  //substitute readout
+          ersatzi = "E_"+Matnr+"_"+(i+1);
+          ersatz = doc.getElementById(ersatzi);
+          ersatz1 = ersatz.getFirstChild();
+          ersatz2 = ersatz1.getData();
+          
+  //line construct
+          stexti = doc.createElement('tspan');
+          stextie = doc.createTextNode(ersatz2);
+          stexti.appendChild(stextie);
+          stexti.setAttribute('dy', "1em");
+          stexti.setAttribute('x', getx+2);
+
+  //rectangle customize
+          anzzeichen = ersatz2.length ;
+          laenge1 = anzzeichen*zeichenlang;
+          ersatzt = doc.getElementById("Infomelde");
+          yhoehea = Number (ersatzt.getAttribute('y'));
+          texta.setAttribute('y', (yhoehea-hoehe1*1.7 ));
+          ersatzr = doc.getElementById("Infomelder");
+          hoehea = Number (ersatzr.getAttribute('height'));
+          rect.setAttribute('height', (hoehea+hoehe1*1.7 ));
+          yhoehea = Number (ersatzr.getAttribute('y'));
+          rect.setAttribute('y', (yhoehea-hoehe1*1.7 ));
+          laenge1a = Number (ersatzr.getAttribute('width'));
+          if (laenge1a < laenge1){rect.setAttribute('width', laenge1+9)};
+
+  //line write
+          suchidan.appendChild(stexti);
+       }
+  //centering ueber mark
+    texta.selectSubString(0,1);
+    rtextvar = "";
+    setzt = doc.getElementById("_"+line0);
+    setzt.setAttribute("onmouseout", rtextvar);
+    svg1.deselectAll();
+    
+
+
+}
+
+// not for SNC
+function Ersatzreset(){
+       suchidan = doc.getElementById("Infomelde");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+
+       suchidan = doc.getElementById("Infomelder");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+
+}
+
+
+
+// set preslection
+function Voreinst(Einstell){
+        Einstellr = "run" ;
+        var Einstella = Einstell.split('_');
+        svg1.setAttribute("width","100%");
+        svg1.setAttribute("height","100%");
+        MessenOn = "Off";
+
+    if (Einstella[1]=="neutr"){
+         self.location.reload();
+        return;
+    }
+
+
+  //AKZ selection all om
+   if (Einstella[1]=="alleein" ){
+      //all AKZ on
+        onoffa('alleaus');
+        //onoffa('alleaus_posi');
+        onoffa('alleein');
+        onoffaz('alleein');
+      //AKZ call
+        UpdateMenu(null, Voreinsts, 'checked', 'layerv', false);
+        UpdateMenu(null, Einstell, 'checked', 'layerv', false);
+      //drawing centering
+        Drehen(rota);
+        Voreinsts = Einstell;
+      //frame backgroundcolor
+        rectstroke ="#22a";
+        GruppenMark("boxfill_vor")
+        boxfills = "none";
+        GruppenMark('boxfill_bf');
+      //Step reset
+        PosiLoopreset();
+      //non assembled green
+        rectstroke ="#0F0";
+        GruppenMark('10000000_vor');
+      //marking reset
+        deMark();
+        Einstellr = " " ;
+        Vorauswahl = 1;
+        
+//Color layer all on
+    var govercs = doc.getElementsByTagName("value");
+    var anzahlidcs = govercs.getLength();
+
+        for (var i=0;i<anzahlidcs;i++){
+            var sichtac = govercs.item(i);
+            leerc = "!"+sichtac+"!";
+            if (leerc == "!null!"){}else{
+            goparaidc = sichtac.getAttribute("id");
+            prefnic = goparaidc.split('_');
+         sichtacs = doc.getElementById("r_c_"+prefnic[1]);
+         leerc1 = "!"+sichtacs+"!";
+         if (leerc1 == "!null!"){}else
+         {sichtacs.setAttribute("opacity", "0.4")
+         }
+ }
+
+
+}        
+        
+        
+        Meldung1("Preselection: all on", "#000");
+        return;
+        }
+
+  // not for SNC Sichtpruefung
+   if (Einstella[1]== "sicht"){
+      //all AKZ on
+        onoffa('alleein');
+        onoffaz('alleaus');
+        onoffg("Lg_111");
+        onoffg('Lg_Pruefung');
+     //Menue customize
+       UpdateMenu(null, Voreinsts, 'checked', 'layerv', false);
+       UpdateMenu(null, Einstell, 'checked', 'layerv', false);
+       Voreinsts = Einstell;
+     //frame backgroundcolor
+        boxfills = "none";
+        GruppenMark('boxfill_bf');
+        GruppenMark('boxfill_br');
+        rectstroke ="#000";
+        GruppenMark("boxfill_vor");
+      //Zusatzlagen aus
+        onoffa('alleaus_Ae');
+      //Step reset
+        PosiLoopreset();
+      //zusatzlagen Pruefung ein
+        onoffg('Lg_Pruefung');
+      //color nach BE-Type
+        for (var i=0;i<1000;i++){
+          ersatzi = "P_"+(i+1);
+          sichta = doc.getElementById(ersatzi);
+          leer = "!"+sichta+"!";
+          if (leer == "!null!"){break;}
+          fil1 = sichta.getAttribute("fil");
+          if (fil1 == "10000000"||fil1 == "A5E00000001"){rectstroke ="silver";GruppenMark(fil1+'_vor');continue}
+          var sichti = sichta.getElementsByTagName("value");
+          var anzahlid = sichti.getLength();
+          var sicht = sichti.item(anzahlid-1);
+          sicht1 = sicht.getFirstChild();
+          sicht2 = sicht1.getData();
+          if (anzahlpref == 0){sicht3 = sicht2.substr(0,1)}else{
+              sicht3 = sicht2.substr(1,1);}
+                 if (sicht3 == "C"){rectstroke ="#00F";GruppenMark(fil1+'_vor');}
+                 if (sicht3 == "V"){rectstroke ="#F00";GruppenMark(fil1+'_vor');}
+                 if (sicht3 == "R"){rectstroke ="#693";GruppenMark(fil1+'_vor');}
+        }
+     //marking reset
+       deMark();
+     //drawing centering
+       Drehen(rota);
+       Einstellr = " " ;
+       Vorauswahl = 1;
+       Meldung1("Preselection : Sichtpruefung", "#000");
+       return;
+     }
+
+  //AKZ selection
+        var Einstellakz = Einstella[1].split('/');
+   if (Einstellakz[0]>=0 || Einstella[1]=="Pruefung"){
+      //all AKZ off
+        onoffa('alleaus');
+        onoffa('alleein');
+        onoffaz('alleein');
+        onoffa('alleaus_posi');
+      //AKZ call
+
+        if (anzahlpref == 0) {onoffg("Lo_"+Einstella[1])} else {
+            onoffg("Lo_"+Einstella[1]);
+            prefni = nutzenpref.split(',');
+            for (var i=0;i<anzahlpref;i++){
+            onoffg("Lo_"+Einstella[1]+"/"+prefni[i]);
+            }
+         }
+
+//Color layer akz on
+    var govercs = doc.getElementsByTagName("value");
+    var anzahlidcs = govercs.getLength();
+
+        for (var i=0;i<anzahlidcs;i++){
+            var sichtac = govercs.item(i);
+            leerc = "!"+sichtac+"!";
+            if (leerc == "!null!"){}else{
+            goparaidc = sichtac.getAttribute("id");
+            prefnic = goparaidc.split('_');
+         sichtacs = doc.getElementById("r_c_"+prefnic[1]);
+         leerc1 = "!"+sichtacs+"!";
+         if (leerc1 == "!null!"){}else
+         
+         
+         
+         {sichtacs.setAttribute("opacity", "0")
+          sichtakz1 = doc.getElementById("r_"+prefnic[1]);
+          sichtakz2 = sichtakz1.getParentNode();
+          fil1c = sichtakz2.getAttribute("id");
+          sichtakz3 = fil1c.split('_');
+          sichtakz4 = sichtakz3[1].split('-');
+          //alert (sichtakz4[0]+"!"+Einstella[1]+"!");          
+          if (sichtakz4[0]==Einstella[1]){
+         sichtacs.setAttribute("opacity", "0.4")
+         }
+         }
+         
+ }
+
+
+}
+
+
+
+        UpdateMenu(null, Voreinsts, 'checked', 'layerv', false);
+        UpdateMenu(null, Einstell, 'checked', 'layerv', false);
+      //drawing centering
+        Drehen(rota);
+        Voreinsts = Einstell;
+      //assembly view schema call
+        Einstella[2]= "fert";
+        }
+
+  //assembly view schema
+   if (Einstella[2]=="fert"){
+      //frame backgroundcolor
+        rectstroke ="#eee";
+        GruppenMark("boxfill_vor")
+        boxfills = "none";
+        GruppenMark('boxfill_bf');
+        GruppenMark('boxfill_br');
+        //rectstroke ="#22a";
+        rectstroke ="#22a";
+        if (anzahlpref == 0) {GruppenMark("boxfill_vor",Einstella[1])} else {
+            prefni = nutzenpref.split(',');
+            for (var i=0;i<anzahlpref;i++){
+            GruppenMark("boxfill_vor",Einstella[1]+"/"+prefni[i]);
+            }
+         }
+
+      //Step reset
+        PosiLoopreset();
+      //Nichtbestueckte gruen
+        rectstroke ="#0F0";
+        GruppenMark('10000000_vor');
+      //marking reset
+        deMark();
+        Einstellr = " " ;
+        Vorauswahl = 1;
+        
+        var docpara= doc.getElementById("PARAMETER");
+        var gopara = docpara.getElementsByTagName("value");
+        var anzahlid = gopara.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gopara.item(i);
+        goparaid = aktid.getAttribute("id");
+        goparaidch = gopara.item(i).getFirstChild();
+        leer4 = "!"+goparaidch+"!";
+        if (leer4 != "!null!"){        
+        paraakz = goparaidch.getData();
+            if (paraakz == "L_"+Einstella[1]){einstellakz = goparaid.substr(3,20); 
+            }else{continue;}
+      }
+      }
+         
+        
+        
+        Meldung1("Preselection : "+einstellakz, "#000");
+        return;
+        }
+}
+
+// call help
+function Hilfe(url){
+
+      var hilfeg = doc.createElement('g');
+      hilfeg.setAttribute('id', "Hilfe");
+
+      var hilfet = doc.createElement('text');
+      hilfet.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;text-decoration:underline;fill:#00F;stroke-width:0.5;text-anchor:end")
+      hilfet.setAttribute('x',svg1Vx-5+svg1Vwidth);
+      hilfet.setAttribute('y',svg1Vy+25);
+      hilfet.setAttribute('onclick', "HilfeText(evt)");
+      texthi = doc.createTextNode("Startinfo");
+      hilfet.appendChild(texthi);
+      hilfeg.appendChild(hilfet);
+  
+  if (url == "URL"){
+      var DocURL = document.URL;
+      DocURL=DocURL.toUpperCase();
+      DocURL2 =  String(DocURL).substring((String(DocURL).indexOf(".SVG"))-3,(String(DocURL).indexOf(".SVG"))-2);
+    if (DocURL2 !="_"){
+        
+      alert ("Offlineversion nur Kurzhilfe vorhanden !");
+      HilfeText(evt)
+      
+    }else{
+  
+      var hilfea = doc.createElement('a');
+      hilfea.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href','https://pap.fthw.siemens.de/servlet/PB/menu/1061187_l1/index.html');      
+      hilfea.setAttribute('target', "_new");
+      var hilfet = doc.createElement('text');
+      hilfet.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;text-decoration:underline;fill:#00F;stroke-width:0.5;text-anchor:end")
+      hilfet.setAttribute('x',svg1Vx-5+svg1Vwidth);
+      hilfet.setAttribute('y',svg1Vy+40);
+      texthi = doc.createTextNode("PAP-Hilfe");
+      hilfet.appendChild(texthi);
+      hilfea.appendChild(hilfet);
+      hilfeg.appendChild(hilfea);
+    }
+  }
+      var parenth = doc.getDocumentElement();
+      parenth.appendChild(hilfeg);
+      
+  window.setTimeout("HilfeEnd()",10000);    
+    
+      
+}
+
+// close help line
+function HilfeEnd(){
+       suchidan = doc.getElementById("Hilfe");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+
+
+}
+
+// input Fid
+function QDatenRnr(){
+
+       suchidanq = doc.getElementById("QEin");
+       leer4 = "!"+suchidanq+"!";
+       if (leer4 != "!null!"){
+       Knotenq = suchidanq.getParentNode();
+       Knotenq.removeChild(suchidanq);
+       }
+
+    ruekmeld1=ruekmeld;
+
+
+    // ruekmeld = prompt("Q-Data : Insert FID !",ruekmeld);
+     
+
+    
+    //if((ruekmeld != "null") ||(ruekmeld != null))
+    //  {
+    //         leer4 = "!"+ruekmeld+"!";
+    //   if (leer4 == "!null!"){ruekmeld=ruekmeld1;}
+    //   if (ruekmeld.length != 14){
+    //           alert("FID: lenght not right !");
+    //           ruekmeld = null;
+    //            return ;
+    //       }
+    //   }
+     
+           var hilfetq = doc.createElement('text');
+      hilfetq.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;fill:#00F;stroke-width:0.5;text-anchor:end")
+      hilfetq.setAttribute('x',svg1Vx-5+svg1Vwidth);
+      hilfetq.setAttribute('y',svg1Vy+40);
+      hilfetq.setAttribute('id', "QEin");
+      hilfetq.setAttribute("onmouseup", "QDatenRnr()");
+      qtext = ("Q-Data FID: "+ruekmeld+" change");
+      texthiq = doc.createTextNode(qtext);
+      hilfetq.appendChild(texthiq);
+        var parenthq = doc.getDocumentElement();
+        
+  //as Link 
+      parenthq.appendChild(hilfetq);
+
+}     
+
+// send Q-DATA
+function QDaten(){
+
+QDaten("1")
+
+}
+
+        // send Q-DATA
+function QDaten(eplq){
+      
+       suchidanq = doc.getElementById("QEin");
+       leer4 = "!"+suchidanq+"!";
+       if (leer4 != "!null!"){
+       Knotenq = suchidanq.getParentNode();
+       Knotenq.removeChild(suchidanq);
+      }
+      ruekmeld2=ruekmeld;
+      
+ //   if ((ruekmeld == "null") ||(ruekmeld == null)){
+ //    ruekmeld = prompt("Q-Data : Please Insert FID !","FID?");
+       
+  
+ //   if(ruekmeld == ruekmeld2){
+    
+ //    ruekmeld = null;
+ //     return ;}
+    
+  
+ //     if((ruekmeld == "")||(ruekmeld == null))
+ //   {
+ //   alert("Q-Data: Please insert FID");
+ //   ruekmeld = null;
+ //   return;
+ //   }
+ //   else
+ //   {
+
+ //   if(ruekmeld != "")
+ //     {
+ //      if (ruekmeld.length>15){
+ //              alert("FID: lenght not right !");
+ //              ruekmeld = null;
+ //               return ;
+ //          }
+ //      }
+ //    }
+
+ //}
+      var hilfetq = doc.createElement('text');
+      hilfetq.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;fill:#00F;stroke-width:0.5;text-anchor:end")
+      hilfetq.setAttribute('x',svg1Vx-5+svg1Vwidth);
+      hilfetq.setAttribute('y',svg1Vy+40);
+      hilfetq.setAttribute('id', "QEin");
+      hilfetq.setAttribute("onmouseup", "QDatenRnr()");
+      //qtext = ("Q-Data FID: "+ruekmeld+" has error");
+      //texthiq = doc.createTextNode(qtext);
+      //hilfetq.appendChild(texthiq);
+      //  var parenthq = doc.getDocumentElement();
+        
+      //parenthq.appendChild(hilfetq);
+
+
+               ParaMatNr1 = doc.getElementById("ItemNO")         
+               ParaMatNr2 = ParaMatNr1.getFirstChild();
+               ParaMatNr = ParaMatNr2.getData()
+
+               ParaAS1 = doc.getElementById("AS")         
+               ParaAS2 = ParaAS1.getFirstChild();
+               ParaAS = ParaAS2.getData()
+
+    
+               ParaSIDE1 = doc.getElementById("SIDE")         
+               ParaSIDE2 = ParaSIDE1.getFirstChild();
+               ParaSIDE = ParaSIDE2.getData()
+               
+               ParaPO1 = doc.getElementById("PO")         
+               ParaPO2 = ParaPO1.getFirstChild();
+               ParaPO = ParaPO2.getData()
+               
+               ParaOP1 = doc.getElementById("OP")         
+               ParaOP2 = ParaOP1.getFirstChild();
+               ParaOP = ParaOP2.getData()
+               
+               ParaWS1 = doc.getElementById("WS")         
+               ParaWS2 = ParaWS1.getFirstChild();
+               ParaWS = ParaWS2.getData()
+               
+               
+               ParaFID1 = doc.getElementById("FID")         
+               ParaFID2 = ParaFID1.getFirstChild();
+               ParaFID = ParaFID2.getData()
+               
+              
+               
+       qurl = doc.getElementById("URL") 
+       qurl1 = qurl.getFirstChild();
+       leer4 = "!"+qurl1+"!";
+         if (leer4 != "!null!"){        
+         qurl2 = qurl1.getData()
+           if (ruekmeld == null){
+                  if (akz1 == " "){akz1="PCB";}
+                  if (line0 == " "){line0="PCB";}
+          
+           //alert(qurl2);
+     
+     open(qurl2+'?mid='+akz1+'&testitem='+line0+'&PNun='+ParaMatNr+'&PO='+ParaPO+'&Side='+ParaSIDE+'&WS='+ParaWS+'&OP='+ParaOP+'&As='+ParaAS+'&fid='+ParaFID+' ',"","width=800,height=950,overflow=auto");
+          }
+         }else{alert("please insert URL in config.xml")} 
+
+}
+
+// call help alert
+function HilfeText(evt){
+    // germany alert("Kurzinfo: \n\n Allgemeine Hinweise \n\n - Mauszeiger auf Einbauplatz zeigt Informationen zum Bauteil an \n - Funktionen werden durch Klick mit rechter Maustaste aufgerufen \n - Buchstabe in Klammer zeigt den Tasten-Aufruf ");
+    alert("Short description: \n\n tips \n\n - Mouse over REFDES -> show component infos \n - Mouse clik on REFDES -> calls Q-Data form \n - Mouse right click -> calls functional menue \n - Character in bracket -> short key \n\n additional key-functions  \n\n - Mouse over + [P] -> show same components as position line  \n - Mouse over + [A] -> show same components  \n"+
+    " - [M] -> Measure function for x y issue \n\n");
+}
+
+// prepare Layers
+function RenameLayer(evt){
+
+
+        var docpara= doc.getElementById("PARAMETER");
+        var gopara = docpara.getElementsByTagName("value");
+        var anzahlid = gopara.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gopara.item(i);
+        goparaid = aktid.getAttribute("id");
+        goparaidch = gopara.item(i).getFirstChild();
+        leer4 = "!"+goparaidch+"!";
+        if (leer4 != "!null!"){        
+        paraakz = goparaidch.getData();
+        
+
+ 
+        
+        var layerpara= doc.getElementById(goparaid.substr(1,20)+"-POSI");        
+        leer4 = "!"+layerpara+"!";
+        if (leer4 != "!null!"){ 
+        layerparaid = layerpara.getAttribute("id")  
+        layerpara.getAttribute("id")  
+        if (goparaid == "LL_PCBLAYER")
+        { layerpara.setAttribute('id', "")}
+        else        
+        {layerpara.setAttribute('id', paraakz+"-POSI")}      
+
+        }else{layerparaid = "XX";}
+        
+        
+        
+        var layerpara= doc.getElementById(goparaid.substr(1,20)+"-POL");        
+        leer4 = "!"+layerpara+"!";
+        if (leer4 != "!null!"){ 
+        layerparaid = layerpara.getAttribute("id")  
+        layerpara.getAttribute("id") 
+         
+        if (goparaid == "LL_PCBLAYER") 
+        {layerpara.setAttribute('id', "")}
+        else        
+        {layerpara.setAttribute('id', paraakz+"-POL")}      
+      
+               
+        }else{layerparaid = "XX";}
+        
+        
+        var layerpara= doc.getElementById(goparaid.substr(1,20)+"-EP");        
+        leer4 = "!"+layerpara+"!";
+        if (leer4 != "!null!"){ 
+        layerparaid = layerpara.getAttribute("id")  
+        layerpara.getAttribute("id")  
+        if (goparaid == "LL_PCBLAYER") 
+        {layerpara.setAttribute('id', "")}
+        else        
+        {layerpara.setAttribute('id', paraakz+"-EP")}      
+               
+        }else{layerparaid = "XX";}
+        
+        
+        }else{}
+
+
+      }
+}
+
+
+// set Basic view
+function DefaultLayer(evt){
+
+          
+               akzren = doc.getElementById("AKZ")         
+
+                  akzren1 = akzren.getFirstChild();
+                  leer5 = "!"+akzren1+"!";
+                   if (leer5 == "!null!"){}
+                   else{
+                  akz1 = akzren1.getData();
+                  akzrenv = doc.getElementById(akz1)
+                  leer5 = "!"+akzrenv+"!";
+                   if (leer5 == "!null!"){
+                   Meldung2(' ! Attention !  Basic view:  Please  select.','#f00',7000)
+                   }else{                  
+                  akzrenv1 = akzrenv.getFirstChild();
+                  akzv1 = akzrenv1.getData();
+                  akzv1 =akzv1.substr(2,20)
+                  Voreinst("Lv_"+akzv1)                  
+                }
+                }
+ }
+
+// info on off
+function infooff(evt){
+
+  
+     
+    menueinfo = doc.getElementById("Ls_Info")
+    leer4 = "!"+menueinfo+"!";
+    if (leer4 == "!null!"){ 
+    LayerMenu("Info")
+    }
+
+    setMenu("Sicht")
+    
+    onoff("L_Info")   
+    
+}
+
+
+// add by thom, 2010-06-08
+// add move function
+function Down(evt)
+{
+  lastX = evt.clientX
+  lastY = evt.clientY
+  down = true
+}
+
+function Up(evt)
+{
+  down = false
+}
+
+function Move(evt)
+{
+  if( ! down )
+    return
+  var x = evt.clientX
+  var y = evt.clientY
+  var dx = x - lastX
+  var dy = y - lastY
+  lastX = x
+  lastY = y
+  if( evt.shiftKey )
+  {
+    document.rootElement.currentTranslate.x += dx
+    document.rootElement.currentTranslate.y += dy
+  }
+  else
+  {
+    tx += dx
+    ty += dy
+    g.setAttribute( "transform", "translate("+tx+","+ty+")" )
+  }
+}
+// end add
+
+
+]]></script>
