@@ -1,0 +1,94 @@
+/**
+ * 
+ */
+package com.converter.action;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.OutputStream;
+
+import oracle.sql.BLOB;
+
+import org.hibernate.Hibernate;
+
+import com.converter.dao.SvgFileDAO;
+import com.converter.*;
+/**
+ * @author zhou
+ *
+ */
+public class uploadAction {
+	private SvgFileDAO uploadfiledao;
+	private String filepath;
+	private String ArticleNo="A5E01131902";
+	private String Estand="0";
+	private String Side="0";
+	private byte[] buffer = new byte[1];
+
+	@SuppressWarnings("deprecation")
+	public String upload(){
+		
+		buffer[0] = 1;
+	try{
+			SvgFileId svgfileid=new SvgFileId(this.getArticleNo(),this.getEstand(),this.getSide());
+			SvgFile svgfile= new SvgFile(svgfileid);
+			svgfile.setSOURCEFILE((BLOB) Hibernate.createBlob(buffer));
+			svgfile.setARTICLE_NO(this.getArticleNo());
+			svgfile.setESTAND(this.getEstand());
+			svgfile.setSIDE(this.getSide());
+			
+			BLOB blob = svgfile.getSOURCEFILE();
+			OutputStream out = blob.getBinaryOutputStream();
+			
+			File f = new File(filepath);
+			FileInputStream fin = new FileInputStream(f);
+			int count = -1, total = 0;
+			byte[] data = new byte[(int)fin.available()];
+			fin.read(data);
+			fin.close();
+			out.write(data);
+
+			this.getUploadfiledao().save(svgfile);
+			return "success";
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return "failed";
+		} finally {
+		}
+	
+	}
+	
+	public SvgFileDAO getUploadfiledao() {
+		return uploadfiledao;
+	}
+	public void setUploadfiledao(SvgFileDAO uploadfiledao) {
+		this.uploadfiledao = uploadfiledao;
+	}
+	public String getFilepath() {
+		return filepath;
+	}
+	public void setFilepath(String filepath) {
+		this.filepath = filepath;
+	}
+	public String getArticleNo() {
+		return ArticleNo;
+	}
+	public void setArticleNo(String articleNo) {
+		ArticleNo = articleNo;
+	}
+	public String getEstand() {
+		return Estand;
+	}
+
+	public void setEstand(String estand) {
+		Estand = estand;
+	}
+
+	public String getSide() {
+		return Side;
+	}
+	public void setSide(String side) {
+		Side = side;
+	}
+
+}

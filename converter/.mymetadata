@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="converter"
+  id="myeclipse.1294102854537"
+  context-root="/converter"
+  j2ee-spec="5.0"
+  archive="converter.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+
