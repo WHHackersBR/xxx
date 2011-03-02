@@ -3,7 +3,7 @@
 <html>
 
 <head><title>Item number result</title>
-	<!-- link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/interface.css" -->
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/interface.css" >
 
 </head>
 

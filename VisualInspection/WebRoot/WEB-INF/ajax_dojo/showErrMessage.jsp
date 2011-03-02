@@ -11,7 +11,12 @@
 	<table>
 		<tr>
 			<td style="color:red">
-				<s:property escape="false" value="errorOutput" />
+				<s:if test="formData.failed">							
+				<td style="color:green"><s:property escape="false" value="errorOutput" /></td>
+				</s:if>
+				<s:else>
+				<td style="background-color:red;"><s:property escape="false" value="errorOutput" /></td>
+				</s:else>							
 			</td>	
 		</tr>
 	</table>											

@@ -74,7 +74,9 @@ function aMouseClick(evt) {
 		         				"width=600, height=500, left=400, top=0, scrollbars=no, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
 			//make sure the popup has the correct parent set
 			if (dataWin.opener == null) dataWin.opener = parent;    				      
-      		      		
+      		//parent.document.getElementById("inputFID");
+			parent.setFocus_FID();
+			//parent.
       		dataWin.focus();
     	}	
 		

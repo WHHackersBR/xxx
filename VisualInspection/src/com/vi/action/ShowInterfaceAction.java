@@ -199,8 +199,6 @@ public class ShowInterfaceAction extends ActionSupport {
 	public String fillCurrentFID(){
 		errorOutput="";
 		if(!(formData.getFid()==null || formData.getFid().equals(""))){
-			formData.setCurrentFid(formData.getFid());
-			formData.setFid("");
 			if (formData.getPoNo()==null || formData.getPoNo().equals("")){
 				errorOutput=ErrMessage.NullPO+ "<br>";
 			}
@@ -214,8 +212,11 @@ public class ShowInterfaceAction extends ActionSupport {
 				errorOutput=errorOutput+ErrMessage.NullOperatorID+"<br>";
 			}
 			if (!errorOutput.isEmpty()){
-				return SUCCESS;
+				formData.setFailed(false);
+				return ERROR;
 			}
+			formData.setCurrentFid(formData.getFid());
+			formData.setFid("");
 			TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(),formData.getWorkstationNr());
 			TabTested testedFID= tabTestedDAO.findById(tabTestedId);
 			if (testedFID == null ){
@@ -269,7 +270,7 @@ public class ShowInterfaceAction extends ActionSupport {
 						}
 					}
 				} 
-			}else if(testedFID.getTestResult()=="P"){
+			}else if(testedFID.getTestResult().equals("P")){
 				formData.setFailed(true);
 				errorOutput=formData.getCurrentFid()+ErrMessage.pastFID;
 			}else{
@@ -278,6 +279,7 @@ public class ShowInterfaceAction extends ActionSupport {
 			}
 		
 		}else{
+			formData.setFailed(false);
 			errorOutput=ErrMessage.NullFID;
 		}
 		return SUCCESS;
@@ -389,12 +391,43 @@ public class ShowInterfaceAction extends ActionSupport {
 	
 	public String testComplete(){
 		
-		formData.setFailed(false);
-		formData.setCurrentFid(null);
-		formData.setFid(null);
-		formData.setItemNr(null);
-		formData.setVersionAS(null);
-		
+		//formData.setFailed(false);
+		//System.out.println("testcomplete\n");
+		Connection conn = null;
+		CallableStatement coll = null;
+		try {
+			conn = dataSource.getConnection();
+			//calling the stored procedure which changes the test result in TAB_TESTED			
+			//  PROCEDURE CHANGE_TESTRESULT(  in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,
+			//in_test_result IN CHAR);                        			
+			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.CHANGE_TESTRESULT(?,?,?)}");
+			//prepare input and output arguments 
+			coll.setString(1, formData.getCurrentFid());
+			coll.setString(2, formData.getWorkstationNr());
+			coll.setString(3, "F");
+			
+			coll.execute();	
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			if (coll != null) {
+				try {
+					coll.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		} 
 		return SUCCESS;
 	}
 

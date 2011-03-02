@@ -185,6 +185,7 @@ public class SVGEdit  {
 						//String abcString=firstChild2.getAttribute("stroke-width");
 						//double stoke=Float.parseFloat(abcString);
 						//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
+						firstChild2.setAttribute("stroke-width","0.005px");
 						
 						//get position
 						String transformVal = firstChild2.getAttribute("transform");

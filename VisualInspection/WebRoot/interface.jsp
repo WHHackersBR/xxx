@@ -24,7 +24,9 @@
   </head>
   <script type="text/javascript" src="./js/openWindow.js"></script>
   
-  <script>
+  <script type="text/javascript">
+  	//document.getElementById("inputFID").focus();
+  	//alert("test01");
     function publish_change_side() {
         dojo.event.topic.publish("change_side");
     }
@@ -33,20 +35,36 @@
     }
     function publish_change_currentID() {
     	if(event.keyCode==13){
-			var otxt=document.getElementById("inputFID");
+			//var otxt=document.getElementById("inputFID");
 			//alert("你按了回车");
-       	dojo.event.topic.publish("change_currentID");        
-			otxt.value="";
+       		dojo.event.topic.publish("change_currentID");        
+			//otxt.value="";
+	        document.getElementById("inputFID").focus();
  		} 
     }
+    function setFocus_FID() {
+        document.getElementById("inputFID").focus();
+    }
+	dojo.event.topic.subscribe("/clear_FID", function(data, request, widget){
+   
+    //data : text returned from request(the html)
+    //request: XMLHttpRequest object
+    //widget: widget that published the topic
+        document.getElementById("inputFID").focus();
+        document.getElementById("inputFID").value="";
+	});
     function publish_get_WorkstationDescription() {
      	if(event.keyCode==13){
-        dojo.event.topic.publish("get_WorkstationDescription");
+	        dojo.event.topic.publish("get_WorkstationDescription");
+	        event.keyCode=9;
+	        document.getElementById("operatiorID").focus();
         }        
     }    
     function publish_get_itemNr_and_version() {
      	if(event.keyCode==13){
-        dojo.event.topic.publish("get_itemNr_and_version"); 
+	        dojo.event.topic.publish("get_itemNr_and_version"); 
+	        event.keyCode=9;
+	        document.getElementById("workstationNo").focus();
         }       
     }
     
@@ -63,55 +81,58 @@
   </script>
   
   <body>  	
-  	<div id="content" >
+  	<div id="content" 	style="background-color: beige;">
 		    <table>
 			    <tr>			    		    				    
-				    <s:form id="frm_ItemNrAndVersion"  >
+				    <s:form id="frm_ItemNrAndVersion">
 				    <td style="width:3cm;"><s:textfield key="formData.poNo" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_itemNr_and_version();"/></td>						    				    			   	
-				    <td style="vertical-align:bottom"><sx:div cssStyle="width:4cm;" href="fillItemList.action" listenTopics="get_itemNr_and_version" formId="frm_ItemNrAndVersion"/></td>					   							    				   	
+				    <td><sx:div cssStyle="width:4cm;" href="fillItemList.action" listenTopics="get_itemNr_and_version" formId="frm_ItemNrAndVersion"/></td>					   							    				   	
 				   	</s:form>	
 
 				    <s:form id="frm_WorkstationDescription">
-				    <td style="width:1.5cm;"><s:textfield key="formData.workstationNr" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_WorkstationDescription();"/></td>				    			   		
-				    <td style="vertical-align:bottom"><sx:div cssStyle="width:100%;" href="fillWorkstationDescription.action" listenTopics="get_WorkstationDescription" formId="frm_WorkstationDescription"/></td>					   							    				   	
+				    <td id="workstationNo" style="width:1.5cm;"><s:textfield key="formData.workstationNr" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_WorkstationDescription();"/></td>				    			   		
+				    <td><sx:div cssStyle="width:100%;" href="fillWorkstationDescription.action" listenTopics="get_WorkstationDescription" formId="frm_WorkstationDescription"/></td>					   							    				   	
 				   	</s:form>	
 				   
 				   	<s:form id="frm_side_Id">
-				   	<td><sx:div cssStyle="width:100%;" href="changeSide.action" listenTopics="change_side" formId="frm_side_Id" /></td>
+				   	<td id="selectside"><sx:div cssStyle="width:100%;" href="changeSide.action" listenTopics="change_side" formId="frm_side_Id" /></td>
 				   	</s:form>
 				   	
-				   	<s:form id="frm_operatorID_Id" >
-				   	<td><sx:div cssStyle="width:100%;" href="changeOperatorID.action" labelposition="left" listenTopics="change_operatorID" formId="frm_operatorID_Id" /></td>
+				   	<s:form id="frm_operatorID_Id" onsubmit="return false">
+				   	<td id="operatiorID"><sx:div cssStyle="width:100%;" href="changeOperatorID.action" labelposition="left" listenTopics="change_operatorID" formId="frm_operatorID_Id" /></td>
 				   	</s:form>
 					
-				    <s:form action="startPO" >
-				    	<td><sx:submit key="startPO" targets="svgDiv" />	</td>			    		
+				    <s:form action="startPO" onsubmit="document.getElementById('currentFID').value='';document.getElementById('inputFID').focus();">
+				    	<td><sx:submit cssStyle="width:1.5cm;" key="startPO" targets="svgDiv" />	</td>			    		
 				    </s:form>
 				    
-				    
-				    <td><sx:submit key="poHistory" targets="dummy" onclick="openWindow('openPoInformation.action')" />
-				    <sx:submit key="openingPO" targets="dummy" onclick="openWindow('openShowUnconfirmed.action')"/></td>
+				    <s:form>
+				    <td><sx:submit cssStyle="width:1.5cm;" key="openingPO" targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openShowUnconfirmed.action')"/>
+				    <sx:submit cssStyle="width:1.5cm;" onfocus="alert('history')" key="poHistory" targets="dummy" onclick="openWindow('openPoInformation.action')" />
+				    </td>
+				    </s:form>
 				    	
 			    </tr>
 			</table>
-			<table border="0" style="height:5%;">
+			<table style="height:5%;">
 			    <tr>
 			    	<s:form>
 				    	<td><s:submit key="storeSvgInDB" action="goToStoreSvgInDB"/></td>
 				    </s:form>
 				    
 				    <s:form id="frm_current_Id">
-				    <td><s:textfield id="inputFID" key="formData.fid" labelposition="left" onkeydown="publish_change_currentID();"/></td>				   		
-				    <td><sx:div cssStyle="width:100%;" labelposition="left" href="fillCurrentFID.action" listenTopics="change_currentID" formId="frm_current_Id"/></td>					   							    				   	
+				    <td><s:textfield cssStyle="width:3.2cm;" id="inputFID" key="formData.fid" labelposition="left" onkeydown="publish_change_currentID();"/></td>				   		
+				    <td><sx:div cssStyle="width:100%;" labelposition="left" href="fillCurrentFID.action" listenTopics="change_currentID" formId="frm_current_Id" afterNotifyTopics="/clear_FID"/></td>					   							    				   	
 				   	</s:form>				   					   				    
 
-					<s:form>									    				    
-	    			<td><s:submit key="failure" action="testComplete_Interface" cssStyle="background-color:orange"/></td>
+					<s:form action="testComplete_Interface">									    				    
+				   	<td><sx:submit key="failure" cssStyle="width:1.2cm;background-color:orange" onclick="document.getElementById('inputFID').value=document.getElementById('currentFID').value;" afterNotifyTopics="change_currentID"/></td>
 					</s:form>
 					
-				    <td><sx:submit key="singleBoardErrList"  targets="dummy" onclick="openWindow('openItemFailureList_ItemFailureList.action')"/></td>
-				    <td><sx:submit key="currentPoDetails"  onclick="openWindow('openPoAllTestsOverview_AllTestsOverview.action')"/></td>
-					
+					<s:form>
+				    <td><sx:submit cssStyle="width:2.2cm;" key="singleBoardErrList"  targets="dummy" onclick="openWindow('openItemFailureList_ItemFailureList.action')"/></td>
+				    <td><sx:submit cssStyle="width:2.2cm;" key="currentPoDetails"  onclick="openWindow('openPoAllTestsOverview_AllTestsOverview.action');"/></td>
+			    	</s:form>
 			    </tr>			
 			    
 		    </table>
@@ -120,9 +141,12 @@
 	<sx:div id="svgDiv" executeScripts="true">
 		
 		 <embed src="createSvg/generated.svg"  width="100%" height="85%"
-		type="image/svg-xml" 
-		pluginspage="http://www.adobe.com/svg/viewer/install/" ></embed>
+		type="image/svg-xml"></embed>
 	</sx:div>
   </body>
+  <script type="text/javascript">
+  	//document.getElementById("inputFID").focus();
+  	//alert("test01");
+  </script>
 </html>
 

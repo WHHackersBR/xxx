@@ -23,6 +23,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	-->
 	
 	<sx:head debug="false" cache="false" compressed="false" />
+	<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/interface.css" >
 	
 
   </head>
@@ -35,19 +36,25 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     //data : text returned from request(the html)
     //request: XMLHttpRequest object
     //widget: widget that published the topic
+	 //   closeNoChanges();
+	 window.opener=null;window.close();
+	});
+	function checkInput(){
 		if(document.getElementById("inputPOS").value==""){
 		alert("请输入子板位置");
+		return false;
 		}else if(document.getElementById("inputFailCode").value=="9999"){
 		alert("请选择错误代码");
+		return false;
 		}else{
-	    closeNoChanges();
+		return true;
 	    }
-	});
+	}
   </script>
   	
   <body>
      <div id="content">
-	   <s:form theme="xhtml" id="frm_failureReport" action="addFailureReport_Interface">
+	   <s:form theme="xhtml" id="frm_failureReport" action="addFailureReport_Interface" onsubmit="return checkInput();">
 	   		
 				<table border="0">			
 				<s:textfield key="formData.poNo" readonly="true" />
@@ -64,7 +71,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<s:textarea key="failureReportData.failureDescription" />
 			    <tr>				    				    
 				    <td><sx:submit key="buttonSave" afterNotifyTopics="/afterAddedReport"  /></td>
-				    <td><s:submit key="buttonCancel" onclick="closeNoChanges()" /></td>				   
+				    <td><s:reset key="buttonCancel" onclick="window.opener=null;window.close();" /></td>				   
 			    </tr>
 				</table>					
 			

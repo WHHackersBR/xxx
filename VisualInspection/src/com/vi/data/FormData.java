@@ -34,7 +34,7 @@ public class FormData {
 		sideList = new ArrayList<String>();
 		sideList.add("CS");
 		sideList.add("SS");
-		sideList.add("V-Flip");
+		//sideList.add("V-Flip");
 		failed=false;
 	}
 	

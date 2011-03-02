@@ -5,7 +5,7 @@ function openWindow(target){
     //second param must not contain whitespaces!
     dataWin=window.open("http://" + location.host +"/VisualInspection/" + target , 
       							"ItemFailureListWindow",  
-		         				"width=1100, height=500, left=400, top=0, scrollbars=yes, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
+		         				"width=1100, height=500, left=5, top=0, scrollbars=yes, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
 	//make sure the popup has the correct parent set
 	if (dataWin.opener == null) dataWin.opener = parent;    				      
       		
