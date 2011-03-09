@@ -7,7 +7,7 @@
 				<result name="success"> index.jsp</result>
 				<result name="failed"> failed.jsp</result>
 			</action>
-			<action name="showSvgaction" class="uploadaction" method="{2}" >
+			<action name="showSvgaction" class="uploadAction" method="upload" >
 				<result name="success"> index.jsp</result>
 				<result name="failed"> failed.jsp</result>
 			</action>

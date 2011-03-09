@@ -1,13 +1,11 @@
-<%@ page language="java" import="java.util.*" pageEncoding="utf-8"%>
-<%
-String path = request.getContextPath();
-String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
-%>
+<%@ page language="java" import="java.util.*" pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%@ taglib prefix="sx" uri="/struts-dojo-tags" %> 
+<%@ page isELIgnored="false"%>
 
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
-  <head>
-    <base href="<%=basePath%>">
+  <head>    
     
     <title>图形文件上传及格式转换 DXF->SVG</title>
 	<meta http-equiv="pragma" content="no-cache">
@@ -17,18 +15,22 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<meta http-equiv="description" content="This is my page">
 	<!--
 	<link rel="stylesheet" type="text/css" href="styles.css">
-	-->
+	--> 
+			
   </head>
-  
   <body>
-    <form action="uploadAction.action" method="post">
-	 本地文件:<input type="file" name="filepath"/>
-	 <input type="submit" value="提交"/>
-	 <embed src=<s:url action="showSvgaction.action">
-	 			 
-	 			</s:url> 
-	 		width="100%" height="100%" type="image/svg+xml">
+    <s:form action="uploadAction" id="showSvg">
+    <tr>
+	 <td><s:file key="filepath" label="本地文件"/> 
+	 <sx:submit value="上传文件" targets="svgDiv"/>
+	 </td>
+	 </tr>
+	 </s:form>
+	<sx:div id="svgDiv">
+	 <embed src=<s:property value="filename"/>
+	 		width="100%" height="85%" type="image/svg+xml">
 	 </embed>
-	</form><br />
-  </body>
+	</sx:div>
+
+	</body>
 </html>

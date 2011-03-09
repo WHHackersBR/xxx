@@ -11,6 +11,7 @@ import org.kabeja.Main;
 //import oracle.sql.BLOB;
 
 
+import org.apache.struts2.ServletActionContext;
 import org.hibernate.Hibernate;
 
 import com.converter.dao.SvgFileDAO;
@@ -34,6 +35,7 @@ public class uploadAction {
 	//@SuppressWarnings("deprecation")
 	public String upload(){
 		Blob photo = null;
+	
     
 	try{
 		filename = filepath.substring(filepath.lastIndexOf("\\"));
@@ -56,17 +58,19 @@ public class uploadAction {
 			outmessage = "Pannel side is empty or not correct/n";
 		}
 		articleNo = filename.substring(0, estandIndex-1);
-		//½«Í¼Æ¬¶Á½øÊäÈëÁ÷  
+		//ï¿½ï¿½Í¼Æ¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  
 		Main main = new Main();
 		main.setSourceFile(filepath);
-		//ÉèÖÃ×ª»»ÎÄ¼þ¸ñÊ½Îªsvg
+		//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½Ê½Îªsvg
 		main.setPipeline("svg");
 		main.omitUI(true);
 		filename = filename + "." + main.getPipeline();
-		main.setDestinationFile(filename);
+		String upfilename=ServletActionContext.getServletContext().getRealPath("/SVG-FILE")+"\\"+ filename;
+		main.setDestinationFile(upfilename);
 		main.initialize();
 		main.process();
-	    FileInputStream fis = new FileInputStream(filename); 
+	    FileInputStream fis = new FileInputStream(upfilename);
+	    filename="SVG-FILE\\"+filename;
 	    
 	    try{
 			byte[] data = new byte[(int)fis.available()];
@@ -74,9 +78,11 @@ public class uploadAction {
 			photo = Hibernate.createBlob(data);
 	    }catch (Exception e) {
 			e.printStackTrace();
+			fis.close();
 			return "failed";
 		} finally {
 			fis.close();
+			setFilepath("");
 		}
 
 		SvgFileId svgfileid=new SvgFileId(this.getarticleNo(),this.getestand(),this.getside());
