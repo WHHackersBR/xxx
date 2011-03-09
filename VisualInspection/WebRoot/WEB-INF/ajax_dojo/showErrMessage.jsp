@@ -18,6 +18,7 @@
 				<td style="background-color:red;"><s:property escape="false" value="errorOutput" /></td>
 				</s:else>							
 			</td>	
+			
 		</tr>
 	</table>											
 	</body>

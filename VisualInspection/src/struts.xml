@@ -42,6 +42,7 @@
 		
 		<action name="goToFailureReport" class="com.vi.action.FailureReportAction" method="goToFailureReport">					  
   			<result name="success">/failureReport.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
 		</action>
 		
 		<action name="*_ItemFailureList" class="com.vi.action.ItemFailureListAction" method="{1}">					  

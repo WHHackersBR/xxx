@@ -69,15 +69,17 @@ function aMouseClick(evt) {
       		//open new popup window
       		//need absolute URL, i think due to security reasons
       		// second param must not contain whitespaces!
-      		dataWin=parent.open(absoluteURL + "/goToFailureReport.action?partname="+  evt.currentTarget.id , 
+      		//alert("abc"+ window);
+      		dataWin=parent.open(absoluteURL + "/goToFailureReport.action?partname="+  evt.currentTarget.id, 
       							"failureReportWindow",  
 		         				"width=600, height=500, left=400, top=0, scrollbars=no, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
 			//make sure the popup has the correct parent set
 			if (dataWin.opener == null) dataWin.opener = parent;    				      
       		//parent.document.getElementById("inputFID");
-			parent.setFocus_FID();
-			//parent.
+			parent.setFocusFID();
+			
       		dataWin.focus();
+      		
     	}	
 		
 	

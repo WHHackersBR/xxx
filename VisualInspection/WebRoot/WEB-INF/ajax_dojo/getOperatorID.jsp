@@ -6,7 +6,6 @@
 		<title>operatorID result</title>
 
 	</head>
-
 	<body>
 		<table>
 			<tr>

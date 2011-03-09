@@ -27,7 +27,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   <body>
  	<s:form>
 	    <div>
-	    	<s:submit key="closeWindow" onclick="closeNoChanges()"/>
+	    	<s:submit key="closeWindow" onclick="window.opener=null;window.close();"/>
 	    </div>
 	    <div>
 	    	<s:text name="unconfirmedText"/>	       

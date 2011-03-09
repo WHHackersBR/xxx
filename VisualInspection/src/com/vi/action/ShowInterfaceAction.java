@@ -80,6 +80,7 @@ public class ShowInterfaceAction extends ActionSupport {
 	 */
 	public String fillItemList() {
 		// remove old stuff
+		errorOutput="";
 		formData.getItemList().clear();
 		formData.getVersionASList().clear();
 		if(formData.getPoNo().equals("") ){
@@ -124,6 +125,7 @@ public class ShowInterfaceAction extends ActionSupport {
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			errorOutput=ErrMessage.WrongPO;
 		} finally {
 			if (conn != null) {
 				try {
@@ -131,6 +133,7 @@ public class ShowInterfaceAction extends ActionSupport {
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					errorOutput=ErrMessage.WrongPO;
 				}
 			}
 
@@ -140,11 +143,15 @@ public class ShowInterfaceAction extends ActionSupport {
 				} catch (SQLException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					errorOutput=ErrMessage.WrongPO;
 				}
 			}
 		} 
-
-		return SUCCESS;
+		if (errorOutput.isEmpty()){
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
 	}
 
 	/**

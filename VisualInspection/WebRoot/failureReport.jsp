@@ -37,6 +37,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     //request: XMLHttpRequest object
     //widget: widget that published the topic
 	 //   closeNoChanges();
+	 window.opener.updateCurrentFID();
 	 window.opener=null;window.close();
 	});
 	function checkInput(){

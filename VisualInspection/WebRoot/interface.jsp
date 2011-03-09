@@ -17,7 +17,10 @@
 	<!--
 	<link rel="stylesheet" type="text/css" href="styles.css">
 	--> 
-		
+	<link rel="stylesheet" type="text/css" href="./ext/resources/css/ext-all.css" />
+	<script type="text/javascript" src="./ext/adapter/ext/ext-base.js"></script>
+	<script type="text/javascript" src="./ext/ext-all.js"></script>
+			
 	<sx:head debug="false" cache="false" compressed="false" />
 	
 	<link rel="stylesheet" type="text/css" href="./css/interface.css">
@@ -42,9 +45,16 @@
 	        document.getElementById("inputFID").focus();
  		} 
     }
-    function setFocus_FID() {
+    function updateCurrentFID() {//call in the failureReport.jsp
+    	document.getElementById('inputFID').value=document.getElementById('currentFID').value;
+    	dojo.event.topic.publish("change_currentID");
+    	//alert("setForcus");
+        //document.getElementById("inputFID").focus();
+    }
+    function setFocusFID() {//call in the failureReport.jsp
         document.getElementById("inputFID").focus();
     }
+
 	dojo.event.topic.subscribe("/clear_FID", function(data, request, widget){
    
     //data : text returned from request(the html)
@@ -54,12 +64,19 @@
         document.getElementById("inputFID").value="";
 	});
     function publish_get_WorkstationDescription() {
-     	if(event.keyCode==13){
+     	//if(event.keyCode==13){
 	        dojo.event.topic.publish("get_WorkstationDescription");
-	        event.keyCode=9;
+	    //    event.keyCode=9;
+	    //    document.getElementById("operatiorID").focus();
+        //}        
+    } 
+    function getFocus_OPID()    {
+     	if(event.keyCode==13){
 	        document.getElementById("operatiorID").focus();
+	        event.keyCode=9;
         }        
-    }    
+    } 
+    
     function publish_get_itemNr_and_version() {
      	if(event.keyCode==13){
 	        dojo.event.topic.publish("get_itemNr_and_version"); 
@@ -84,18 +101,20 @@
   	<div id="content" 	style="background-color: beige;">
 		    <table>
 			    <tr>			    		    				    
+				    <s:form>
+				   	</s:form>	
 				    <s:form id="frm_ItemNrAndVersion">
-				    <td style="width:3cm;"><s:textfield key="formData.poNo" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_itemNr_and_version();"/></td>						    				    			   	
+				    <td style="width:2.5cm;"><s:textfield key="formData.poNo" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_itemNr_and_version();"/></td>						    				    			   	
 				    <td><sx:div cssStyle="width:4cm;" href="fillItemList.action" listenTopics="get_itemNr_and_version" formId="frm_ItemNrAndVersion"/></td>					   							    				   	
 				   	</s:form>	
 
-				    <s:form id="frm_WorkstationDescription">
-				    <td id="workstationNo" style="width:1.5cm;"><s:textfield key="formData.workstationNr" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_WorkstationDescription();"/></td>				    			   		
+				    <s:form id="frm_WorkstationDescription"  onsubmit="return false">
+				    <td id="workstationNo" style="width:1.5cm;"><s:textfield key="formData.workstationNr" labelposition="left" cssStyle="width:100%;" onkeydown="getFocus_OPID();" onblur="publish_get_WorkstationDescription();"/></td>				    			   		
 				    <td><sx:div cssStyle="width:100%;" href="fillWorkstationDescription.action" listenTopics="get_WorkstationDescription" formId="frm_WorkstationDescription"/></td>					   							    				   	
 				   	</s:form>	
 				   
 				   	<s:form id="frm_side_Id">
-				   	<td id="selectside"><sx:div cssStyle="width:100%;" href="changeSide.action" listenTopics="change_side" formId="frm_side_Id" /></td>
+				   	<td id="changeSide"><sx:div cssStyle="width:100%;" href="changeSide.action" listenTopics="change_side" formId="frm_side_Id" /></td>
 				   	</s:form>
 				   	
 				   	<s:form id="frm_operatorID_Id" onsubmit="return false">
@@ -107,8 +126,9 @@
 				    </s:form>
 				    
 				    <s:form>
+				    <td><sx:submit cssStyle="width:1.5cm;" key="poHistory" targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openPoInformation.action')" />
+				    </td>
 				    <td><sx:submit cssStyle="width:1.5cm;" key="openingPO" targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openShowUnconfirmed.action')"/>
-				    <sx:submit cssStyle="width:1.5cm;" onfocus="alert('history')" key="poHistory" targets="dummy" onclick="openWindow('openPoInformation.action')" />
 				    </td>
 				    </s:form>
 				    	
@@ -130,7 +150,7 @@
 					</s:form>
 					
 					<s:form>
-				    <td><sx:submit cssStyle="width:2.2cm;" key="singleBoardErrList"  targets="dummy" onclick="openWindow('openItemFailureList_ItemFailureList.action')"/></td>
+				    <td><sx:submit cssStyle="width:2.2cm;" key="singleBoardErrList"  targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openItemFailureList_ItemFailureList.action')"/></td>
 				    <td><sx:submit cssStyle="width:2.2cm;" key="currentPoDetails"  onclick="openWindow('openPoAllTestsOverview_AllTestsOverview.action');"/></td>
 			    	</s:form>
 			    </tr>			
@@ -144,9 +164,5 @@
 		type="image/svg-xml"></embed>
 	</sx:div>
   </body>
-  <script type="text/javascript">
-  	//document.getElementById("inputFID").focus();
-  	//alert("test01");
-  </script>
 </html>
 
