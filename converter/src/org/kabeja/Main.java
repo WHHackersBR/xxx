@@ -230,6 +230,14 @@ public class Main {
 		}
 	}
 
+	public Parser getParser() {
+		return parser;
+	}
+
+	public void setParser(Parser parser) {
+		this.parser = parser;
+	}
+
 	public void setParserConfigFile(String file) {
 		parser = ParserBuilder.buildFromXML(file);
 	}

@@ -34,4 +34,17 @@
  <login-config>
   <auth-method>BASIC</auth-method>
  </login-config>
+
+	<!-- confiugre SVG-servlet -->
+	<servlet>
+		<servlet-name>svgServlet</servlet-name>
+		<servlet-class>com.converter.servlets.SvgServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>svgServlet</servlet-name>
+		<!-- url(s) for which the servlet is called -->
+		<url-pattern>/createSvg/*</url-pattern>
+	</servlet-mapping>
+	
+
 </web-app>

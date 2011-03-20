@@ -90,5 +90,7 @@ public abstract class AbstractSVGSAXGenerator implements SVGSAXGenerator {
 						SVGConstants.SVG_ATTRIBUTE_STROKE_DASHARRAY, "");
 			}
 		}
+		
+		SVGUtils.addAttribute(atts, SVGConstants.SVG_ATTRIBUTE_LAYER, entity.getLayerName());
 	}
 }

@@ -15,9 +15,9 @@ public class SvgFile implements java.io.Serializable {
 
 	private SvgFileId id;
 	private Blob sourcefile;
-	private String articleNo;
-	private String estand;
-	private String side;
+	//private String articleNo;
+	//private String estand;
+	//private String side;
 
 	// Constructors
 
@@ -34,29 +34,6 @@ public class SvgFile implements java.io.Serializable {
 		this.sourcefile = sourcefile;
 	}
 
-	public String getArticleNo() {
-		return articleNo;
-	}
-
-	public void setArticleNo(String articleNo) {
-		this.articleNo = articleNo;
-	}
-
-	public String getEstand() {
-		return estand;
-	}
-
-	public void setEstand(String estand) {
-		this.estand = estand;
-	}
-
-	public String getSide() {
-		return side;
-	}
-
-	public void setSide(String side) {
-		this.side = side;
-	}
 
 	/** minimal constructor */
 	public SvgFile(SvgFileId id) {

@@ -31,7 +31,8 @@
 		</property>
 		<property name="mappingResources">
 			<list>
-				<value>com/converter/SvgFile.hbm.xml</value></list>
+				<value>com/converter/SvgFile.hbm.xml</value>
+				<value>com/converter/SvgSide.hbm.xml</value></list>
 		</property></bean>
 	<bean id="SvgFileDAO" class="com.converter.dao.SvgFileDAO">
 		<property name="sessionFactory">
@@ -43,5 +44,14 @@
 			<ref bean="SvgFileDAO"/>
 		</property>
 	</bean>
-	
-	</beans>
+	<bean id="sideContentaction" class="com.converter.action.uploadAction"> 
+		<property name="savesidedao">
+			<ref bean="SvgSideDAO"/>
+		</property>
+	</bean>
+	<bean id="pageLabel" class="com.converter.data.PageLabel"/>
+	<bean id="SvgSideDAO" class="com.converter.dao.SvgSideDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean></beans>
