@@ -3,6 +3,7 @@
  */
 package com.converter.action;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -27,6 +28,7 @@ import com.converter.dao.SvgSideDAO;
 import com.converter.data.PageLabel;
 import com.converter.*;
 import com.opensymphony.xwork2.ActionSupport;
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import com.sun.org.apache.bcel.internal.generic.Select;
 /**
  * @author zhou
@@ -40,7 +42,11 @@ public class uploadAction extends ActionSupport{
 	private SvgSideDAO savesidedao;
 
 	private PageLabel pageLabel;
-	private String filename="100_6162.JPG";
+	private String filename="A5E00994011-08.svg";
+	private File oriFile;
+
+	private String contentType;
+	private String fileName;
 	private String outmessage;
 
 	//collection/array/map/enumeration/iterator type
@@ -50,23 +56,37 @@ public class uploadAction extends ActionSupport{
 	 */
 	private List<String> leftCsList;
 	private List<String> rightSsList;
+	private List<String> colorList;
  
 	//@SuppressWarnings("deprecation")
+
 	public uploadAction() {
 		// TODO Auto-generated constructor stub
 		leftCsList = new ArrayList<String>();
 		rightSsList = new ArrayList<String>();
+		colorList = new ArrayList<String>();
+		colorList.add("blueviolet");
+		colorList.add("brown");
+		colorList.add("chartreuse");
+		colorList.add("darkorange");
+		colorList.add("magenta");
+		colorList.add("olivedrab");
+		colorList.add("orangered");
+		colorList.add("royalblue");
+		colorList.add("tan");
+		colorList.add("yellowgreen");
 	}
 
 	public String upload(){
 		Blob photo = null;
 	
-	if( pageLabel.getFilePath()==null || pageLabel.getFilePath().isEmpty()){
-		return "success";
+	if( this.oriFile == null){
+		return "failed";
 	}
 	try{
-		filename = pageLabel.getFilePath().substring(pageLabel.getFilePath().lastIndexOf("\\"));
-		filename = filename.substring(1, filename.lastIndexOf("."));
+		//filename = this.getOriFileFileName().substring(this.getOriFileFileName().lastIndexOf("\\"));
+		filename = this.getOriFileFileName();
+		filename = filename.substring(0, filename.lastIndexOf("."));
 		if (filename.isEmpty()){
 			setOutmessage("Part number is empty\\n");
 		}
@@ -84,7 +104,8 @@ public class uploadAction extends ActionSupport{
 		pageLabel.setPartNo(filename.substring(0, ASIndex));
 		//start to parse the dxf file  
 		Main main = new Main();
-		main.setSourceFile(pageLabel.getFilePath());
+		//main.setSourceFile(pageLabel.getOriFilefileName());
+		main.setOriFile(this.getOriFile());
 		//set the file format for converting
 		main.setPipeline("svg");
 		main.omitUI(true);
@@ -101,8 +122,8 @@ public class uploadAction extends ActionSupport{
 		uploadAction.sideList.clear();
         while (i.hasNext()) {
             DXFLayer layer = (DXFLayer) i.next();
-            if(!layer.getName().equals("0")){
-        		uploadAction.sideList.add(layer.getName());
+            if(!layer.getName().equals("0") ){ //&& !layer.getName().equals("BOARDFIGURE")
+        		uploadAction.sideList.add(layer.getName().trim());
             }
         }
 
@@ -120,13 +141,13 @@ public class uploadAction extends ActionSupport{
 			return "failed";
 		} finally {
 			fis.close();
-			pageLabel.setFilePath("");
+			this.setOriFile(null);
 		}
 
 		SvgFileId svgfileid=new SvgFileId(pageLabel.getPartNo(),pageLabel.getPartAs(),pageLabel.getSide());
 		SvgFile svgfile= new SvgFile(svgfileid);
 		svgfile.setSourcefile(photo);
-		
+		//System.out.println(this.getUploadfiledao().findById(svgfileid).getSourcefile().toString());
 		this.getUploadfiledao().attachDirty(svgfile);
 		//this.getUploadfiledao().merge(svgfile);//it cannot update the a exist SVG file and always insert a empty SVG file	
 		
@@ -138,7 +159,9 @@ public class uploadAction extends ActionSupport{
 	setOutmessage("Successful");
 	return "success";	
 	}
-
+	public String originalSvg(){
+		return "success";
+	}
 
 	public String loadSvg(){
 		setOutmessage("");
@@ -158,16 +181,60 @@ public class uploadAction extends ActionSupport{
 
 	public String sideMaintenance(){
 		setOutmessage("");
-		System.out.println(pageLabel.getPartNo());
-		System.out.println(pageLabel.getPartAs());
-		//leftCsList = Arrays.asList(new String[uploadAction.sideList.size()]);  
+		//System.out.println(pageLabel.getPartNo());
+		//System.out.println(pageLabel.getPartAs());
 		//Collections.copy(leftCsList, uploadAction.sideList);  
-		//leftCsList =  uploadAction.sideList;
-		for(int i=0; i<uploadAction.sideList.size(); i++){
-			leftCsList.add(uploadAction.sideList.get(i));
-		}
+		leftCsList.clear();
+		rightSsList.clear();
 		
-		return "success";
+		try{
+			List LayerList=this.getSavesidedao().findByPropertys(new String[]{"id.articleNo","id.as"}, new String[]{pageLabel.getPartNo(),pageLabel.getPartAs()});
+			//System.out.println(LayerList.size());
+			for(int i=0; i<uploadAction.sideList.size(); i++){
+				Iterator<SvgSide> j = LayerList.iterator();
+				//for new partnumber
+				if(!j.hasNext()){
+					leftCsList.add(uploadAction.sideList.get(i));
+				}
+				while (j.hasNext()) {
+					SvgSide svgSide=j.next();
+					//System.out.println("side1: "+svgSide.getId().getLayerName().toString()+":"+uploadAction.sideList.get(i));
+		        	if(svgSide.getId().getLayerName().toString().equals(uploadAction.sideList.get(i))){
+						//System.out.println("side2: "+svgSide.getId().getLayerName().toString()+":"+uploadAction.sideList.get(i));
+						if(svgSide.getSide().toString().equals("CS")){
+							leftCsList.add(uploadAction.sideList.get(i));
+							//System.out.println("side3: "+svgSide.getId().getLayerName().toString()+":"+uploadAction.sideList.get(i));
+						}else{
+							rightSsList.add(uploadAction.sideList.get(i));
+							//System.out.println("side4: "+svgSide.getId().getLayerName().toString()+":"+uploadAction.sideList.get(i));
+						}
+						break;
+		        	}else if(!j.hasNext()){
+						leftCsList.add(uploadAction.sideList.get(i));
+		        	}
+		        }
+			}
+			Iterator<SvgSide> j = LayerList.iterator();
+	        while (j.hasNext()) {
+	        	SvgSide svgSide=j.next();
+				//System.out.println("delete: "+svgSide.getId().getLayerName().toString());
+	        	int i=0;
+				for(i=0; i<uploadAction.sideList.size() && 
+							!svgSide.getId().getLayerName().toString().equals(uploadAction.sideList.get(i)); i++);
+					if(i==uploadAction.sideList.size()){
+						this.getSavesidedao().delete(svgSide);
+					
+				}
+	        }
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			setOutmessage("Cannot set side!!");
+			return "error";
+		} finally {
+		}
+		setOutmessage("Successful");
+		return "success";	
 	}
 
 	public String sideContentaction(){
@@ -177,28 +244,39 @@ public class uploadAction extends ActionSupport{
 		//System.out.println("leftCsList Contains : " + leftCsList);
 		//System.out.println("rightSsList Contains : " + rightSsList);
 	try{
+		//SvgSide   svgSide1 = new SvgSide();
+		//svgSide1.setSide("SS");
+		//List svgLayerList=this.getSavesidedao().findByExample(svgSide1);
+		//System.out.println(svgLayerList.size());
 		Iterator i = pageLabel.getCsSide().iterator();
-		int j=1;
+		int j=1,colorIndex=0;
         while (i.hasNext()) {
-			SvgSideId svgSideId=new SvgSideId(pageLabel.getPartNo(),pageLabel.getPartAs(),"CS",i.next().toString());
+			SvgSideId svgSideId=new SvgSideId(pageLabel.getPartNo(),pageLabel.getPartAs(),i.next().toString());
 			SvgSide   svgSide = new SvgSide(svgSideId);
+			svgSide.setSide("CS");
 			svgSide.setLayerSn(new BigDecimal(j));
-			svgSide.setColor(Integer.toString(j));
+			svgSide.setColor(colorList.get(colorIndex));
 			this.getSavesidedao().attachDirty(svgSide);
+			j++;
+			colorIndex++;
         }
         i = pageLabel.getSsSide().iterator();
         j=1;
         while (i.hasNext()) {
-			SvgSideId svgSideId=new SvgSideId(pageLabel.getPartNo(),pageLabel.getPartAs(),"SS",i.next().toString());
+			SvgSideId svgSideId=new SvgSideId(pageLabel.getPartNo(),pageLabel.getPartAs(),i.next().toString());
 			SvgSide   svgSide = new SvgSide(svgSideId);
+			svgSide.setSide("SS");
 			svgSide.setLayerSn(new BigDecimal(j));
-			svgSide.setColor(Integer.toString(j));
+			svgSide.setColor(colorList.get(colorIndex));
 			this.getSavesidedao().attachDirty(svgSide);
+			j++;
+			colorIndex++;
         }
         
 	} catch (Exception e) {
 		e.printStackTrace();
-		return "failed";
+		setOutmessage("Side set failed!!");
+		return "error";
 	} finally {
 	}
 	setOutmessage("Successful");
@@ -236,21 +314,21 @@ public class uploadAction extends ActionSupport{
 	}
 
 	public PageLabel getPageLabel() {
-		if(pageLabel!=null){
+		/*if(pageLabel!=null){
 			System.out.println("getpagelabel:"+pageLabel.getPartNo()+":"+pageLabel.getClass());
 		}else{
 			System.out.println("setpagelabel:"+pageLabel);
-		}
+		}*/
 		return pageLabel;
 	}
 
 	public void setPageLabel(PageLabel pageLabel) {
-		if(pageLabel!=null){
+		/*if(pageLabel!=null){
 
 		System.out.println("setpagelabel:"+pageLabel.getPartNo()+":"+pageLabel.getClass());
 		}else{
 			System.out.println("setpagelabel:"+pageLabel);
-		}
+		}*/
 		this.pageLabel = pageLabel;
 	}
 
@@ -302,5 +380,59 @@ public class uploadAction extends ActionSupport{
 	public void setSavesidedao(SvgSideDAO savesidedao) {
 		this.savesidedao = savesidedao;
 	}
+	/**
+	 * @return the colorList
+	 */
+	public List<String> getColorList() {
+		return colorList;
+	}
+
+	/**
+	 * @param colorList the colorList to set
+	 */
+	public void setColorList(List<String> colorList) {
+		this.colorList = colorList;
+	}
+	/**
+	 * @return the oriFile
+	 */
+	public File getOriFile() {
+		return oriFile;
+	}
+
+	/**
+	 * @param oriFile the oriFile to set
+	 */
+	public void setOriFile(File oriFile) {
+		this.oriFile = oriFile;
+	}
+	/**
+	 * @return the contentType
+	 */
+	public String getOriFileContentType() {
+		return contentType;
+	}
+
+	/**
+	 * @param contentType the contentType to set
+	 */
+	public void setOriFileContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * @return the fileName
+	 */
+	public String getOriFileFileName() {
+		return fileName;
+	}
+
+	/**
+	 * @param fileName the fileName to set
+	 */
+	public void setOriFileFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
 
 }

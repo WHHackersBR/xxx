@@ -23,7 +23,7 @@
 	<classpathentry kind="lib" path="lib/pdf-transcoder.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis-ext.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
-	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/struts2-dojo-plugin-2.2.1.jar"/>
 	<classpathentry kind="lib" path="WebRoot/WEB-INF/lib/spring.jar"/>
+	<classpathentry kind="con" path="melibrary.com.genuitec.eclipse.struts2.MYECLIPSE_STRUTS21_DOJO"/>
 	<classpathentry kind="output" path="WebRoot/WEB-INF/classes"/>
 </classpath>

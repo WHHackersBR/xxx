@@ -42,6 +42,21 @@ import org.kabeja.ui.xml.SAXServiceContainerBuilder;
 public class Main {
 	private String encoding = DXFParser.DEFAULT_ENCODING;
 	private String sourceFile;
+	private File oriFile;
+	/**
+	 * @return the oriFile
+	 */
+	public File getOriFile() {
+		return oriFile;
+	}
+
+	/**
+	 * @param oriFile the oriFile to set
+	 */
+	public void setOriFile(File oriFile) {
+		this.oriFile = oriFile;
+	}
+
 	private String destinationFile;
 	private Parser parser;
 	private boolean process = false;
@@ -124,7 +139,8 @@ public class Main {
 		}
 
 		if (this.nogui) {
-			File f = new File(this.sourceFile);
+			//File f = new File(this.sourceFile);
+			File f = this.oriFile;
 
 			if (f.exists() && f.isFile()) {
 				parseFile(f, this.destinationFile);
