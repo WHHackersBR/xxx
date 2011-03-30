@@ -11,24 +11,14 @@
 	  			<result name="loadsvg">/WEB-INF/ajax_dojo/getSvg.jsp</result>
 	  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
 			</action>
-			<action name="sideMaintenance" class="com.converter.action.uploadAction" method="sideMaintenance" >
+			<action name="sideMaintenance" class="sideContentaction" method="sideMaintenance" >
 				<result name="success">sideMaintenance.jsp</result>
-				<result name="failed">showErrMessage.jsp</result>
+				<result name="error">showErrMessage.jsp</result>
 			</action>
 			<action name="sideContentaction" class="sideContentaction" method="sideContentaction" >
-				<result name="success">result.jsp</result>
-				<result name="failed">showErrMessage.jsp</result>
+				<result name="success">index.jsp</result>
+				<result name="error">showErrMessage.jsp</result>
 			</action>
-		  <action name="optionTransferSelectAction" 
-			class="com.mkyong.common.action.OptionTransferSelectAction" 
-		        method="display">
-			<result name="none">optiontransferselect.jsp</result>
-		  </action>
-		 
-		  <action name="resultAction" 
-		        class="com.mkyong.common.action.OptionTransferSelectAction" method="result">
-			<result name="success">result.jsp</result>
-		  </action>
   
   	  </package>
 
