@@ -63,14 +63,14 @@ public class DXFInsert extends DXFEntity {
             return bounds;
         }
         //滤除loaded为false的元件,主要针对一些边框,以最大化的显示图形
-        Iterator i=attribs.iterator();
+        /*Iterator i=attribs.iterator();
         while (i.hasNext()){
             DXFAttrib attrib = (DXFAttrib) i.next();
             if (attrib.getAttribTag().equals("LOADED")&& attrib.getText().equals("FALSE")){
             	bounds.setValid(false);
             	return bounds;
             }
-        }
+        }*/
 
         Point blkPoint = block.getReferencePoint();
 

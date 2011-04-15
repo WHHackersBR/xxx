@@ -110,7 +110,7 @@ public class uploadAction extends ActionSupport{
 		main.setPipeline("svg");
 		main.omitUI(true);
 		filename = filename + "." + main.getPipeline();
-		String upfilename=ServletActionContext.getServletContext().getRealPath("/SVG-FILE")+"\\"+ filename;
+		String upfilename=ServletActionContext.getServletContext().getRealPath("/SVG-FILE")+"/"+ filename;
 		main.setDestinationFile(upfilename);
 		main.initialize();
 		main.process();

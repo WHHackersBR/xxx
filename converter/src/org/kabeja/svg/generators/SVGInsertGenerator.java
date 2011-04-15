@@ -66,28 +66,47 @@ public class SVGInsertGenerator extends AbstractSVGSAXGenerator {
            // SVGSAXGenerator gen = this.manager.getSVGGenerator("attrib");
 
         AttributesImpl attrX = new AttributesImpl();
-        boolean f_loaded = true;
-        //entity内部的解析使用loaded选项,如果loaded为false的均不显示
+        boolean f_loaded = false;
+        //entity内部的解析使用loaded/partnumber选项,如果loaded/partnumber不存在的均不显示
         if (insert.getSectionName().equals("entity") ){
             Iterator i = list.iterator();
             //每个attribute的内部遍历?
         	//f_loaded = true;
             while (i.hasNext()) {
                 DXFAttrib attrib = (DXFAttrib) i.next();
-                if (attrib.getAttribTag().equals("REFNAME") ){
-                	if(!attrib.getText().equals("")){
+                //parse the component location
+                if (attrib.getAttribTag().toUpperCase().equals("REFNAME") ){
+                	if(!attrib.getText().isEmpty()){
                 	SVGUtils.addAttribute(attrX, SVGConstants.XML_ID,
                         attrib.getText());
+                	//f_loaded = true;
                        // gen.toSAX(handler, svgContext, attrib, null);
                 	}
-                    else{
-                    	f_loaded = false;
-                    }
-                	continue;
-                }
-                if (attrib.getAttribTag().equals("LOADED")&& attrib.getText().equals("FALSE")){
-                    	f_loaded = false;
-                    	continue;
+                }else if (attrib.getAttribTag().toUpperCase().equals("LOADED")){
+                	if(!attrib.getText().isEmpty()){
+                    	SVGUtils.addAttribute(attrX, SVGConstants.SVG_ATTRIBUTE_LOADED,
+                            attrib.getText());
+                    	f_loaded = true;
+                 	}
+
+                }else if (attrib.getAttribTag().toUpperCase().equals("PART") ){
+                	if(!attrib.getText().isEmpty()){
+                    	SVGUtils.addAttribute(attrX, SVGConstants.SVG_ATTRIBUTE_PARTNUMBER2,
+                            attrib.getText());
+                	}
+                	f_loaded = true;
+                }else if (attrib.getAttribTag().toUpperCase().equals("PARTNUMBER") ){
+                	if(!attrib.getText().isEmpty()){
+                    	SVGUtils.addAttribute(attrX, SVGConstants.SVG_ATTRIBUTE_PARTNUMBER1,
+                            attrib.getText());
+                	}
+                	f_loaded = true;
+                }else if (attrib.getAttribTag().toUpperCase().equals("$$DEVICE$$") ){
+                	if(!attrib.getText().isEmpty()){
+                    	SVGUtils.addAttribute(attrX, SVGConstants.SVG_ATTRIBUTE_DEVICE,
+                            attrib.getText());
+                	}
+                	f_loaded = true;
                 }
             }
         	

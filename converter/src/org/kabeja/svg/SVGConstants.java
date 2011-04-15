@@ -87,8 +87,14 @@ public class SVGConstants {
     public static final String SVG_ATTRIBUTEVALUE_VISIBLE = "visible";
     public static final String SVG_ATTRIBUTE_VISIBILITY = "visibility";
     public static final String SVG_ATTRIBUTE_VISIBILITY_VALUE_HIDDEN = "hidden";
-    public static final String SVG_ATTRIBUTE_LAYER = "layer";
+
+    public static final String SVG_ATTRIBUTE_LAYER = "layer"; //
+    public static final String SVG_ATTRIBUTE_LOADED = "loaded"; //
+    public static final String SVG_ATTRIBUTE_PARTNUMBER1 = "partno1"; //
+    public static final String SVG_ATTRIBUTE_PARTNUMBER2 = "partno2"; //
+    public static final String SVG_ATTRIBUTE_DEVICE = "device"; //
     public static final String XML_ID = "id";
+
     public static final String XMLNS_NAMESPACE = "http://www.w3.org/2000/xmlns/";
     public static final double DEFAULT_STROKE_WIDTH_PERCENT = 0.00025;
     public static final String SVG_ATTRIBUTE_PATH_PLACEHOLDER = " ";
