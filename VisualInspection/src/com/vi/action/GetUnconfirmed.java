@@ -63,9 +63,10 @@ public class GetUnconfirmed extends ActionSupport {
 			ResultSet rs = (ResultSet) coll.getObject(1);
 			//and process data			
 			while (rs.next()) {
-				System.out.println(	 rs.getString(1)+'\t'
+				/*System.out.println(	 rs.getString(1)+'\t'
 									+rs.getString(2)+'\t'
 									+rs.getString(3)); 
+				*/
 				
 				// add the values
 				Unconfirmed unconfirmed=new Unconfirmed();

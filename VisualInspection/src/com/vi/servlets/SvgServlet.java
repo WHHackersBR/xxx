@@ -102,7 +102,7 @@ public class SvgServlet extends HttpServlet {
 				//prepare input and output arguments 
 				coll.setString(1, formData.getItemNr());
 				coll.setString(2, formData.getVersionAS());
-				coll.setString(3, "A");
+				coll.setString(3, "0");
 
 				coll.registerOutParameter(4, OracleTypes.BLOB);
 
@@ -123,7 +123,7 @@ public class SvgServlet extends HttpServlet {
 							+ request.getContextPath();
 					//add information to the SVG and send it to the user
 					svgEdit.writeEnhancedSVG_useStream(out, svgStream, itemNr,
-							version, dataSource, absoluteURL);
+							version, dataSource, absoluteURL,side);
 	
 
 				} else {

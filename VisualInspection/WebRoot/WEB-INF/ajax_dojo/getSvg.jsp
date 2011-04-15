@@ -10,8 +10,7 @@
 
 <sx:div  executeScripts="true">
 
-   	<embed src="createSvg/generated.svg" width="100%" height="85%"
-	type="image/svg-xml"/>   
+   	<embed src="createSvg/generated.svg" width="100%" height="85%"></embed>   
 		
 </sx:div>
 

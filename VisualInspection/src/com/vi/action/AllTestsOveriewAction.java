@@ -52,6 +52,7 @@ public class AllTestsOveriewAction extends ActionSupport{
 	 * @return Result which will be processed by Struts2
 	 */
 	public String openPoAllTestsOverview() {
+		System.out.println("PO:"+formData.getPoNo()+"OPID:"+formData.getOperatorID());
 		return SUCCESS;
 	}
 	
@@ -396,10 +397,20 @@ public class AllTestsOveriewAction extends ActionSupport{
 	}
 
 	public FormData getFormData() {
+		/*if (formData!=null){
+		System.out.println("getformdata:"+formData.getPoNo()+":"+formData.getClass());
+		}else{
+			System.out.println("getformdata:"+formData);
+		}*/
 		return formData;
 	}
 
 	public void setFormData(FormData formData) {
+		if(formData!=null){
+		System.out.println("setformdata:"+formData.getPoNo()+":"+formData.getClass());
+		}else{
+			System.out.println("setformdata:"+formData);
+		}
 		this.formData = formData;
 	}
 

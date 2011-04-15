@@ -20,7 +20,12 @@ public class FormData {
 	private String operatorID;
 	private String fid;
 	private String currentFid;
+	private String poCompleted;
 	
+	public void setPoCompleted(String poCompleted) {
+		this.poCompleted = poCompleted;
+	}
+
 	private boolean failed;
 
 	private ArrayList<String> itemList;
@@ -123,6 +128,16 @@ public class FormData {
 	public void setFailed(boolean failed) {
 		this.failed = failed;
 	}
+	/**
+	 * @return the poCompleted
+	 */
+	public String getPoCompleted() {
+		return poCompleted;
+	}
+
+	/**
+	 * @param poCompleted the poCompleted to set
+	 */
 	
 	
 }

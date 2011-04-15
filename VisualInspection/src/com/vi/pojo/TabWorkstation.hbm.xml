@@ -22,5 +22,8 @@
         <property name="equipContent" type="java.lang.String">
             <column name="EQUIP_CONTENT" length="50" />
         </property>
+        <property name="machId" type="java.lang.String">
+            <column name="MACH_ID" length="6" />
+        </property>
     </class>
 </hibernate-mapping>

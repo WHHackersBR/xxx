@@ -10,8 +10,13 @@
 	<package name="admin" namespace="/" extends="struts-default">
 		<action name="*_Interface" class="com.vi.action.ShowInterfaceAction" method="{1}">					  
   			<result name="success">/interface.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
 		</action>
 		
+		<action name="poCompleted" class="com.vi.action.ShowInterfaceAction" method="poCompleted">					  
+  			<result name="success">/WEB-INF/ajax_dojo/getPoCompleted.jsp</result>
+  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+		</action>
 		<action name="fillItemList" class="com.vi.action.ShowInterfaceAction" method="fillItemList">					  
   			<result name="success">/WEB-INF/ajax_dojo/getItemNrAndVersion.jsp</result>
   			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
@@ -35,12 +40,12 @@
   			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
 		</action>
 		
-		<action name="saveFailureReportData" class="com.vi.action.FailureReportAction" method="saveFailureReportData">					  
+		<action name="saveFailureReportData" class="com.vi.action.ShowInterfaceAction" method="saveFailureReportData">					  
   			<result name="success">/failureReport.jsp</result>
 		</action>
 		
 		
-		<action name="goToFailureReport" class="com.vi.action.FailureReportAction" method="goToFailureReport">					  
+		<action name="goToFailureReport" class="com.vi.action.ShowInterfaceAction" method="goToFailureReport">					  
   			<result name="success">/failureReport.jsp</result>
   			<result name="error">/showErrMessage.jsp</result>
 		</action>

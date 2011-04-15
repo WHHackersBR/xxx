@@ -12,4 +12,8 @@ public class ErrMessage {
 	public static String pastFID="已存在,合格";
 	public static String failedFID="已存在,不合格";
 	public static String passFID="合格";
+	public static String setFIDfail="请先将此序列号设为不合格,方法是在主页上点击不合格按钮";
+	public static String NUllorConfirmFID="PCB序列号不存在或已经确认";
+	public static String PoNotMatch="系统订单号与当前订单号不匹配";
+	public static String FidNotExist="序列号不是由本系统产生的";
 }

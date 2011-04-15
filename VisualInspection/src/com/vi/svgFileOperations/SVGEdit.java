@@ -6,7 +6,11 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,8 +39,9 @@ import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 public class SVGEdit  {	
 	  
+	  
 	  public void writeEnhancedSVG_useStream(PrintWriter out, InputStream svgStream, String itemNr, String version,
-				BasicDataSource dataSource, String absoluteURL) {
+				BasicDataSource dataSource, String absoluteURL, String initSide) {
 
 			try {
 
@@ -67,10 +72,38 @@ public class SVGEdit  {
 					is.close();
 				}
 
+				Connection conn = null;
+				//CallableStatement coll = null;
+				List<String> layerListCS= new ArrayList<String>();
+				List<String> layerListSS= new ArrayList<String>();
+
+				conn = dataSource.getConnection();
+				String strsql = "select layer_name,side,color from pcbvi.svg_side where article_no=? and as_=?";
+				PreparedStatement pstmt = conn.prepareStatement(strsql);   
+				pstmt.setString(1,itemNr);
+				pstmt.setString(2,version);
+				ResultSet rs = pstmt.executeQuery();   
+				  
+				while(rs.next()){
+					if (rs.getString("side").equals("CS")){
+						layerListCS.add(rs.getString("layer_name"));   
+						layerListCS.add(rs.getString("color"));   
+					}else{
+						layerListSS.add(rs.getString("layer_name"));   
+						layerListSS.add(rs.getString("color"));   
+					}
+				//System.out.println("the fname is " + fname); 
+				}
+				//rs.first();
+				rs.close();   
+				pstmt.close();
+				//System.out.println("layerlistCS: " + layerListCS);
+				//System.out.println("layerlistSS: " + layerListSS);
+
 				Element documentElement = doc.getDocumentElement();
 
 				//add onload='Init(evt)' 
-				documentElement.setAttribute("onload", "Init(evt,'" + absoluteURL + "')");
+				documentElement.setAttribute("onload", "Init(evt,'" + absoluteURL + "','"+ layerListCS+ "','"+ layerListSS + "','"+ initSide + "')");
 				//add javascript functionality part1
 				documentElement.setAttribute("contentScriptType", "text/ecmascript");
 				//add link functionality
@@ -89,6 +122,16 @@ public class SVGEdit  {
 						XPathConstants.NODE);
 
 				documentElement.insertBefore(script, firstChild);
+				/*Calculate the size of view box
+				String viewBox = documentElement.getAttribute("viewBox");
+				String X1 = viewBox.substring(0, viewBox.indexOf(" ")).trim();
+				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
+				String X2 = viewBox.substring(0,viewBox.indexOf(" ")).trim();
+				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
+				String Y1 = viewBox.substring(0,viewBox.indexOf(" ")).trim();
+				String Y2 = viewBox.substring(viewBox.indexOf(" ")).trim();
+				Double textSize= Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1)+Double.valueOf(X2)-Double.valueOf(X1))*0.01;
+				*/
 
 				documentElement = null;
 				script = null;
@@ -103,13 +146,15 @@ public class SVGEdit  {
 
 				//get text size that matches size of the other stuff, get the size from the A5E...-label			
 
-				XPath xpath = factory.newXPath();
-				XPathExpression expr = xpath
-					//.compile("/svg/g/g/text//@font-size");
-				.compile("/svg/g/g/text/tspan/@font-size[ contains(..,'A5E')]");
-				;
-				Double textSize = (Double) expr
-						.evaluate(doc, XPathConstants.NUMBER);
+				//XPath xpath = factory.newXPath();
+				//XPathExpression expr = xpath
+				//.compile("/svg/g/g/text/tspan/@font-size[ contains(..,'A5E')]");
+				Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
+				String textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				//String textSize="0.02";
+
+				//Double textSize = (Double) expr
+				//		.evaluate(doc, XPathConstants.NUMBER);
 
 				//this will be needed many times:
 				Element text = doc.createElement("text");
@@ -139,84 +184,112 @@ public class SVGEdit  {
 				findDraftChildren = null;
 
 				//get the part information from the database
-				Connection conn = null;
+				//Connection conn = null;
 				CallableStatement coll = null;
 
-				conn = dataSource.getConnection();
-
 				//query DB for each element
-				for (int i = 0; i < draftChildren.getLength(); i++) {
-					Element element = (Element) draftChildren.item(i);
+				//calling the stored procedure which gets the label
+				coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?)}",
+						ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY);
+				//prepare input and output arguments 
+				coll.setString(1, itemNr);
+				coll.setString(2, version);
+				coll.registerOutParameter(3, OracleTypes.CURSOR);
 
-					//add events
-					element.setAttribute("onmousemove","ShowMyTooltip(evt, true)");
-					element.setAttribute("onclick","aMouseClick(evt)");
-					element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");					
-					String refdes = element.getAttribute("id");
-					//System.out.print(refdes + '\n');
-					
-					//calling the stored procedure which gets the label
-					//PROCEDURE GET_LABEL(in_itemNr IN VARCHAR2,in_versionAS IN VARCHAR2,
-					//in_refdes IN VARCHAR2,out_component_nr OUT VARCHAR2,out_label OUT VARCHAR2);
-					coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?,?,?)}");
-					//prepare input and output arguments 
-					coll.setString(1, itemNr);
-					coll.setString(2, version);
-					coll.setString(3, refdes);
-					coll.registerOutParameter(4, OracleTypes.VARCHAR);
-					coll.registerOutParameter(5, OracleTypes.VARCHAR);
+				coll.execute();
+				ResultSet rsLabel = (ResultSet) coll.getObject(3);
 
-					coll.execute();
-
-					//retrieve label and componentNr from query result
-					String componentNr = coll.getString(4);
-					String label = coll.getString(5);
-					coll.close();
-					if (null != componentNr) {
-						//modify file/tree:
-						
-						// firstChild2 is <use tag
-						Element firstChild2 = (Element) element.getFirstChild()
-								.getNextSibling();
-						
-						//add this attributes to get events also inside the element, not just when touching the border:
-						firstChild2.setAttribute("fill","white");
-						firstChild2.setAttribute("fill-opacity","0");
-						//String abcString=firstChild2.getAttribute("stroke-width");
-						//double stoke=Float.parseFloat(abcString);
-						//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
-						firstChild2.setAttribute("stroke-width","0.005px");
-						
-						//get position
-						String transformVal = firstChild2.getAttribute("transform");
-						//only need "translate-part"
-						transformVal = transformVal.substring(0, transformVal
-								.indexOf(')') + 1);
-						//mirror text											
-						transformVal = transformVal + " scale(1 -1)";
-
-						//change text to label-text
-						if (null != label) {
-							textNode.setNodeValue(refdes + " | Comp.Nr.: "
-									+ componentNr + " | Label: " + label);
-						} else {
-							textNode.setNodeValue(refdes + " | Comp.Nr.: "
-									+ componentNr + " | Label:");
+				while(rsLabel.next()){
+					for (int i = 0; i < draftChildren.getLength(); i++) {
+						Element element = (Element) draftChildren.item(i);
+						String refdes = element.getAttribute("id");
+						if(refdes.equals(rsLabel.getString("refdes"))){
+	
+							//add events
+							element.setAttribute("onmousemove","ShowMyTooltip(evt, true)");
+							element.setAttribute("onclick","aMouseClick(evt)");
+							element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");					
+							//System.out.print(refdes + '\n');
+							
+							//PROCEDURE GET_LABEL(in_itemNr IN VARCHAR2,in_versionAS IN VARCHAR2,
+							//in_refdes IN VARCHAR2,out_component_nr OUT VARCHAR2,out_label OUT VARCHAR2);
+							//coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?,?,?)}");
+							//prepare input and output arguments 
+							//coll.setString(1, itemNr);
+							//coll.setString(2, version);
+							//coll.setString(3, refdes);
+							//coll.registerOutParameter(4, OracleTypes.VARCHAR);
+							//coll.registerOutParameter(5, OracleTypes.VARCHAR);
+		
+							//coll.execute();
+		
+							//retrieve label and componentNr from query result
+							String	componentNr = rsLabel.getString("componentnumber");
+							String	label = rsLabel.getString("label");
+							//coll.close();
+							if (null != componentNr && !componentNr.isEmpty()) {
+								//modify file/tree:
+								
+								// firstChild2 is <use tag
+								Element firstChild2 = (Element) element.getFirstChild()
+										.getNextSibling();
+								
+								//add this attributes to get events also inside the element, not just when touching the border:
+								firstChild2.setAttribute("fill","white");
+								firstChild2.setAttribute("fill-opacity","0");
+								//String abcString=firstChild2.getAttribute("stroke-width");
+								//double stoke=Float.parseFloat(abcString);
+								//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
+								firstChild2.setAttribute("stroke-width","0.01px");
+								
+								//get display position
+								String transformVal = firstChild2.getAttribute("transform");
+								//only need "translate-part"
+								transformVal = transformVal.substring(0, transformVal
+										.indexOf(')') + 1);
+								//mirror text											
+								transformVal = transformVal + " scale(1 -1)";
+		
+								//change text to label-text
+								if (null != label) {
+									textNode.setNodeValue(refdes + " | Comp.Nr.: "
+											+ componentNr + " | Label: " + label);
+								} else {
+									textNode.setNodeValue(refdes + " | Comp.Nr.: "
+											+ componentNr + " | Label:");
+								}
+		
+								//get copy of the prepared node
+								Element individualized = (Element) text.cloneNode(true);
+								//set transform attribute
+								individualized.setAttribute("transform", transformVal);
+		
+								//add it to the element
+								element.appendChild(individualized);
+		
+							}
+						break;
 						}
-
-						//get copy of the prepared node
-						Element individualized = (Element) text.cloneNode(true);
-						//set transform attribute
-						individualized.setAttribute("transform", transformVal);
-
-						//add it to the element
-						element.appendChild(individualized);
-
 					}
 				}
-
+				//to disable component that is not used
+				for (int i = 0; i < draftChildren.getLength(); i++) {
+					Element element = (Element) draftChildren.item(i);
+						if ( element.hasAttribute("loaded") && element.getAttribute("loaded").equals("FALSE") ){
+							// firstChild2 is <use> tag 
+							Element firstChild2 = (Element) element.getFirstChild()
+									.getNextSibling();
+							firstChild2.setAttribute("stroke","gray");
+							//firstChild2.setAttribute("fill-opacity","0");
+						}
+					}
 				if (conn != null) {
 					conn.close();
+				}
+
+				if (rsLabel != null) {
+					rsLabel.close();
 				}
 
 				if (coll != null) {
@@ -231,6 +304,7 @@ public class SVGEdit  {
 			} catch (IOException e) {
 				out.println("IO Error: " + e.getMessage());
 				e.printStackTrace(out);
+				
 			} catch (ParserConfigurationException e) {
 				out.println("Parser Configuration Error: " + e.getMessage());
 				e.printStackTrace(out);
@@ -246,7 +320,6 @@ public class SVGEdit  {
 			}
 
 		}
-
 
 
 }

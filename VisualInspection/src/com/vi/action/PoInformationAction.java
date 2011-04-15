@@ -125,13 +125,14 @@ public class PoInformationAction extends ActionSupport{
 	
 				poInformationList.add(poInformation);							
 			
-				System.out.println(	 	poInformation.getItemNr()+'\t' +
+				/*System.out.println(	 	poInformation.getItemNr()+'\t' +
 										poInformation.getVersionAS()+'\t' +
 										poInformation.getWorkstationNr()+'\t' +
 										poInformation.getWorkstationDescription()+'\t' +
 										poInformation.getTestedQty()+'\t' +
 										poInformation.getPassedQty()+'\t' +
 										poInformation.getFailedQty());
+				*/
 
 			}
 			

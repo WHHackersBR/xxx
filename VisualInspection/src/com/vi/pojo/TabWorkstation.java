@@ -15,6 +15,7 @@ public class TabWorkstation implements java.io.Serializable {
 	private String type;
 	private String code;
 	private String equipContent;
+	private String machId;
 
 	// Constructors
 
@@ -29,12 +30,13 @@ public class TabWorkstation implements java.io.Serializable {
 
 	/** full constructor */
 	public TabWorkstation(String workstationNo, String side, String type,
-			String code, String equipContent) {
+			String code, String equipContent,String machId) {
 		this.workstationNo = workstationNo;
 		this.side = side;
 		this.type = type;
 		this.code = code;
 		this.equipContent = equipContent;
+		this.machId = machId;
 	}
 
 	// Property accessors
@@ -77,6 +79,20 @@ public class TabWorkstation implements java.io.Serializable {
 
 	public void setEquipContent(String equipContent) {
 		this.equipContent = equipContent;
+	}
+
+	/**
+	 * @return the machId
+	 */
+	public String getMachId() {
+		return machId;
+	}
+
+	/**
+	 * @param machId the machId to set
+	 */
+	public void setMachId(String machId) {
+		this.machId = machId;
 	}
 
 }

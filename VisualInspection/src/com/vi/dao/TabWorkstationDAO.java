@@ -28,6 +28,7 @@ public class TabWorkstationDAO extends HibernateDaoSupport {
 	public static final String TYPE = "type";
 	public static final String CODE = "code";
 	public static final String EQUIP_CONTENT = "equipContent";
+	public static final String MACH_ID = "machid";
 
 	protected void initDao() {
 		// do nothing
@@ -107,6 +108,10 @@ public class TabWorkstationDAO extends HibernateDaoSupport {
 
 	public List findByEquipContent(Object equipContent) {
 		return findByProperty(EQUIP_CONTENT, equipContent);
+	}
+
+	public List findByMachId(Object machid) {
+		return findByProperty(MACH_ID, machid);
 	}
 
 	public List findAll() {

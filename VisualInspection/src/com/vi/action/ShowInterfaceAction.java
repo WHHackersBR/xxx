@@ -1,24 +1,37 @@
 package com.vi.action;
 
+import java.net.InetAddress;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import oracle.jdbc.driver.OracleTypes;
 
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.struts2.ServletActionContext;
 
 import com.opensymphony.xwork2.ActionSupport;
-import com.sun.org.apache.bcel.internal.generic.NEW;
-import com.vi.dao.TabTestedDAO;
 import com.vi.dao.TabWorkstationDAO;
+import com.vi.dao.VFailureDAO;
+import com.vi.dao.VFidHistDAO;
+import com.vi.dao.VPoDAO;
+import com.vi.dao.VtestedDAO;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.ErrMessage;
-import com.vi.pojo.TabTested;
 import com.vi.pojo.TabTestedId;
 import com.vi.pojo.TabWorkstation;
+import com.vi.pojo.VFailure;
+import com.vi.pojo.VFailureId;
+import com.vi.pojo.VFidHist;
+import com.vi.pojo.VFidHistId;
+import com.vi.pojo.VPo;
+import com.vi.pojo.VPoId;
+import com.vi.pojo.Vtested;
+import com.vi.pojo.VtestedId;
 
 @SuppressWarnings("serial")
 public class ShowInterfaceAction extends ActionSupport {
@@ -34,12 +47,18 @@ public class ShowInterfaceAction extends ActionSupport {
 	
 	// DAOs
 	private TabWorkstationDAO tabWorkstationDAO;
-	private TabTestedDAO tabTestedDAO;
+	private VtestedDAO	vtestedDAO;
+	private VPoDAO	vPoDAO;
+	private VFailureDAO vFailureDAO;
+	private VFidHistDAO vFidHistDAO;
 
 	
 	private FormData formData;
 	private FailureReportData failureReportData;
 	private TabTestedId tabTestedId=new TabTestedId();
+	private final String v_machType = "PVI******";
+    private static String v_side;
+    private static String v_mach_id;
 	//private TabTested testedFID = new TabTested();
 	
 	/**
@@ -178,7 +197,56 @@ public class ShowInterfaceAction extends ActionSupport {
 			return ERROR;
 		}
 	}
+	/**
+	 * Action for get the quantity of PO finished/planed
+	 * according to PO number
+	 * 
+	 * @return Result which will be processed by Struts2
+	 */
+	public String poCompleted() {
+		//use Hibernate to get data
+		//List vPo<VPo>;
+		try {
+			VPoId vPoId = new VPoId(formData.getPoNo(),formData.getItemNr(),v_machType);
+			VPo vPo = vPoDAO.findById(vPoId);
+			 if (vPo != null)
+			formData.setPoCompleted(vPo.getQtyProduce().toString() + "/" + vPo.getQtyPlan().toString());
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			//e.getCause();
+		}
+		return SUCCESS;
+	}
 	
+	/**
+	 * @return the vPoDAO
+	 */
+	public VPoDAO getvPoDAO() {
+		return vPoDAO;
+	}
+
+	/**
+	 * @param vPoDAO the vPoDAO to set
+	 */
+	public void setvPoDAO(VPoDAO vPoDAO) {
+		this.vPoDAO = vPoDAO;
+	}
+
+	/**
+	 * @return the vFailureDAO
+	 */
+	public VFailureDAO getvFailureDAO() {
+		return vFailureDAO;
+	}
+
+	/**
+	 * @param vFailureDAO the vFailureDAO to set
+	 */
+	public void setvFailureDAO(VFailureDAO vFailureDAO) {
+		this.vFailureDAO = vFailureDAO;
+	}
+
 	/**
 	 * Action for storing operatorID
 	 * 
@@ -224,32 +292,64 @@ public class ShowInterfaceAction extends ActionSupport {
 			}
 			formData.setCurrentFid(formData.getFid());
 			formData.setFid("");
-			TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(),formData.getWorkstationNr());
-			TabTested testedFID= tabTestedDAO.findById(tabTestedId);
-			if (testedFID == null ){
+			Vtested testedFID = new Vtested();
+			VFidHist vFidHist = new VFidHist();
+			try {
+	    		if (!formData.getWorkstationNr().equals("")) {
+	    			TabWorkstation tabWorkstation = tabWorkstationDAO
+	    					.findById(formData.getWorkstationNr());
+	    			//System.out.println(tabWorkstation.getMachId()+":"+tabWorkstation);
+	    			if (tabWorkstation != null && tabWorkstation.getMachId()!=null) {
+	    				v_mach_id = tabWorkstation.getMachId();
+	    				v_side = tabWorkstation.getSide();
+	    			} else {
+		    			v_mach_id = formData.getWorkstationNr();
+		    			v_side = formData.getSide();
+	    			}
+	    		}else {
+	    			v_mach_id = formData.getWorkstationNr();
+	    			v_side = formData.getSide();
+	    		}
+				VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
+				testedFID = vtestedDAO.findById(vtestedId);
+
+				// try to compare PO number with the one in the jerry.fid_hist
+				VFidHistId vFidHistId = new VFidHistId(formData.getCurrentFid());
+				vFidHist = vFidHistDAO.findById(vFidHistId);
+			}catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+				//e.getCause();
+			}
+			if ( testedFID == null && vFidHist != null && vFidHist.getPoNo().equals(formData.getPoNo()) ){
 				Connection conn = null;
 				CallableStatement coll = null;
 				try {
 					conn = dataSource.getConnection();
 					//calling the stored procedure which stores the PO/test
-					//PROCEDURE ADD_TESTED(  in_fid IN VARCHAR2,in_test_result IN CHAR,in_workstation_no IN VARCHAR2,
-		            //in_item_no IN VARCHAR2,in_as IN VARCHAR2,in_po_no IN VARCHAR2,in_fake IN CHAR,
-		            //in_operatior_id IN VARCHAR2,in_side IN VARCHAR2);
-		            coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.ADD_TESTED(?,?,?,?,?,?,?,?,?)}");
-					//prepare input and output arguments 
-					coll.setString(1, formData.getCurrentFid());
-					coll.setString(2, "P");
-					coll.setString(3, formData.getWorkstationNr());
-					coll.setString(4, formData.getItemNr());
-					coll.setString(5, formData.getVersionAS());
-					coll.setString(6, formData.getPoNo());
-					coll.setString(7, "Y");
-					coll.setString(8, formData.getOperatorID());
-					coll.setString(9, formData.getSide());
-							
+		            coll = conn.prepareCall("{call JERRY.FID_management_pkg.job_distrubute_main(?,?,?)}");
+					//prepare input and output arguments
+		            Date   now   =   new   Date(); 
+		            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
+		            String msg_in = InetAddress.getLocalHost().getHostAddress().concat("               ").substring(0,15)
+		            +"GREQ 1.00 PVI******" + v_mach_id +" VE    inspeteste '" + formData.getCurrentFid()+"' '"
+    				+ dateFormat.format(now) + "' 'P' '" + v_side + "'";
+		            //System.out.println(formData.getWorkstationNr()+":"+msg_in);
+					coll.setString(1, msg_in);
+					coll.setInt(2, msg_in.length());
+					coll.registerOutParameter(3, OracleTypes.VARCHAR);
 					coll.execute();	
-					formData.setFailed(true);
-					errorOutput=formData.getCurrentFid()+ErrMessage.passFID;
+		            String msg_out = coll.getString(3);
+
+		            //System.out.println("msg_out:"+msg_out);
+					if (!msg_out.contains("NACK")){
+						formData.setFailed(true);
+						errorOutput=formData.getCurrentFid()+ ErrMessage.passFID;
+					}else{
+						formData.setFailed(false);
+						errorOutput=msg_out.substring(msg_out.indexOf("NACK"));
+						//errorOutput=msg_out;
+					}
 				} catch (Exception e) {
 					formData.setFailed(false);
 					errorOutput=ErrMessage.failInsertFID;
@@ -277,12 +377,18 @@ public class ShowInterfaceAction extends ActionSupport {
 						}
 					}
 				} 
+			}else if ( vFidHist == null ){
+				formData.setFailed(false);
+				errorOutput= formData.getCurrentFid() + ":" + ErrMessage.FidNotExist;
+			}else if ( !vFidHist.getPoNo().equals(formData.getPoNo()) ){
+				formData.setFailed(false);
+				errorOutput=vFidHist.getPoNo() + ":" + ErrMessage.PoNotMatch;
 			}else if(testedFID.getTestResult().equals("P")){
 				formData.setFailed(true);
-				errorOutput=formData.getCurrentFid()+ErrMessage.pastFID;
-			}else{
-				formData.setFailed(true);
-				errorOutput=formData.getCurrentFid()+ErrMessage.failedFID;
+				errorOutput=formData.getCurrentFid() + ErrMessage.pastFID;
+			}else {
+			formData.setFailed(false);
+			errorOutput=formData.getCurrentFid() + ErrMessage.failedFID;
 			}
 		
 		}else{
@@ -328,6 +434,59 @@ public class ShowInterfaceAction extends ActionSupport {
 	}
 	
 	/**
+	 * Action for linking to the failure report page
+	 * 
+	 * @return Result which will be processed by Struts2
+	 */
+	public String goToFailureReport() {
+		//get and set partname
+		String partname=ServletActionContext.getRequest().getParameter("partname");
+		failureReportData.setPartname(partname);
+		failureReportData.setFailureDescription(null);
+		failureReportData.setPositionNr(null);
+		if((formData.getCurrentFid()==null || formData.getCurrentFid().isEmpty()) ){
+			errorOutput=ErrMessage.NullFID+ "<br>";
+		}
+		if (formData.getPoNo()==null || formData.getPoNo().equals("")){
+			errorOutput=ErrMessage.NullPO+ "<br>";
+		}
+		if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
+			errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
+		}
+		if (formData.getSide()==null || formData.getSide().equals("")){
+			errorOutput=errorOutput+ErrMessage.NullSIDE+"<br>";
+		}
+		if (formData.getOperatorID()==null || formData.getOperatorID().equals("")){
+			errorOutput=errorOutput+ErrMessage.NullOperatorID+"<br>";
+		}
+
+		try {
+			VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
+			Vtested vtested = vtestedDAO.findById(vtestedId);
+			if (vtested != null && vtested.getConfirm().equals("N") ){
+				if( !vtested.getTestResult().equals("F") ){
+					formData.setFailed(true);		
+					errorOutput = ErrMessage.setFIDfail;
+				}
+			}else{
+				errorOutput = ErrMessage.NUllorConfirmFID;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+		} 
+		
+		
+		if (errorOutput.isEmpty()){
+			//formData.setFailed(false);
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
+	
+	}
+
+	/**
 	 * Action adding a PO to the TAB_TESTED database table 
 	 * (as passed, at least at first), it also changes the test 
 	 * result to failed
@@ -336,108 +495,59 @@ public class ShowInterfaceAction extends ActionSupport {
 	 */
 	public String addFailureReport() {
 		
-		formData.setFailed(true);		
+		errorOutput="";
 		
-		Connection conn = null;
-		CallableStatement coll = null;
+		//Connection conn = null;
+		//CallableStatement coll = null;
 		try {
-			conn = dataSource.getConnection();
-			//calling the stored procedure which changes the test result in TAB_TESTED			
-			//  PROCEDURE CHANGE_TESTRESULT(  in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,
-			//in_test_result IN CHAR);                        			
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.CHANGE_TESTRESULT(?,?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, formData.getCurrentFid());
-			coll.setString(2, formData.getWorkstationNr());
-			coll.setString(3, "F");
-			
-			coll.execute();	
-			coll.close();
-			
-			//calling the stored procedure which adds a failure in TAB_FAILURE						
-			//PROCEDURE ADD_FAILURE(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,                        
-			//in_piece_location IN VARCHAR2,in_component_location IN VARCHAR2,
-            //in_failure_code IN VARCHAR2,in_failure_description IN VARCHAR2,
-            //in_side IN VARCHAR2);
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.ADD_FAILURE(?,?,?,?,?,?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, formData.getCurrentFid());
-			coll.setString(2, formData.getWorkstationNr());
-			coll.setString(3, failureReportData.getPositionNr());
-			coll.setString(4, failureReportData.getPartname());
-			coll.setString(5, failureReportData.getFailureCode());
-			coll.setString(6, failureReportData.getFailureDescription());
-			coll.setString(7, formData.getSide());			
-			
-			coll.execute();			
-			
+					VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), v_machType, v_side
+							,failureReportData.getPartname(),failureReportData.getPositionNr(),failureReportData.getFailureCode());
+					VFailure vFailure = new VFailure(vFailureId);
+					vFailure.setMachId(v_mach_id);
+		            Date   now   =   new   Date(); 
+		            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
+					vFailure.setMachTime(dateFormat.format(now));
+					vFailure.setTolerance(formData.getWorkstationNr());
+					vFailure.setDescription(failureReportData.getFailureDescription());
+					vFailureDAO.attachDirty(vFailure);
+					formData.setFailed(false);		
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			if (coll != null) {
-				try {
-					coll.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 		} 
 
-		return SUCCESS;
+		if (errorOutput.equals("")){
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
 	}
 	
 	public String testComplete(){
 		
 		//formData.setFailed(false);
 		//System.out.println("testcomplete\n");
-		Connection conn = null;
-		CallableStatement coll = null;
+		//Connection conn = null;
+		//CallableStatement coll = null;
 		try {
-			conn = dataSource.getConnection();
-			//calling the stored procedure which changes the test result in TAB_TESTED			
-			//  PROCEDURE CHANGE_TESTRESULT(  in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,
-			//in_test_result IN CHAR);                        			
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.CHANGE_TESTRESULT(?,?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, formData.getCurrentFid());
-			coll.setString(2, formData.getWorkstationNr());
-			coll.setString(3, "F");
-			
-			coll.execute();	
+			VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
+			Vtested vtested = vtestedDAO.findById(vtestedId);
+			if (vtested != null && vtested.getConfirm().equals("N") ){
+				vtested.setTestResult("F");
+				vtested = vtestedDAO.merge(vtested);
+				formData.setFailed(false);		
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (conn != null) {
-				try {
-					conn.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-			if (coll != null) {
-				try {
-					coll.close();
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 		} 
 		return SUCCESS;
 	}
 
+	public String saveFailureReportData(){
+		return SUCCESS;
+	}
+	
 	public TabWorkstationDAO getTabWorkstationDAO() {
 		return tabWorkstationDAO;
 	}
@@ -474,14 +584,6 @@ public class ShowInterfaceAction extends ActionSupport {
 		this.errorOutput = errorOutput;
 	}
 
-	public TabTestedDAO getTabTestedDAO() {
-		return tabTestedDAO;
-	}
-
-	public void setTabTestedDAO(TabTestedDAO tabTestedDAO) {
-		this.tabTestedDAO = tabTestedDAO;
-	}
-
 	public TabTestedId getTabTestedId() {
 		return tabTestedId;
 	}
@@ -493,6 +595,34 @@ public class ShowInterfaceAction extends ActionSupport {
 
 	public void setFailureReportData(FailureReportData failureReportData) {
 		this.failureReportData = failureReportData;
+	}
+
+	/**
+	 * @return the vtestedDAO
+	 */
+	public VtestedDAO getVtestedDAO() {
+		return vtestedDAO;
+	}
+
+	/**
+	 * @param vtestedDAO the vtestedDAO to set
+	 */
+	public void setVtestedDAO(VtestedDAO vtestedDAO) {
+		this.vtestedDAO = vtestedDAO;
+	}
+
+	/**
+	 * @return the vFidHistDAO
+	 */
+	public VFidHistDAO getvFidHistDAO() {
+		return vFidHistDAO;
+	}
+
+	/**
+	 * @param vFidHistDAO the vFidHistDAO to set
+	 */
+	public void setvFidHistDAO(VFidHistDAO vFidHistDAO) {
+		this.vFidHistDAO = vFidHistDAO;
 	}
 
 

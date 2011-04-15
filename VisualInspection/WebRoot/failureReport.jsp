@@ -37,7 +37,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
     //request: XMLHttpRequest object
     //widget: widget that published the topic
 	 //   closeNoChanges();
-	 window.opener.updateCurrentFID();
+	 window.opener.parent.updateCurrentFID();
+	 window.opener.parent.focus();
+	 window.opener.parent.setFocusFID();
 	 window.opener=null;window.close();
 	});
 	function checkInput(){
@@ -71,8 +73,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							listKey="failureCodeAbbr" listValue="failurCodeName" headerKey="9999" headerValue="请选择错误代码" id="inputFailCode"/>
 				<s:textarea key="failureReportData.failureDescription" />
 			    <tr>				    				    
-				    <td><sx:submit key="buttonSave" afterNotifyTopics="/afterAddedReport"  /></td>
-				    <td><s:reset key="buttonCancel" onclick="window.opener=null;window.close();" /></td>				   
+				    <td><sx:submit key="buttonSave" /></td>
+				    <td><sx:submit key="buttonConfirm" afterNotifyTopics="/afterAddedReport"  /></td>
+				    <td><s:reset key="buttonCancel" onclick="window.opener.parent.focus();window.opener.parent.setFocusFID();window.opener=null;window.close();" /></td>				   
 			    </tr>
 				</table>					
 			

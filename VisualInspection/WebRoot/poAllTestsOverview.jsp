@@ -43,7 +43,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    		</tr>	    		
 	    		<tr>
 	    		    <td colspan="4"><s:submit key="confirmAll" action="toDO"/></td>   		
-	    			<td colspan="4"><s:submit key="closeWindow" onclick="window.opener.setFocusFID();window.opener=null;window.close();"/></td>    			
+	    			<td colspan="4"><s:submit key="closeWindow" onclick="window.opener.parent.setFocusFID();window.opener=null;window.close();"/></td>    			
 	    		</tr>
 	    	</table>
 	    </div>

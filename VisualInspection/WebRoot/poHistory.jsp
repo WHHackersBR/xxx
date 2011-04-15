@@ -23,7 +23,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	-->
 
   </head>
-  <script type="text/javascript" src="./js/updateParentWindow.js"></script>
+  <!-- script type="text/javascript" src="./js/updateParentWindow.js"></script-->
   <body>
  	<s:form>
  		<s:text name="viList"/>

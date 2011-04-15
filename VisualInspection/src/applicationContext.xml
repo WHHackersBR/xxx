@@ -32,7 +32,11 @@
 			<list>
 				<value>com/vi/pojo/TabWorkstation.hbm.xml</value>
 				<value>com/vi/pojo/ErrMsg.hbm.xml</value>
-				<value>com/vi/pojo/TabTested.hbm.xml</value></list>
+				<value>com/vi/pojo/TabTested.hbm.xml</value>
+				<value>com/vi/pojo/Vtested.hbm.xml</value>
+				<value>com/vi/pojo/VFailure.hbm.xml</value>
+				<value>com/vi/pojo/VPo.hbm.xml</value>
+				<value>com/vi/pojo/VFidHist.hbm.xml</value></list>
 		</property></bean>
 	<bean id="tabWorkstationDAO"
 		class="com.vi.dao.TabWorkstationDAO">
@@ -50,5 +54,25 @@
 	<bean id="tabTestedDAO" class="com.vi.dao.TabTestedDAO">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="vtestedDAO" class="com.vi.dao.VtestedDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="vFailureDAO" class="com.vi.dao.VFailureDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="vPoDAO" class="com.vi.dao.VPoDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="vFidHistDAO" class="com.vi.dao.VFidHistDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"></ref>
 		</property>
 	</bean></beans>
