@@ -218,78 +218,6 @@ function chooseSide(side) {
 		  	}
 		}
 		break;
-	case "layer01":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[0].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[0].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer02":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[1].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[1].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer03":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[2].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[2].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer04":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[0].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[0].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer05":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[1].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[1].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer06":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[2].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[2].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
 	default:
 	  	for(var i = 0; i < useTag.length;i=i+1 ) {
 		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
@@ -337,16 +265,20 @@ function aMouseClick(evt) {
 	      		//dataWin.focus();
 			//}
       		
-    	}	
+    	}
+}
 		
-function searchComp(keyword){
+function searchComp(evt,keyword){
     var anode = newMenuRoot.childNodes.item(1).childNodes;
     for (var i=0;i < anode.length;i=i+1){
         if ( anode.item(i).hasAttributes() ){
         //alert(anode.item(i).nodeName);
         	if( anode.item(i).getAttribute("id") == "layer" ){
+        	}
+        	
+        }
 	
 	
-}
+    }
 }
 
