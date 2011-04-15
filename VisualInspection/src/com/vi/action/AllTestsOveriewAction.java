@@ -11,14 +11,17 @@ import oracle.jdbc.driver.OracleTypes;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.data.ErrMessage;
 import com.vi.data.FailureInformation;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.Tested;
+import com.vi.pojo.Vtested;
 
 public class AllTestsOveriewAction extends ActionSupport{
 	//DataSource
 	private BasicDataSource dataSource;
+	public String errorOutput=""; 
 	
 	private FormData formData;
 	private FailureReportData failureReportData;
@@ -52,8 +55,20 @@ public class AllTestsOveriewAction extends ActionSupport{
 	 * @return Result which will be processed by Struts2
 	 */
 	public String openPoAllTestsOverview() {
-		System.out.println("PO:"+formData.getPoNo()+"OPID:"+formData.getOperatorID());
-		return SUCCESS;
+		//System.out.println("PO:"+formData.getPoNo()+"OPID:"+formData.getOperatorID());
+		errorOutput="";
+		if (formData.getPoNo()==null || formData.getPoNo().equals("")){
+			errorOutput=ErrMessage.NullPO+ "<br>";
+		}
+		if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
+			errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
+		}
+		
+		if (errorOutput.equals("")){
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
 	}
 	
 	/**
@@ -94,16 +109,10 @@ public class AllTestsOveriewAction extends ActionSupport{
 				tested.setFid(rs.getString(1));
 				tested.setOperatorID(rs.getString(2));
 				tested.setTime(rs.getString(3));
-				String confirm=rs.getString(4);
-				//FAKE is Y if confirmation is N and vice versa
-				if(confirm.equals("Y")){
-					tested.setConfirmation("N");
-				}
-				else if(confirm.equals("N")){
-					tested.setConfirmation("Y");
-				}		
+				tested.setConfirmation(rs.getString(4));
 				
 				passedList.add(tested);
+				
 				//count all passed POs
 				nrOfPassedInt++;
 				
@@ -132,14 +141,7 @@ public class AllTestsOveriewAction extends ActionSupport{
 				tested.setFid(rs.getString(1));
 				tested.setOperatorID(rs.getString(2));
 				tested.setTime(rs.getString(3));
-				String confirm=rs.getString(4);
-				//FAKE is Y if confirmation is N and vice versa
-				if(confirm.equals("Y")){
-					tested.setConfirmation("N");
-				}
-				else if(confirm.equals("N")){
-					tested.setConfirmation("Y");
-				}		
+				tested.setConfirmation(rs.getString(4));
 
 				preTreatmentErrorList.add(tested);
 				
@@ -173,14 +175,7 @@ public class AllTestsOveriewAction extends ActionSupport{
 				failureInformation.setFailureDescription(rs.getString(6));
 				failureInformation.setTime(rs.getString(7));
 				failureInformation.setOperatorID(rs.getString(8));				
-				String confirm=rs.getString(9);
-				//FAKE is Y if confirmation is N and vice versa
-				if(confirm.equals("Y")){
-					failureInformation.setConfirmation("N");
-				}
-				else if(confirm.equals("N")){
-					failureInformation.setConfirmation("Y");
-				}		
+				failureInformation.setConfirmation(rs.getString(9));
 				failedList.add(failureInformation);
 				//count all failed POs
 				nrOfFailedInt++;
@@ -406,11 +401,11 @@ public class AllTestsOveriewAction extends ActionSupport{
 	}
 
 	public void setFormData(FormData formData) {
-		if(formData!=null){
+		/*if(formData!=null){
 		System.out.println("setformdata:"+formData.getPoNo()+":"+formData.getClass());
 		}else{
 			System.out.println("setformdata:"+formData);
-		}
+		}*/
 		this.formData = formData;
 	}
 

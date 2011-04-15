@@ -36,7 +36,8 @@
 				<value>com/vi/pojo/Vtested.hbm.xml</value>
 				<value>com/vi/pojo/VFailure.hbm.xml</value>
 				<value>com/vi/pojo/VPo.hbm.xml</value>
-				<value>com/vi/pojo/VFidHist.hbm.xml</value></list>
+				<value>com/vi/pojo/VFidHist.hbm.xml</value>
+				<value>com/vi/pojo/TabViPo.hbm.xml</value></list>
 		</property></bean>
 	<bean id="tabWorkstationDAO"
 		class="com.vi.dao.TabWorkstationDAO">
@@ -74,5 +75,10 @@
 	<bean id="vFidHistDAO" class="com.vi.dao.VFidHistDAO">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory"></ref>
+		</property>
+	</bean>
+	<bean id="tabViPoDAO" class="com.vi.dao.TabViPoDAO">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
 		</property>
 	</bean></beans>

@@ -29,7 +29,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    <div>
 	    	<table border="1">
 	    		<tr>
-	    			<td colspan="4"><s:textfield key="formData.poNo"  labelposition="left" readonly="true"/></td>
+	    			<td colspan="2"><s:textfield key="formData.poNo"  labelposition="left" readonly="true"/></td>
 	    			<td colspan="2"><s:textfield key="formData.itemNr" labelposition="left" readonly="true"/></td>
 	    			<td colspan="2"><s:textfield key="formData.versionAS" labelposition="left" readonly="true"/></td>
 	    		</tr>

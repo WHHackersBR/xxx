@@ -14,6 +14,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.struts2.ServletActionContext;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.dao.TabViPoDAO;
 import com.vi.dao.TabWorkstationDAO;
 import com.vi.dao.VFailureDAO;
 import com.vi.dao.VFidHistDAO;
@@ -23,6 +24,8 @@ import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.ErrMessage;
 import com.vi.pojo.TabTestedId;
+import com.vi.pojo.TabViPo;
+import com.vi.pojo.TabViPoId;
 import com.vi.pojo.TabWorkstation;
 import com.vi.pojo.VFailure;
 import com.vi.pojo.VFailureId;
@@ -51,8 +54,9 @@ public class ShowInterfaceAction extends ActionSupport {
 	private VPoDAO	vPoDAO;
 	private VFailureDAO vFailureDAO;
 	private VFidHistDAO vFidHistDAO;
-
+	private TabViPoDAO	tabViPoDAO;
 	
+
 	private FormData formData;
 	private FailureReportData failureReportData;
 	private TabTestedId tabTestedId=new TabTestedId();
@@ -219,33 +223,6 @@ public class ShowInterfaceAction extends ActionSupport {
 		return SUCCESS;
 	}
 	
-	/**
-	 * @return the vPoDAO
-	 */
-	public VPoDAO getvPoDAO() {
-		return vPoDAO;
-	}
-
-	/**
-	 * @param vPoDAO the vPoDAO to set
-	 */
-	public void setvPoDAO(VPoDAO vPoDAO) {
-		this.vPoDAO = vPoDAO;
-	}
-
-	/**
-	 * @return the vFailureDAO
-	 */
-	public VFailureDAO getvFailureDAO() {
-		return vFailureDAO;
-	}
-
-	/**
-	 * @param vFailureDAO the vFailureDAO to set
-	 */
-	public void setvFailureDAO(VFailureDAO vFailureDAO) {
-		this.vFailureDAO = vFailureDAO;
-	}
 
 	/**
 	 * Action for storing operatorID
@@ -253,6 +230,19 @@ public class ShowInterfaceAction extends ActionSupport {
 	 * @return Result which will be processed by Struts2
 	 */
 	public String changeOperatorID(){
+		if (!formData.getPoNo().isEmpty()){
+			try{
+	            Date   now   =   new   Date(); 
+	            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
+				TabViPoId tabViPoId=new TabViPoId(formData.getPoNo(), formData.getWorkstationNr(), formData.getItemNr(), 
+						formData.getVersionAS(), formData.getSide(), formData.getOperatorID(),dateFormat.format(now));
+				TabViPo	tabViPo = new TabViPo(tabViPoId);
+				tabViPoDAO.attachDirty(tabViPo);			
+			}catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
+			}
+		}
 		return SUCCESS;
 	}
 	
@@ -425,6 +415,18 @@ public class ShowInterfaceAction extends ActionSupport {
 		}
 		if (formData.getOperatorID()==null || formData.getOperatorID().equals("")){
 			errorOutput=errorOutput+ErrMessage.NullOperatorID+"<br>";
+		}
+		try{
+            Date   now   =   new   Date(); 
+            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
+			TabViPoId tabViPoId=new TabViPoId(formData.getPoNo(), formData.getWorkstationNr(), formData.getItemNr(), 
+					formData.getVersionAS(), formData.getSide(), formData.getOperatorID(),dateFormat.format(now));
+			TabViPo	tabViPo = new TabViPo(tabViPoId);
+			tabViPoDAO.attachDirty(tabViPo);			
+		}catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			errorOutput = errorOutput + "Cannot save PO basic information<br>";
 		}
 		if (errorOutput.equals("")){
 			return SUCCESS;
@@ -624,6 +626,46 @@ public class ShowInterfaceAction extends ActionSupport {
 	public void setvFidHistDAO(VFidHistDAO vFidHistDAO) {
 		this.vFidHistDAO = vFidHistDAO;
 	}
+	/**
+	 * @return the vPoDAO
+	 */
+	public VPoDAO getvPoDAO() {
+		return vPoDAO;
+	}
 
+	/**
+	 * @param vPoDAO the vPoDAO to set
+	 */
+	public void setvPoDAO(VPoDAO vPoDAO) {
+		this.vPoDAO = vPoDAO;
+	}
+
+	/**
+	 * @return the vFailureDAO
+	 */
+	public VFailureDAO getvFailureDAO() {
+		return vFailureDAO;
+	}
+
+	/**
+	 * @param vFailureDAO the vFailureDAO to set
+	 */
+	public void setvFailureDAO(VFailureDAO vFailureDAO) {
+		this.vFailureDAO = vFailureDAO;
+	}
+
+	/**
+	 * @return the tabViPoDAO
+	 */
+	public TabViPoDAO getTabViPoDAO() {
+		return tabViPoDAO;
+	}
+
+	/**
+	 * @param tabViPoDAO the tabViPoDAO to set
+	 */
+	public void setTabViPoDAO(TabViPoDAO tabViPoDAO) {
+		this.tabViPoDAO = tabViPoDAO;
+	}
 
 }
