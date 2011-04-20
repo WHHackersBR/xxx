@@ -284,6 +284,7 @@ public class ShowInterfaceAction extends ActionSupport {
 			formData.setFid("");
 			Vtested testedFID = new Vtested();
 			VFidHist vFidHist = new VFidHist();
+			//System.out.println();
 			try {
 	    		if (!formData.getWorkstationNr().equals("")) {
 	    			TabWorkstation tabWorkstation = tabWorkstationDAO
@@ -311,7 +312,7 @@ public class ShowInterfaceAction extends ActionSupport {
 				e.printStackTrace();
 				//e.getCause();
 			}
-			if ( testedFID == null && vFidHist != null && vFidHist.getPoNo().equals(formData.getPoNo()) ){
+			if ( testedFID == null && vFidHist != null && vFidHist.getPoNo().equals(formData.getPoNo())){
 				Connection conn = null;
 				CallableStatement coll = null;
 				try {
@@ -374,11 +375,22 @@ public class ShowInterfaceAction extends ActionSupport {
 				formData.setFailed(false);
 				errorOutput=vFidHist.getPoNo() + ":" + ErrMessage.PoNotMatch;
 			}else if(testedFID.getTestResult().equals("P")){
-				formData.setFailed(true);
-				errorOutput=formData.getCurrentFid() + ErrMessage.pastFID;
-			}else {
-			formData.setFailed(false);
-			errorOutput=formData.getCurrentFid() + ErrMessage.failedFID;
+				if (testedFID.getConfirm().equals("Y")){
+					formData.setFailed(true);
+					errorOutput = formData.getCurrentFid() + ErrMessage.pastFID +"," + ErrMessage.Confirmed;
+				}else {
+					formData.setFailed(true);
+					errorOutput=formData.getCurrentFid() + ErrMessage.pastFID + "," + ErrMessage.NotConfirmed;
+				}
+			}else{
+				if (testedFID.getConfirm().equals("Y")){
+					formData.setFailed(false);
+					errorOutput=formData.getCurrentFid() + ErrMessage.failedFID +"," + ErrMessage.Confirmed;
+				}else {
+					formData.setFailed(false);
+					errorOutput=formData.getCurrentFid() + ErrMessage.failedFID + "," + ErrMessage.NotConfirmed;
+				}
+
 			}
 		
 		}else{
@@ -511,6 +523,7 @@ public class ShowInterfaceAction extends ActionSupport {
 					vFailure.setMachTime(dateFormat.format(now));
 					vFailure.setTolerance(formData.getWorkstationNr());
 					vFailure.setDescription(failureReportData.getFailureDescription());
+					vFailure.setConfirm("N");
 					vFailureDAO.attachDirty(vFailure);
 					formData.setFailed(false);		
 		} catch (Exception e) {
@@ -527,10 +540,7 @@ public class ShowInterfaceAction extends ActionSupport {
 	
 	public String testComplete(){
 		
-		//formData.setFailed(false);
-		//System.out.println("testcomplete\n");
-		//Connection conn = null;
-		//CallableStatement coll = null;
+		errorOutput = "";
 		try {
 			VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
 			Vtested vtested = vtestedDAO.findById(vtestedId);
@@ -538,6 +548,8 @@ public class ShowInterfaceAction extends ActionSupport {
 				vtested.setTestResult("F");
 				vtested = vtestedDAO.merge(vtested);
 				formData.setFailed(false);		
+			}else {
+				errorOutput = ErrMessage.ConfirmedFid;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -11,13 +11,25 @@ import oracle.jdbc.driver.OracleTypes;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.dao.TabWorkstationDAO;
+import com.vi.dao.VFailureDAO;
+import com.vi.dao.VtestedDAO;
+import com.vi.data.ErrMessage;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.ItemFailure;
+import com.vi.pojo.TabWorkstation;
+import com.vi.pojo.VFailure;
+import com.vi.pojo.VFailureId;
+import com.vi.pojo.Vtested;
+import com.vi.pojo.VtestedId;
 
 public class ItemFailureListAction extends ActionSupport {
 	//DataSource
 	private BasicDataSource dataSource;
+	private VtestedDAO vtestedDAO;
+	private VFailureDAO vFailureDAO;
+	private TabWorkstationDAO tabWorkstationDAO;
 	
 	private FormData formData;
 	//list for storing the database query results
@@ -26,6 +38,10 @@ public class ItemFailureListAction extends ActionSupport {
 	private FailureReportData failureReportData;
 
 	private String oldFailureCode;
+	private String machType;
+	private String side;
+
+	public String errorOutput=""; 
 
 	/**
 	 * Action for linking to the failures of the current PO page
@@ -46,26 +62,33 @@ public class ItemFailureListAction extends ActionSupport {
 	 */
 	public String changeToPassed(){
 		
+		errorOutput = "";
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			conn = dataSource.getConnection();
-			//calling the stored procedure which deletes all failures of the current PO
-			//  PROCEDURE DELETE_ALL_ITEM_FAILURES(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2);   
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_ALL_ITEM_FAILURES(?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, formData.getCurrentFid());
-			coll.setString(2, formData.getWorkstationNr());
+			VtestedId	vtestedId = new VtestedId(formData.getCurrentFid(), this.getMachType(), this.getSide());
+			Vtested		vtested	=	vtestedDAO.findById(vtestedId);
+			if (vtested.getConfirm().equals("Y")){
+				errorOutput = ErrMessage.ConfirmedFid;
+			}else{
+				conn = dataSource.getConnection();
+				//calling the stored procedure which deletes all failures of the current PO
+				//  PROCEDURE DELETE_ALL_ITEM_FAILURES(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2);   
+				coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_ALL_ITEM_FAILURES(?,?)}");
+				//prepare input and output arguments 
+				coll.setString(1, formData.getCurrentFid());
+				coll.setString(2, formData.getWorkstationNr());
+				
+				coll.execute();		
+				coll.close();			
 			
-			coll.execute();		
-			coll.close();			
-		
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.CHANGE_TESTRESULT(?,?,?)}");
-			coll.setString(1, formData.getCurrentFid());
-			coll.setString(2, formData.getWorkstationNr());
-			coll.setString(3, "P");
-			
-			coll.execute();	
+				coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.CHANGE_TESTRESULT(?,?,?)}");
+				coll.setString(1, formData.getCurrentFid());
+				coll.setString(2, formData.getWorkstationNr());
+				coll.setString(3, "P");
+				
+				coll.execute();	
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -89,9 +112,13 @@ public class ItemFailureListAction extends ActionSupport {
 			}
 		} 
 
-		formData.setFailed(false);		
 		
-		return SUCCESS;
+		if (errorOutput.equals("")){
+			formData.setFailed(false);		
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
 	}
 	
 	/**
@@ -101,23 +128,33 @@ public class ItemFailureListAction extends ActionSupport {
 	 */
 	public String delFailure(){
 		
+		errorOutput = "";
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			conn = dataSource.getConnection();
-			//calling the stored procedure which deletes a failure entry
-			//PROCEDURE DELETE_FAILURE(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,                        
-            //in_piece_location IN VARCHAR2,in_component_location IN VARCHAR2,
-            //in_failure_code IN VARCHAR2);  			
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_FAILURE(?,?,?,?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, formData.getCurrentFid());
-			coll.setString(2, formData.getWorkstationNr());
-			coll.setString(3, failureReportData.getPositionNr());
-			coll.setString(4, failureReportData.getPartname());
-			coll.setString(5, failureReportData.getFailureCode());
-			
-			coll.execute();		
+			VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), this.getMachType(), this.getSide(), 
+					failureReportData.getPartname(), failureReportData.getPositionNr(), failureReportData.getFailureCode());
+			System.out.println(formData.getCurrentFid()+":"+this.getMachType()+":"+this.getSide()+":"+failureReportData.getPartname()
+					+":"+failureReportData.getPositionNr()+":"+failureReportData.getFailureCode());
+			VFailure vFailure = vFailureDAO.findById(vFailureId);
+			if (vFailure.getConfirm().equals("Y")){
+				errorOutput = ErrMessage.ConfirmedFid;
+			}else{
+				conn = dataSource.getConnection();
+				//calling the stored procedure which deletes a failure entry
+				//PROCEDURE DELETE_FAILURE(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,                        
+	            //in_piece_location IN VARCHAR2,in_component_location IN VARCHAR2,
+	            //in_failure_code IN VARCHAR2);  			
+				coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_FAILURE(?,?,?,?,?)}");
+				//prepare input and output arguments 
+				coll.setString(1, formData.getCurrentFid());
+				coll.setString(2, formData.getWorkstationNr());
+				coll.setString(3, failureReportData.getPositionNr());
+				coll.setString(4, failureReportData.getPartname());
+				coll.setString(5, failureReportData.getFailureCode());
+				
+				coll.execute();		
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -141,8 +178,12 @@ public class ItemFailureListAction extends ActionSupport {
 			}
 		} 
 
-		
-		return SUCCESS;
+		if (errorOutput.equals("")){
+			formData.setFailed(false);		
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
 	}
 	
 	/**
@@ -151,8 +192,18 @@ public class ItemFailureListAction extends ActionSupport {
 	 * @return Result which will be processed by Struts2
 	 */
 	public String goToEditFailureReport() {
+		
 		oldFailureCode=failureReportData.getFailureCode();
-		return SUCCESS;
+		VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), this.getMachType(), this.getSide(), 
+				failureReportData.getPartname(), failureReportData.getPositionNr(), failureReportData.getFailureCode());
+		VFailure vFailure = vFailureDAO.findById(vFailureId);
+		if (vFailure.getConfirm().equals("Y")){
+			errorOutput = ErrMessage.ConfirmedFid;
+			return ERROR;
+		}else{
+			
+			return SUCCESS;
+		}
 	}
 	
 	/**
@@ -331,5 +382,80 @@ public class ItemFailureListAction extends ActionSupport {
 	public void setOldFailureCode(String oldFailureCode) {
 		this.oldFailureCode = oldFailureCode;
 	}
+
+	/**
+	 * @return the vtestedDAO
+	 */
+	public VtestedDAO getVtestedDAO() {
+		return vtestedDAO;
+	}
+
+	/**
+	 * @param vtestedDAO the vtestedDAO to set
+	 */
+	public void setVtestedDAO(VtestedDAO vtestedDAO) {
+		this.vtestedDAO = vtestedDAO;
+	}
+
+	/**
+	 * @return the vFailureDAO
+	 */
+	public VFailureDAO getvFailureDAO() {
+		return vFailureDAO;
+	}
+
+	/**
+	 * @param vFailureDAO the vFailureDAO to set
+	 */
+	public void setvFailureDAO(VFailureDAO vFailureDAO) {
+		this.vFailureDAO = vFailureDAO;
+	}
+
+	/**
+	 * @return the tabWorkstationDAO
+	 */
+	public TabWorkstationDAO getTabWorkstationDAO() {
+		return tabWorkstationDAO;
+	}
+
+	/**
+	 * @param tabWorkstationDAO the tabWorkstationDAO to set
+	 */
+	public void setTabWorkstationDAO(TabWorkstationDAO tabWorkstationDAO) {
+		this.tabWorkstationDAO = tabWorkstationDAO;
+	}
+
+	/**
+	 * @return the machType
+	 */
+	public String getMachType() {
+		TabWorkstation tabWorkstation = tabWorkstationDAO.findById(formData.getWorkstationNr());
+		machType	=	tabWorkstation.getMachType();
+		return machType;
+	}
+
+	/**
+	 * @param machType the machType to set
+	 */
+	public void setMachType(String machType) {
+		this.machType = machType;
+	}
+
+	/**
+	 * @return the side
+	 */
+	public String getSide() {
+		TabWorkstation tabWorkstation = tabWorkstationDAO.findById(formData.getWorkstationNr());
+		side	=	tabWorkstation.getSide();
+		return side;
+	}
+
+	/**
+	 * @param side the side to set
+	 */
+	public void setSide(String side) {
+		this.side = side;
+	}
+
 	
 }

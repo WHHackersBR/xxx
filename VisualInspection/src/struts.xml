@@ -52,10 +52,12 @@
 		
 		<action name="*_ItemFailureList" class="com.vi.action.ItemFailureListAction" method="{1}">					  
   			<result name="success">/itemFailureList.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
 		</action>
 		
 		<action name="goToEditFailureReport" class="com.vi.action.ItemFailureListAction" method="goToEditFailureReport">					  
   			<result name="success">/editFailureReport.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
 		</action>
 
 		<action name="openPoInformation" class="com.vi.action.PoInformationAction" method="openPoInformation">					  
@@ -68,9 +70,11 @@
 		
 		<action name="*_AllTestsOverview" class="com.vi.action.AllTestsOveriewAction" method="{1}">					  
   			<result name="success">/poAllTestsOverview.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
 		</action>
 		<action name="goToEditFailureInformation" class="com.vi.action.AllTestsOveriewAction" method="goToEditFailureInformation">					  
   			<result name="success">/editFailureInformation.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
 		</action>
 		
 		<action name="goToStoreSvgInDB" class="com.vi.action.ShowInterfaceAction" method="goToStoreSvgInDB">					  

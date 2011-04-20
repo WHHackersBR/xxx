@@ -11,12 +11,19 @@ import oracle.jdbc.driver.OracleTypes;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.dao.TabWorkstationDAO;
+import com.vi.dao.VFailureDAO;
+import com.vi.dao.VtestedDAO;
 import com.vi.data.ErrMessage;
 import com.vi.data.FailureInformation;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.Tested;
+import com.vi.pojo.VFailure;
+import com.vi.pojo.VFailureId;
 import com.vi.pojo.Vtested;
+import com.vi.pojo.VtestedId;
+import com.vi.pojo.TabWorkstation;
 
 public class AllTestsOveriewAction extends ActionSupport{
 	//DataSource
@@ -25,7 +32,9 @@ public class AllTestsOveriewAction extends ActionSupport{
 	
 	private FormData formData;
 	private FailureReportData failureReportData;
-	
+	private VtestedDAO vtestedDAO;
+	private VFailureDAO vFailureDAO;
+	private TabWorkstationDAO tabWorkstationDAO;
 	//lists for storing the database query results
 	//so they can be iterated by Struts2
 	private ArrayList<Tested> passedList;
@@ -46,9 +55,14 @@ public class AllTestsOveriewAction extends ActionSupport{
 	private String confirmation;
 	
 	private String oldFailureCode;
+	private String machType;
+	private String side;
 	
 	private boolean retrievedData;
 
+	public AllTestsOveriewAction(){
+		
+	}
 	/**
 	 * Action for linking to the all tests overview page
 	 * 
@@ -144,6 +158,7 @@ public class AllTestsOveriewAction extends ActionSupport{
 				tested.setConfirmation(rs.getString(4));
 
 				preTreatmentErrorList.add(tested);
+				nrOfFailedInt++;
 				
 			}
 			coll.close();
@@ -164,6 +179,7 @@ public class AllTestsOveriewAction extends ActionSupport{
 			//get cursor
 			rs = (ResultSet) coll.getObject(5);
 			//and process data
+			String oldFailuerFid="";
 			while (rs.next()) {			   
 				FailureInformation failureInformation=new FailureInformation();
 				
@@ -178,7 +194,10 @@ public class AllTestsOveriewAction extends ActionSupport{
 				failureInformation.setConfirmation(rs.getString(9));
 				failedList.add(failureInformation);
 				//count all failed POs
-				nrOfFailedInt++;
+				if (!oldFailuerFid.equals(rs.getString(1))){
+					nrOfFailedInt++;
+				}
+					oldFailuerFid = rs.getString(1) ;
 				
 			}
 			coll.close();
@@ -217,19 +236,20 @@ public class AllTestsOveriewAction extends ActionSupport{
 	 * 
 	 * @return Result which will be processed by Struts2
 	 */
-	public String deleteTested(){
-		
+	public String confirmAll(){
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
 			conn = dataSource.getConnection();
 			//calling the stored procedure which deletes a test entry
 			//PROCEDURE DELETE_TESTED( in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2); 
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_TESTED(?,?)}");
+			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.CONFIRM_ALL(?,?,?,?)}");
 			//prepare input and output arguments 
-			coll.setString(1, fid);
-			coll.setString(2, workstationNr);			
-			
+			coll.setString(1, formData.getPoNo());
+			coll.setString(2, formData.getItemNr());
+			coll.setString(3, formData.getVersionAS());
+			coll.setString(4, formData.getWorkstationNr());			
+			System.out.println(formData.getPoNo()+formData.getItemNr()+formData.getVersionAS()+formData.getWorkstationNr());
 			coll.execute();		
 			
 		} catch (Exception e) {
@@ -255,6 +275,61 @@ public class AllTestsOveriewAction extends ActionSupport{
 		} 
 
 		return SUCCESS;
+	}
+	/**
+	 * Delete a record from the TAB_TESTED database table
+	 * 
+	 * @return Result which will be processed by Struts2
+	 */
+	public String deleteTested(){
+	
+	errorOutput = "";
+	Connection conn = null;
+	CallableStatement coll = null;
+	try {
+		
+		VtestedId	vtestedId = new VtestedId(fid, this.getMachType(), this.getSide());
+		Vtested		vtested	=	vtestedDAO.findById(vtestedId);
+		if (vtested.getConfirm().equals("Y")){
+			errorOutput = ErrMessage.ConfirmedFid;
+		}else{
+		conn = dataSource.getConnection();
+		//calling the stored procedure which deletes a test entry
+		//PROCEDURE DELETE_TESTED( in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2); 
+		coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_TESTED(?,?)}");
+		//prepare input and output arguments 
+		coll.setString(1, fid);
+		coll.setString(2, workstationNr);			
+		
+		coll.execute();	
+		}
+		
+	} catch (Exception e) {
+		e.printStackTrace();
+	} finally {
+		if (conn != null) {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	
+		if (coll != null) {
+			try {
+				coll.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		} 
+	if (errorOutput.equals("")){
+		return SUCCESS;
+	}else{
+		return ERROR;
+	}
 	}
 	
 	/**
@@ -264,23 +339,30 @@ public class AllTestsOveriewAction extends ActionSupport{
 	 */
 	public String delFailureInformation(){
 		
+		errorOutput = "";
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			conn = dataSource.getConnection();
-			//calling the stored procedure which deletes a failure entry
-			//PROCEDURE DELETE_FAILURE(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,                        
-            //in_piece_location IN VARCHAR2,in_component_location IN VARCHAR2,
-            //in_failure_code IN VARCHAR2);  
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_FAILURE(?,?,?,?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, fid);
-			coll.setString(2, workstationNr);
-			coll.setString(3, positionNr);
-			coll.setString(4, partname);
-			coll.setString(5, failureCode);
-			
-			coll.execute();		
+			VFailureId vFailureId = new VFailureId(fid, this.getMachType(), this.getSide(), partname, positionNr, failureCode);
+			VFailure vFailure = vFailureDAO.findById(vFailureId);
+			if (vFailure.getConfirm().equals("Y")){
+				errorOutput = ErrMessage.ConfirmedFid;
+			}else{
+				conn = dataSource.getConnection();
+				//calling the stored procedure which deletes a failure entry
+				//PROCEDURE DELETE_FAILURE(in_fid IN VARCHAR2,in_workstation_no IN VARCHAR2,                        
+	            //in_piece_location IN VARCHAR2,in_component_location IN VARCHAR2,
+	            //in_failure_code IN VARCHAR2);  
+				coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.DELETE_FAILURE(?,?,?,?,?)}");
+				//prepare input and output arguments 
+				coll.setString(1, fid);
+				coll.setString(2, workstationNr);
+				coll.setString(3, positionNr);
+				coll.setString(4, partname);
+				coll.setString(5, failureCode);
+				
+				coll.execute();		
+			}
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -303,9 +385,11 @@ public class AllTestsOveriewAction extends ActionSupport{
 				}
 			}
 		} 
-
-		
-		return SUCCESS;
+		if (errorOutput.equals("")){
+			return SUCCESS;
+		}else{
+			return ERROR;
+		}
 	}
 
 	/**
@@ -315,7 +399,16 @@ public class AllTestsOveriewAction extends ActionSupport{
 	 */
 	public String goToEditFailureInformation() {
 		oldFailureCode=failureCode;
-		return SUCCESS;
+		VFailureId vFailureId = new VFailureId(fid, this.getMachType(), this.getSide(), partname, positionNr, failureCode);
+		VFailure vFailure = vFailureDAO.findById(vFailureId);
+		if (vFailure.getConfirm().equals("Y")){
+			errorOutput = ErrMessage.ConfirmedFid;
+			return ERROR;
+		}else{
+			
+			return SUCCESS;
+		}
+
 	}
 	
 	/**
@@ -554,6 +647,75 @@ public class AllTestsOveriewAction extends ActionSupport{
 
 	public void setConfirmation(String confirmation) {
 		this.confirmation = confirmation;
+	}
+
+	/**
+	 * @return the vtestedDAO
+	 */
+	public VtestedDAO getVtestedDAO() {
+		return vtestedDAO;
+	}
+
+	/**
+	 * @param vtestedDAO the vtestedDAO to set
+	 */
+	public void setVtestedDAO(VtestedDAO vtestedDAO) {
+		this.vtestedDAO = vtestedDAO;
+	}
+
+	/**
+	 * @return the vFailureDAO
+	 */
+	public VFailureDAO getvFailureDAO() {
+		return vFailureDAO;
+	}
+
+	/**
+	 * @param vFailureDAO the vFailureDAO to set
+	 */
+	public void setvFailureDAO(VFailureDAO vFailureDAO) {
+		this.vFailureDAO = vFailureDAO;
+	}
+	/**
+	 * @return the tabWorkstationDAO
+	 */
+	public TabWorkstationDAO getTabWorkstationDAO() {
+		return tabWorkstationDAO;
+	}
+	/**
+	 * @param tabWorkstationDAO the tabWorkstationDAO to set
+	 */
+	public void setTabWorkstationDAO(TabWorkstationDAO tabWorkstationDAO) {
+		this.tabWorkstationDAO = tabWorkstationDAO;
+	}
+	/**
+	 * @return the machType
+	 */
+	public String getMachType() {
+		TabWorkstation tabWorkstation = tabWorkstationDAO.findById(workstationNr);
+		machType	=	tabWorkstation.getMachType();
+		return machType;
+	}
+	/**
+	 * @param machType the machType to set
+	 */
+	public void setMachType(String machType) {
+		this.machType = machType;
+	}
+
+	/**
+	 * @return the side
+	 */
+	public String getSide() {
+		TabWorkstation tabWorkstation = tabWorkstationDAO.findById(workstationNr);
+		side	=	tabWorkstation.getSide();
+		return	side;
+	}
+	/**
+	 * @param side the side to set
+	 */
+	public void setSide(String side) {
+		this.side = side;
 	}
 			
 	

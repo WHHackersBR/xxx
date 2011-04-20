@@ -139,10 +139,6 @@
 	</table>
 	<table style="height:5%;">
 	 <tr>
-    	<s:form>
-	    	<td><s:submit key="storeSvgInDB" action="goToStoreSvgInDB"/></td>
-	    </s:form>
-	    
 	    <s:form id="frm_current_Id">
 	    <td><s:textfield cssStyle="width:3.2cm;" id="inputFID" key="formData.fid" labelposition="left" onkeydown="publish_change_currentID();"/></td>				   		
 	    <td><sx:div cssStyle="width:100%;" labelposition="left" href="fillCurrentFID.action" listenTopics="change_currentID" formId="frm_current_Id" afterNotifyTopics="/clear_FID"/></td>					   							    				   	

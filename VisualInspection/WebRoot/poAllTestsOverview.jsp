@@ -42,7 +42,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<td><s:textfield key="nrOfFailed" labelposition="left" readonly="true"/></td>    			
 	    		</tr>	    		
 	    		<tr>
-	    		    <td colspan="4"><s:submit key="confirmAll" action="toDO"/></td>   		
+	    		    <td colspan="4"><s:submit key="confirmAll" action="confirmAll_AllTestsOverview"/></td>   		
 	    			<td colspan="4"><s:submit key="closeWindow" onclick="window.opener.parent.setFocusFID();window.opener=null;window.close();"/></td>    			
 	    		</tr>
 	    	</table>

@@ -15,6 +15,8 @@ public class PoInformation {
 	private String testedQty;
 	private String passedQty;
 	private String failedQty;
+	private String side;
+	
 	
 	
 	
@@ -59,6 +61,18 @@ public class PoInformation {
 	}
 	public void setFailedQty(String failedQty) {
 		this.failedQty = failedQty;
+	}
+	/**
+	 * @return the side
+	 */
+	public String getSide() {
+		return side;
+	}
+	/**
+	 * @param side the side to set
+	 */
+	public void setSide(String side) {
+		this.side = side;
 	}
 	
 	

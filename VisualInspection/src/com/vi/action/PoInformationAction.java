@@ -12,8 +12,8 @@ import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.vi.data.FormData;
-import com.vi.data.ItemFailure;
 import com.vi.data.PoInformation;
+import com.vi.data.PoPlanInformation;
 
 public class PoInformationAction extends ActionSupport{
 	//DataSource
@@ -21,11 +21,11 @@ public class PoInformationAction extends ActionSupport{
 	
 	private FormData formData;
 	
-	private String planQuantity;
-	
+
 	//list for storing the database query results
 	//so they can be iterated by Struts2	
 	private ArrayList<PoInformation> poInformationList;
+	private ArrayList<PoPlanInformation>	poPlanInfoList;
 	private boolean retrievedData;
 	
 	/**
@@ -43,74 +43,53 @@ public class PoInformationAction extends ActionSupport{
 	 * to populate the lists and set the counts
 	 */
 	private void retrieveData(){
-		poInformationList=new ArrayList<PoInformation>();		
+		poInformationList=new ArrayList<PoInformation>();
+		poPlanInfoList = new ArrayList<PoPlanInformation>();
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			//query database for the information			
 			conn = dataSource.getConnection();
-			//calling the stored procedure which returns the quantity
-			//PROCEDURE GET_PO_QUANTITY(in_po_no IN VARCHAR2,out_quantity OUT VARCHAR2);    
-			coll = conn.prepareCall("{call PCBVI.PKG_PO_HISTORY.GET_PO_QUANTITY(?,?)}");
+			coll = conn.prepareCall("{call PCBVI.PKG_GET_PO.GET_PO(?,?)}");
 			//prepare input and output arguments 
-			coll.setString(1, formData.getPoNo());			
-
-			coll.registerOutParameter(2, OracleTypes.NUMBER);
-			
-			coll.execute();
-			//get quantity
-			planQuantity=coll.getString(2);
-			coll.close();
-			
-			//calling the stored procedure which returns a cursor to the data
-			//PROCEDURE GET_WORKSTATION_INFO(in_po_no IN VARCHAR2,v_cursor_workstation_info OUT CURSOR_WI);   
-			coll = conn.prepareCall("{call PCBVI.PKG_PO_HISTORY.GET_WORKSTATION_INFO(?,?)}");
-			//prepare input and output arguments 
-			coll.setString(1, formData.getPoNo());			
+			coll.setString(1, formData.getPoNo());
 
 			coll.registerOutParameter(2, OracleTypes.CURSOR);
 			
 			coll.execute();
+			
 			//get cursor
 			ResultSet rs = (ResultSet) coll.getObject(2);
 			//and process data
+			while (rs.next()){
+				PoPlanInformation poPlanInformation = new PoPlanInformation();
+				
+				poPlanInformation.setPoNo(rs.getString(1));
+				poPlanInformation.setItemNo(rs.getString(2));
+				poPlanInformation.setAs_(rs.getString(3));
+				poPlanInformation.setPlanQty(rs.getString(4));
+				poPlanInformation.setReleaseDate(rs.getString(5));
+				//System.out.println(formData.getPoNo() +":" + rs.getString(1) + ":" +
+				//		rs.getShort(2) +":"+rs.getString(3)+":"+rs.getString(4));
+				
+				poPlanInfoList.add(poPlanInformation);
+			}
+			rs.close();
+			coll.close();
+			
+			//calling the stored procedure which returns a cursor to the data
+			//PROCEDURE GET_WORKSTATION_INFO(in_po_no IN VARCHAR2,v_cursor_workstation_info OUT CURSOR_WI);   
+			coll = conn.prepareCall("{call PCBVI.PKG_PO_HISTORY.GET_QUANTITY_INFO(?,?,?)}");
+			//prepare input and output arguments 
+			coll.setString(1, formData.getPoNo());
+			coll.setString(2, formData.getWorkstationNr());
+			coll.registerOutParameter(3, OracleTypes.CURSOR);
+			
+			coll.execute();
+			//get cursor
+			 rs = (ResultSet) coll.getObject(3);
+			//and process data
 						
 			while (rs.next()) {
-				//calling the stored procedure which returns the passed POs quantity
-				//PROCEDURE GET_QUANTITY_INFO(in_po_no IN VARCHAR2,in_item_no IN VARCHAR2,
-				//in_as_ IN VARCHAR2,in_workstation_no IN VARCHAR2,in_test_result IN CHAR,out_qty OUT NUMBER); 
-				CallableStatement coll2 = conn.prepareCall("{call PCBVI.PKG_PO_HISTORY.GET_QUANTITY_INFO(?,?,?,?,?,?)}");
-				//prepare input and output arguments 
-				coll2.setString(1, formData.getPoNo());			
-				coll2.setString(2, rs.getString(1));	
-				coll2.setString(3, rs.getString(2));	
-				coll2.setString(4, rs.getString(3));
-				coll2.setString(5, "P");
-				
-				coll2.registerOutParameter(6, OracleTypes.NUMBER);
-				
-				coll2.execute();
-				
-				int passQty=coll2.getInt(6);
-				coll2.close();
-				
-				//calling the stored procedure which returns the failed POs quantity
-				//PROCEDURE GET_QUANTITY_INFO(in_po_no IN VARCHAR2,in_item_no IN VARCHAR2,
-				//in_as_ IN VARCHAR2,in_workstation_no IN VARCHAR2,in_test_result IN CHAR,out_qty OUT NUMBER); 				
-				coll2 = conn.prepareCall("{call PCBVI.PKG_PO_HISTORY.GET_QUANTITY_INFO(?,?,?,?,?,?)}");
-				//prepare input and output arguments 
-				coll2.setString(1, formData.getPoNo());			
-				coll2.setString(2, rs.getString(1));	
-				coll2.setString(3, rs.getString(2));	
-				coll2.setString(4, rs.getString(3));
-				coll2.setString(5, "F");
-				
-				coll2.registerOutParameter(6, OracleTypes.NUMBER);
-				
-				coll2.execute();
-				
-				int failQty=coll2.getInt(6);
-				coll2.close();
 				
 				//process data
 				PoInformation poInformation=new PoInformation();
@@ -119,9 +98,10 @@ public class PoInformationAction extends ActionSupport{
 				poInformation.setVersionAS(rs.getString(2));
 				poInformation.setWorkstationNr(rs.getString(3));
 				poInformation.setWorkstationDescription(rs.getString(4));
-				poInformation.setTestedQty(String.valueOf(passQty+failQty));
-				poInformation.setPassedQty(String.valueOf(passQty));
-				poInformation.setFailedQty(String.valueOf(failQty));
+				poInformation.setTestedQty(String.valueOf(Integer.parseInt(rs.getString(5))+Integer.parseInt(rs.getString(6)) ));
+				poInformation.setPassedQty(rs.getString(5));
+				poInformation.setFailedQty(rs.getString(6));
+				poInformation.setSide(rs.getString(7));
 	
 				poInformationList.add(poInformation);							
 			
@@ -135,6 +115,7 @@ public class PoInformationAction extends ActionSupport{
 				*/
 
 			}
+			rs.close();
 			
 
 		} catch (Exception e) {
@@ -178,19 +159,6 @@ public class PoInformationAction extends ActionSupport{
 		this.formData = formData;
 	}
 
-	public String getPlanQuantity() {
-		//only retrieve the data once, makes no sense to split query into many queries
-		//but have to make sure it's done when the first getter is called
-		if(!retrievedData){
-			retrieveData();
-		}
-		return planQuantity;
-	}
-
-	public void setPlanQuantity(String planQuantity) {
-		this.planQuantity = planQuantity;
-	}
-
 	public ArrayList<PoInformation> getPoInformationList() {
 		//only retrieve the data once, makes no sense to split query into many queries
 		//but have to make sure it's done when the first getter is called
@@ -203,6 +171,24 @@ public class PoInformationAction extends ActionSupport{
 	public void setPoInformationList(ArrayList<PoInformation> poInformationList) {
 		this.poInformationList = poInformationList;
 	}
+
+	/**
+	 * @return the poPlanInfoList
+	 */
+	public ArrayList<PoPlanInformation> getPoPlanInfoList() {
+		if(!retrievedData){
+			retrieveData();
+		}
+		return poPlanInfoList;
+	}
+
+	/**
+	 * @param poPlanInfoList the poPlanInfoList to set
+	 */
+	public void setPoPlanInfoList(ArrayList<PoPlanInformation> poPlanInfoList) {
+		this.poPlanInfoList = poPlanInfoList;
+	}
+
 	
 	
 }

@@ -67,7 +67,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			    <s:iterator value="itemFailureList">
 			    
 		    	<s:url id="editUrl" action="goToEditFailureReport">
-					<s:param name="fid" value="fid" />
+					<s:param name="formData.currentFid" value="fid" />
 					<s:param name="formData.workstationNr" value="formData.workstationNr" />
 					<s:param name="failureReportData.positionNr" value="pieceLocation" />
 					<s:param name="failureReportData.partname" value="componentLocation" />
@@ -75,7 +75,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<s:param name="failureReportData.failureDescription" value="failureDescription" />
 				</s:url>
 	   			<s:url id="removeUrl" action="delFailure_ItemFailureList">
-					<s:param name="fid" value="fid" />
+					<s:param name="formData.currentFid" value="fid" />
 					<s:param name="formData.workstationNr" value="formData.workstationNr" />
 					<s:param name="failureReportData.positionNr" value="pieceLocation" />
 					<s:param name="failureReportData.partname" value="componentLocation" />

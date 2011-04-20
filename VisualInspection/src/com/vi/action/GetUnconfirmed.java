@@ -11,12 +11,14 @@ import oracle.jdbc.driver.OracleTypes;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.data.FormData;
 import com.vi.data.ItemFailure;
 import com.vi.data.Unconfirmed;
 
 public class GetUnconfirmed extends ActionSupport {
 	//DataSource
 	private BasicDataSource dataSource;
+	private FormData formData;
 	
 	//list for storing the database query results
 	//so they can be iterated by Struts2
@@ -54,13 +56,14 @@ public class GetUnconfirmed extends ActionSupport {
 			conn = dataSource.getConnection();
 			//calling the stored procedure which returns a cursor to the data			
 			//PROCEDURE GET_UNCONFIRMED(v_cursor_unconfirmed OUT CURSOR_IF);
-			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.GET_UNCONFIRMED(?)}");
-			//prepare input and output arguments 			
-			coll.registerOutParameter(1, OracleTypes.CURSOR);
+			coll = conn.prepareCall("{call PCBVI.PKG_TESTRECORDS.GET_UNCONFIRMED(?,?)}");
+			//prepare input and output arguments 	
+			coll.setString(1, formData.getWorkstationNr());
+			coll.registerOutParameter(2, OracleTypes.CURSOR);
 			
 			coll.execute();
 			//get cursor
-			ResultSet rs = (ResultSet) coll.getObject(1);
+			ResultSet rs = (ResultSet) coll.getObject(2);
 			//and process data			
 			while (rs.next()) {
 				/*System.out.println(	 rs.getString(1)+'\t'
@@ -74,6 +77,7 @@ public class GetUnconfirmed extends ActionSupport {
 				unconfirmed.setPoNo(rs.getString(1));
 				unconfirmed.setWorkstationNr(rs.getString(2));
 				unconfirmed.setWorkstationDescription(rs.getString(3));				
+				unconfirmed.setSide(rs.getString(4));				
 				
 				unconfirmedList.add(unconfirmed);
 				
@@ -107,6 +111,20 @@ public class GetUnconfirmed extends ActionSupport {
 
 	public void setUnconfirmedList(ArrayList<Unconfirmed> unconfirmedList) {
 		this.unconfirmedList = unconfirmedList;
+	}
+
+	/**
+	 * @return the formData
+	 */
+	public FormData getFormData() {
+		return formData;
+	}
+
+	/**
+	 * @param formData the formData to set
+	 */
+	public void setFormData(FormData formData) {
+		this.formData = formData;
 	}	
 	
 }

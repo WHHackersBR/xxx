@@ -30,14 +30,27 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    <div>
 	    	<table border="1">
 	    		<tr>
-	    			<td colspan="4"><s:text name="viInfo"/></td>	    			
+	    			<td colspan="5" align="center"><s:text name="poPlanInformation"/></td>	    			
 	    		</tr>
 	    		<tr>
-	    			<td><s:label key="formData.poNo" labelposition="top" /></td>
-	    			<td><s:label key="planQuantity" labelposition="top" /></td>    			
+				    <td><s:text name="poNo"/></td>
+				    <td><s:text name="articleNo"/></td>
+				    <td><s:text name="as"/></td>
+				    <td><s:text name="planQty"/></td>
+				    <td><s:text name="releaseDate"/></td>
 	    		</tr>
+	    		<s:iterator value="poPlanInfoList">
 	    		<tr>
-	    			<td colspan="4"><s:text name="testInfo"/></td>	    			
+				    <td><s:property value="poNo"/></td>
+				    <td><s:property value="itemNo"/></td>
+				    <td><s:property value="as_"/></td>
+				    <td><s:property value="planQty"/></td>
+				    <td><s:property value="releaseDate"/></td>
+	    		</tr>
+	    		</s:iterator>
+	    		
+	    		<tr>
+	    			<td colspan="7" align="center"><s:text name="testInfo"/></td>	    			
 	    		</tr>
 	    		<tr>
 	    			<th><s:text name="articleNo"/></th>
@@ -47,6 +60,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<th><s:text name="testQty"/></th>
 	    			<th><s:text name="passQty"/></th>
 	    			<th><s:text name="failQty"/></th>
+	    			<th><s:text name="side"/></th>
 	    		</tr>
 			          
 			    <s:iterator value="poInformationList">			   		    			
@@ -58,6 +72,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    <td><s:property value="testedQty"/></td>
 				    <td><s:property value="passedQty"/></td>
 				    <td><s:property value="failedQty"/></td>
+				    <td><s:property value="side"/></td>
 		
 			    </tr>
 			    </s:iterator>

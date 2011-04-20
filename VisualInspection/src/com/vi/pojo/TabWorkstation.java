@@ -1,9 +1,7 @@
 package com.vi.pojo;
 
 /**
- * TabWorkstation entity.
- * 
- * @author MyEclipse Persistence Tools
+ * TabWorkstation entity. @author MyEclipse Persistence Tools
  */
 
 public class TabWorkstation implements java.io.Serializable {
@@ -16,6 +14,7 @@ public class TabWorkstation implements java.io.Serializable {
 	private String code;
 	private String equipContent;
 	private String machId;
+	private String machType;
 
 	// Constructors
 
@@ -23,20 +22,15 @@ public class TabWorkstation implements java.io.Serializable {
 	public TabWorkstation() {
 	}
 
-	/** minimal constructor */
-	public TabWorkstation(String workstationNo) {
-		this.workstationNo = workstationNo;
-	}
-
 	/** full constructor */
-	public TabWorkstation(String workstationNo, String side, String type,
-			String code, String equipContent,String machId) {
-		this.workstationNo = workstationNo;
+	public TabWorkstation(String side, String type, String code,
+			String equipContent, String machId, String machType) {
 		this.side = side;
 		this.type = type;
 		this.code = code;
 		this.equipContent = equipContent;
 		this.machId = machId;
+		this.machType = machType;
 	}
 
 	// Property accessors
@@ -81,18 +75,20 @@ public class TabWorkstation implements java.io.Serializable {
 		this.equipContent = equipContent;
 	}
 
-	/**
-	 * @return the machId
-	 */
 	public String getMachId() {
-		return machId;
+		return this.machId;
 	}
 
-	/**
-	 * @param machId the machId to set
-	 */
 	public void setMachId(String machId) {
 		this.machId = machId;
+	}
+
+	public String getMachType() {
+		return this.machType;
+	}
+
+	public void setMachType(String machType) {
+		this.machType = machType;
 	}
 
 }

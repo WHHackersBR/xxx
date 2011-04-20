@@ -11,8 +11,21 @@ public class Unconfirmed {
 	private String poNo;
 	private String workstationNr;
 	private String workstationDescription;
+	private String side;
 	
 	
+	/**
+	 * @return the side
+	 */
+	public String getSide() {
+		return side;
+	}
+	/**
+	 * @param side the side to set
+	 */
+	public void setSide(String side) {
+		this.side = side;
+	}
 	public String getPoNo() {
 		return poNo;
 	}

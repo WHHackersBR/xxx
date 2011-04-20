@@ -8,7 +8,7 @@
     <class name="com.vi.pojo.TabWorkstation" table="TAB_WORKSTATION" schema="PCBVI">
         <id name="workstationNo" type="java.lang.String">
             <column name="WORKSTATION_NO" length="8" />
-            <generator class="assigned" />
+            <generator class="uuid.hex" />
         </id>
         <property name="side" type="java.lang.String">
             <column name="SIDE" length="2" />
@@ -24,6 +24,9 @@
         </property>
         <property name="machId" type="java.lang.String">
             <column name="MACH_ID" length="6" />
+        </property>
+        <property name="machType" type="java.lang.String">
+            <column name="MACH_TYPE" length="9" />
         </property>
     </class>
 </hibernate-mapping>

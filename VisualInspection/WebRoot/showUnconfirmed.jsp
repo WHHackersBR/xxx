@@ -38,6 +38,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<th><s:text name="poNoText"/></th>
 	    			<th><s:text name="workstationNrText"/></th>
 	    			<th><s:text name="workstationDescriptionText"/></th>	    			
+	    			<th><s:text name="side"/></th>	    			
 	    		</tr>
 			   
 			    <s:iterator value="unconfirmedList">			    		    	
@@ -46,6 +47,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    <td><s:property value="poNo"/></td>
 				    <td><s:property value="workstationNr"/></td>
 				    <td><s:property value="workstationDescription"/></td>				   		
+				    <td><s:property value="side"/></td>				   		
 			    </tr>
 			    </s:iterator>
 		    </table>

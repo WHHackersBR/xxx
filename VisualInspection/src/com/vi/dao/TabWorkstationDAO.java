@@ -28,7 +28,8 @@ public class TabWorkstationDAO extends HibernateDaoSupport {
 	public static final String TYPE = "type";
 	public static final String CODE = "code";
 	public static final String EQUIP_CONTENT = "equipContent";
-	public static final String MACH_ID = "machid";
+	public static final String MACH_ID = "machId";
+	public static final String MACH_TYPE = "machType";
 
 	protected void initDao() {
 		// do nothing
@@ -49,15 +50,15 @@ public class TabWorkstationDAO extends HibernateDaoSupport {
 		log.debug("deleting TabWorkstation instance");
 		try {
 			getHibernateTemplate().delete(persistentInstance);
-			//log.debug("delete successful");
+			log.debug("delete successful");
 		} catch (RuntimeException re) {
-			//log.error("delete failed", re);
+			log.error("delete failed", re);
 			throw re;
 		}
 	}
 
 	public TabWorkstation findById(java.lang.String id) {
-		//log.debug("getting TabWorkstation instance with id: " + id);
+		log.debug("getting TabWorkstation instance with id: " + id);
 		try {
 			TabWorkstation instance = (TabWorkstation) getHibernateTemplate()
 					.get("com.vi.pojo.TabWorkstation", id);
@@ -110,8 +111,12 @@ public class TabWorkstationDAO extends HibernateDaoSupport {
 		return findByProperty(EQUIP_CONTENT, equipContent);
 	}
 
-	public List findByMachId(Object machid) {
-		return findByProperty(MACH_ID, machid);
+	public List findByMachId(Object machId) {
+		return findByProperty(MACH_ID, machId);
+	}
+
+	public List findByMachType(Object machType) {
+		return findByProperty(MACH_TYPE, machType);
 	}
 
 	public List findAll() {

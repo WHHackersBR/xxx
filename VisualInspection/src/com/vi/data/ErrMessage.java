@@ -16,4 +16,8 @@ public class ErrMessage {
 	public static String NUllorConfirmFID="PCB序列号不存在或已经确认";
 	public static String PoNotMatch="系统订单号与当前订单号不匹配";
 	public static String FidNotExist="序列号不是由本系统产生的";
+	public static String ConfirmedFid = "此序列号已经被确认";
+	public static String Confirmed = "确认";
+	public static String NotConfirmed = "未确认";
+	
 }
