@@ -1,0 +1,86 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+		     <!-- Sichtpruefungs menue -->
+<menu>		
+     <header>Adobe SVG Viewer</header>
+		<menu id="side">
+			<header>CS/SS选择 : Choose side</header>
+			<item id="csSide" checked="no" onactivate="chooseSide('CS')"> CS/零件面 </item>
+			<item id="ssSide" checked="no" onactivate="chooseSide('SS')"> SS/焊接面 </item>
+			<separator/>
+		</menu>
+		<menu id="layer">
+			<header>层选择 : Layer</header>
+			<item id="alleausz" checked="no" onactivate="onoffaz('alleaus')">  All off</item>
+			<item id="alleeinz" checked="no" onactivate="onoffaz('alleein')">  All on</item>
+			<separator/>
+		</menu>
+		
+       <separator/>
+	      <item onactivate="Schieben()">Move                      (Alt + Mouse left)</item>
+	      <item action="ZoomIn">Zoom +  (Strg + Mouse left expand)</item>
+	      <item action="ZoomOut">Zoom -                          (Strg + shift)</item>
+	      <item id="OriginalView" action="OriginalView">Original view</item>
+		
+		<menu id="Dreh">
+		  <header>Rotate</header>
+		  <item id="Drehen0" enabled="no" onactivate="Drehen('0')" >rotate     0</item>
+		  <item id="Drehen90" enabled="yes" onactivate="Drehen('90')">rotate   90</item>
+		  <item id="Drehen180" enabled="yes" onactivate="Drehen('180')">rotate 180</item>
+		  <item id="Drehen270" enabled="yes" onactivate="Drehen('270')">rotate 270</item>
+		</menu>
+	               
+		<separator/>
+	
+		<menu id="layerv">
+		  <header>Preselection :</header>
+		  <item id="Lv_neutr" checked="yes" onactivate="Voreinst('Lv_neutr')">  Basic view</item>
+		  <item id="LV_alleein" checked="no" onactivate="Voreinst('LV_alleein')">  all views on</item>
+		</menu>
+		
+		<separator/>
+		
+		<menu id="layerg" display="none">
+		 <header >Layer :  AKZ</header>
+		 <item id="alleaus" checked="no" onactivate="onoffa('alleaus')">  Alle aus</item>
+		 <item id="alleein" checked="no" onactivate="onoffa('alleein')">  Alle ein</item>
+		 <separator/>
+		</menu>
+		
+	       <separator/>
+	
+         <menu id="action">
+	         <header>Search :</header>
+			      <item onactivate="GruppenMark('10000000')">Component not assembled </item>
+			      <item onactivate="GruppenMark('?')" >Component no data </item>
+         </menu>
+
+		      <item onactivate="suchenEP()">  RefDes            (S)</item>
+		      <item onactivate="GruppenMark('+')">  Attribute         (A)</item>
+		      <item onactivate="reseten()">  Reset              (Esc)</item>
+		
+		
+	       <separator/>
+		      <menu display="none">
+			      <header>Anzeigen :</header>
+			      <item id="anzers" onactivate="onofff('anzers')">Ersatztypen   (leer)</item>
+		      </menu>
+		      <item >Show :</item>
+		      <item onactivate="Beztausch('gkz1')">  Ref.-Designator (E)</item>
+		      <item onactivate="Beztausch('label1')">  Label                  (W)</item>
+		      <item onactivate="Beztauschb()">  Ref and Label    (Z)</item>
+		      <item id="Sgross" checked="no" onactivate="Schriftgross()" >  Font size            (G)</item>
+		
+		
+		       <separator/>
+		      <item id="Tstepm" checked="no" onactivate="suchen('84')" >Section step           (T)</item>
+		      <item onactivate="suchen('40')" >Step all on             (Arrow ->)</item>
+		      <item id="br" onactivate="PosiLoopresetall()" >Step reset</item>
+		
+		
+		      <separator/>
+		      <item id="Masters" onactivate="Masters()">New open            (F)</item>
+		      <item onactivate="HilfeText()">Quick help            (H)</item>
+		      <item action='ViewSource'>View Source</item>
+		      <item action='CopySVG'>Copy SVG</item>
+		      <item action="About">About Adobe SVG Viewer...</item>
+</menu>		

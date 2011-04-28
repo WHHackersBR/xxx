@@ -19,7 +19,7 @@
 	<link rel="stylesheet" type="text/css" href="./css/interface.css">
 				
   </head>
-  <!--<script type="text/javascript" src="./js/openWindow.js"></script>  -->
+  <script type="text/javascript" src="./js/openWindow.js"></script>  
   <script type="text/javascript">
   	function csChecked(){
   		//alert(document.getElementsByTagName("path").length);
@@ -54,13 +54,18 @@
     <s:form>
     </s:form>
     
-    <s:form action="loadSvg">
+    <s:form action="userManual"  name="loadSvg" id="loadSvg"  target="_blank">
 		<td><s:textfield labelposition="left" key="pageLabel.partNo"></s:textfield></td>
 		<td><s:textfield cssStyle="width:1cm" labelposition="left" key="pageLabel.partAs"></s:textfield></td>
  	    <td><s:checkbox labelposition="left" key="pageLabel.chooseCs" value="true" onclick="csChecked()"/></td>
 	    <td><s:checkbox labelposition="left" key="pageLabel.chooseSs" value="true" onclick="ssChecked()"/></td>
-       <td><sx:submit cssStyle="width:1.5cm;" key="pageLabel.showPhoto" targets="photoDiv" /></td>			    		
+       <td><s:submit cssStyle="width:1.5cm;" key="pageLabel.userManual" /></td>	
+
     </s:form>
+    
+       <td><sx:submit cssStyle="width:1.5cm;" href="loadSvg.action" key="pageLabel.showPhoto" targets="photoDiv" formId="loadSvg"/></td>			    		
+    
+ 
 	</tr>
   </table>
   </div>
