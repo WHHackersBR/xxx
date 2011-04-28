@@ -35,14 +35,14 @@
 				<value>com/converter/SvgSide.hbm.xml</value>
 				<value>com/converter/TabWorkstation.hbm.xml</value></list>
 		</property></bean>
-	<bean id="SvgFileDAO" class="com.converter.dao.SvgFileDAO">
+	<bean id="svgFileDAO" class="com.converter.dao.SvgFileDAO">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
 		</property>
 	</bean>
 	<bean id="uploadaction" class="com.converter.action.uploadAction"> 
 		<property name="uploadfiledao">
-			<ref bean="SvgFileDAO"/>
+			<ref bean="svgFileDAO"/>
 		</property>
 	</bean>
 	<bean id="sideContentaction" class="com.converter.action.uploadAction"> 

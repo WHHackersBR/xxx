@@ -15,6 +15,8 @@ public class SvgFile implements java.io.Serializable {
 
 	private SvgFileId id;
 	private Blob sourcefile;
+	private String userManual;
+	private String modifier;
 	//private String articleNo;
 	//private String estand;
 	//private String side;
@@ -54,6 +56,34 @@ public class SvgFile implements java.io.Serializable {
 
 	public void setId(SvgFileId id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the userManual
+	 */
+	public String getUserManual() {
+		return userManual;
+	}
+
+	/**
+	 * @param userManual the userManual to set
+	 */
+	public void setUserManual(String userManual) {
+		this.userManual = userManual;
+	}
+
+	/**
+	 * @return the modifier
+	 */
+	public String getModifier() {
+		return modifier;
+	}
+
+	/**
+	 * @param modifier the modifier to set
+	 */
+	public void setModifier(String modifier) {
+		this.modifier = modifier;
 	}
 
 

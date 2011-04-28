@@ -11,6 +11,14 @@
 	  			<result name="loadsvg">/WEB-INF/ajax_dojo/getSvg.jsp</result>
 	  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
 			</action>
+			<action name="userManual" class="com.converter.action.uploadAction" method="userManual">					  
+	  			<result name="success">/WEB-INF/ajax_dojo/userManual.jsp</result>
+	  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+			</action>
+			<action name="uploadManual" class="com.converter.action.uploadAction" method="uploadManual">					  
+	  			<result name="success">/WEB-INF/ajax_dojo/userManual.jsp</result>
+	  			<result name="error">showErrMessage.jsp</result>
+			</action>
 			<action name="sideMaintenance" class="sideContentaction" method="sideMaintenance" >
 				<result name="success">sideMaintenance.jsp</result>
 				<result name="error">showErrMessage.jsp</result>

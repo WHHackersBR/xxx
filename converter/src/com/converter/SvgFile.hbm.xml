@@ -20,5 +20,11 @@
         <property name="sourcefile" type="blob">
             <column name="SOURCEFILE" />
         </property>
+        <property name="userManual" type="java.lang.String">
+            <column name="USER_MANUAL" length="256" />
+        </property>
+        <property name="modifier" type="java.lang.String">
+            <column name="MODIFIER" length="16" />
+        </property>
     </class>
 </hibernate-mapping>

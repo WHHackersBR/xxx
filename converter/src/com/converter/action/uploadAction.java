@@ -5,6 +5,9 @@ package com.converter.action;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,13 +50,16 @@ public class uploadAction extends ActionSupport{
 
 	private String contentType;
 	private String fileName;
+	
 	private String outmessage;
+	private SvgFileDAO svgFileDAO;
+
+	private final int maxFileSize=2048;
+	private final String userManualDir="/webserver/ViUserManual/";
 
 	//collection/array/map/enumeration/iterator type
 	public static List<String> sideList = new ArrayList<String>();
-	/**
-	 * 
-	 */
+
 	private List<String> leftCsList;
 	private List<String> rightSsList;
 	private List<String> colorList;
@@ -145,12 +151,14 @@ public class uploadAction extends ActionSupport{
 		}
 
 		SvgFileId svgfileid=new SvgFileId(pageLabel.getPartNo(),pageLabel.getPartAs(),pageLabel.getSide());
-		SvgFile svgfile= new SvgFile(svgfileid);
+		SvgFile svgfile= this.getUploadfiledao().findById(svgfileid);
+		if (svgfile == null){
+			svgfile= new SvgFile(svgfileid);
+		}
 		svgfile.setSourcefile(photo);
 		//System.out.println(this.getUploadfiledao().findById(svgfileid).getSourcefile().toString());
 		this.getUploadfiledao().attachDirty(svgfile);
 		//this.getUploadfiledao().merge(svgfile);//it cannot update the a exist SVG file and always insert a empty SVG file	
-		
 	} catch (Exception e) {
 		e.printStackTrace();
 		return "failed";
@@ -276,20 +284,93 @@ public class uploadAction extends ActionSupport{
 	} catch (Exception e) {
 		e.printStackTrace();
 		setOutmessage("Side set failed!!");
-		return "error";
+		return ERROR;
 	} finally {
 	}
 	setOutmessage("Successful");
-	return "success";	
+	return SUCCESS;	
 	}
 	
+	public String userManual(){
+		
+		SvgFileId svgFileId = new SvgFileId(pageLabel.getPartNo(), pageLabel.getPartAs(), "0");
+		
+		SvgFile svgFile= svgFileDAO.findById(svgFileId);
+		//List<String> viList = new ArrayList<String>();
+		//viList.add("abc");
+		
+		if (svgFile != null && svgFile.getUserManual() != null && !svgFile.getUserManual().isEmpty()){
+			//viList.addAll(Arrays.asList(svgFile.getUserManual().split(":")));
+			pageLabel.setViDocReview(svgFile.getUserManual().replaceFirst(pageLabel.getPartNo()+"-"+pageLabel.getPartAs()+"-", ""));
+			pageLabel.setViDocReal("userManual/"+svgFile.getUserManual());
+		}
+			//pageLabel.setViDocList(viList);
+		
+		return SUCCESS;
+		
+	}
+
+	public String uploadManual(){
+		
+		setOutmessage("");
+		try {
+			InputStream stream = new FileInputStream(pageLabel.getViDocument());
+			String realName=pageLabel.getPartNo() + "-" + pageLabel.getPartAs() + "-" + pageLabel.getViDocumentFileName();
+			String targetPath=ServletActionContext.getServletContext().getRealPath("/userManual")+"/" + realName;
+			// System.out.println(stream.available());
+			if (stream.available() < maxFileSize * 1024) {
+				OutputStream bos = new FileOutputStream(targetPath);
+				byte[] buffer = new byte[8192];
+				int bytesRead = 0;
+				while ((bytesRead = stream.read(buffer, 0, 8192)) != -1) {
+					bos.write(buffer, 0, bytesRead);
+				}
+				bos.close();
+				stream.close();
+				
+			} else {
+				setOutmessage("Cannot upload file, because file size is largger than "+ maxFileSize + "K bytes");
+				pageLabel.setViDocReview(this.getOutmessage());
+				return ERROR;
+			}
+			SvgFileId svgFileId = new SvgFileId(pageLabel.getPartNo(), pageLabel.getPartAs(), "0");
+			
+			SvgFile svgFile= svgFileDAO.findById(svgFileId);
+			
+			if (svgFile == null){
+				svgFile = new SvgFile(svgFileId);
+			}else {
+				File oldFile=new File(ServletActionContext.getServletContext().getRealPath("/userManual")+"/"+svgFile.getUserManual());
+				if (oldFile.exists()&& svgFile.getUserManual().equals(realName)){
+					oldFile.delete();
+				}
+			}
+			svgFile.setUserManual(realName);
+			this.svgFileDAO.attachDirty(svgFile);
+			//pageLabel.setViDocReview(pageLabel.getViDocumentFileName());
+			pageLabel.setViDocReview(pageLabel.getViDocumentFileName());
+			pageLabel.setViDocReal("userManual/"+ svgFile.getUserManual());
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			this.setOutmessage("Upload file failed");
+			pageLabel.setViDocReview(this.getOutmessage());
+			return ERROR;
+
+		}
+
+		setOutmessage("Upload file successfully");
+		return SUCCESS;
+		
+	}
 	public String showSvg(){
 		Blob photo = null;
     
 	try{
 		
 		
-		return "success";
+		return SUCCESS;
 	} catch (Exception e) {
 		e.printStackTrace();
 		return "failed";
@@ -432,6 +513,20 @@ public class uploadAction extends ActionSupport{
 	 */
 	public void setOriFileFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	/**
+	 * @return the svgFileDAO
+	 */
+	public SvgFileDAO getSvgFileDAO() {
+		return svgFileDAO;
+	}
+
+	/**
+	 * @param svgFileDAO the svgFileDAO to set
+	 */
+	public void setSvgFileDAO(SvgFileDAO svgFileDAO) {
+		this.svgFileDAO = svgFileDAO;
 	}
 
 
