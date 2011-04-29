@@ -2,6 +2,8 @@ package com.vi.data;
 
 public class ErrMessage {
 	public static String NullPO="请输入订单号";
+	public static String NullItemNr="PCB型号不存在";
+	public static String NullVersion="PCB版本号不存在";
 	public static String WrongPO="订单无效";
 	public static String NullFID="请输入PCB序列号";
 	public static String NullWS="请输入工位号";

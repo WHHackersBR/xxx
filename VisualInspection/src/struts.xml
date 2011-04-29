@@ -84,5 +84,10 @@
   			<result name="success">/storeSvgInDB.jsp</result>
 		</action>
 		
+		<action name="help" class="com.vi.action.ShowInterfaceAction" method="help">					  
+  			<result name="success">/help.jsp</result>
+  			<result name="error">/showErrMessage.jsp</result>
+		</action>
+		
 	</package>
 </struts>

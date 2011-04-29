@@ -77,13 +77,15 @@
 	        event.keyCode=9;
         }        
     } 
+    function getFocus_WorkStation()    {
+     	if(event.keyCode==13){
+	        document.getElementById("workstationNo").focus();
+	        event.keyCode=9;
+        }        
+    } 
     
     function publish_get_itemNr_and_version() {
-     	if(event.keyCode==13){
 	        dojo.event.topic.publish("get_itemNr_and_version"); 
-	        event.keyCode=9;
-	        document.getElementById("workstationNo").focus();
-        }       
     }
     
     //make sure everything is loaded on startup
@@ -103,12 +105,12 @@
     <table>
 	 <tr>			    		    				    
 	    <s:form id="frm_ItemNrAndVersion">
-	    <td style="width:2.5cm;"><s:textfield key="formData.poNo" labelposition="left" cssStyle="width:100%;" onkeydown="publish_get_itemNr_and_version();"/></td>						    				    			   	
+	    <td style="width:2.5cm;"><s:textfield key="formData.poNo" labelposition="left" cssStyle="width:100%;" onkeydown="getFocus_WorkStation()" onblur="publish_get_itemNr_and_version();"/></td>						    				    			   	
 	    <td><sx:div cssStyle="width:4cm;" href="fillItemList.action" listenTopics="get_itemNr_and_version" formId="frm_ItemNrAndVersion"/></td>					   							    				   	
 	   	</s:form>	
 
 	    <s:form id="frm_poCompleted">
-	    <td><sx:div cssStyle="width:2cm;" href="poCompleted.action" listenTopics="get_poCompleted" formId="frm_poCompleted" updateFreq="15000"/></td>
+	    <td><sx:div cssStyle="width:2cm;" href="poCompleted.action" listenTopics="get_poCompleted" updateFreq="15000"/></td>
 	   	</s:form>	
 
 	    <s:form id="frm_WorkstationDescription"  onsubmit="return false">
@@ -117,23 +119,19 @@
 	   	</s:form>	
 	   
 	   	<s:form id="frm_side_Id">
-	   	<td id="changeSide"><sx:div cssStyle="width:100%;" href="changeSide.action" listenTopics="change_side" formId="frm_side_Id" /></td>
+	   	<td id="changeSide" ><sx:div cssStyle="width:100%;" labelposition="left" href="changeSide.action" listenTopics="change_side" formId="frm_side_Id" /></td>
 	   	</s:form>
 	   	
 	   	<s:form id="frm_operatorID_Id" onsubmit="return false">
-	   	<td id="operatiorID"><sx:div cssStyle="width:100%;" href="changeOperatorID.action" labelposition="left" listenTopics="change_operatorID" formId="frm_operatorID_Id" /></td>
+	   	<td id="operatiorID" style="width:1.5cm"><sx:div cssStyle="width:100%;" href="changeOperatorID.action" labelposition="left" listenTopics="change_operatorID" formId="frm_operatorID_Id" /></td>
 	   	</s:form>
-		
 	    <s:form action="startPO" onsubmit="document.getElementById('currentFID').value='';document.getElementById('inputFID').focus();">
 	    	<td><sx:submit cssStyle="width:1.5cm;" key="startPO" targets="svgDiv" />	</td>			    		
 	    </s:form>
-	    
-	    <s:form>
 	    <td><sx:submit cssStyle="width:1.5cm;" key="poHistory" targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openPoInformation.action')" />
 	    </td>
 	    <td><sx:submit cssStyle="width:1.5cm;" key="openingPO" targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openShowUnconfirmed.action')"/>
 	    </td>
-	    </s:form>
 	    	
 	 </tr>
 	</table>
@@ -151,6 +149,7 @@
 		<s:form>
 	    <td><sx:submit cssStyle="width:2.2cm;" key="singleBoardErrList"  targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openItemFailureList_ItemFailureList.action')"/></td>
 	    <td><sx:submit cssStyle="width:2.2cm;" key="currentPoDetails"  onclick="openWindow('openPoAllTestsOverview_AllTestsOverview.action');"/></td>
+    	<td><sx:submit cssStyle="width:2.2cm;" key="formData.help" onclick="openWindow('help.action');"/></td>    	
     	</s:form>
 	</tr>			
 	    

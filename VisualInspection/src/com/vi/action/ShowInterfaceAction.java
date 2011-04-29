@@ -8,12 +8,16 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+
 import oracle.jdbc.driver.OracleTypes;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.struts2.ServletActionContext;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.spi.HttpServerProvider;
 import com.vi.dao.TabViPoDAO;
 import com.vi.dao.TabWorkstationDAO;
 import com.vi.dao.VFailureDAO;
@@ -55,6 +59,7 @@ public class ShowInterfaceAction extends ActionSupport {
 	private VFailureDAO vFailureDAO;
 	private VFidHistDAO vFidHistDAO;
 	private TabViPoDAO	tabViPoDAO;
+	//private 
 	
 
 	private FormData formData;
@@ -114,6 +119,8 @@ public class ShowInterfaceAction extends ActionSupport {
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
+			formData.setItemNr("");
+			formData.setVersionAS("");
 			//query database for the information			
 			conn = dataSource.getConnection();
 			//calling the stored procedure which returns a cursor to the data
@@ -125,7 +132,6 @@ public class ShowInterfaceAction extends ActionSupport {
 			coll.registerOutParameter(2, OracleTypes.CURSOR);
 			
 			coll.execute();
-			
 			//get cursor
 			ResultSet rs = (ResultSet) coll.getObject(2);
 			//and process data
@@ -142,12 +148,13 @@ public class ShowInterfaceAction extends ActionSupport {
 				formData.getVersionASList().add(rs.getString(3));
 				formData.setItemNr(rs.getString(2));
 				formData.setVersionAS(rs.getString(3));
-				
 			}
 
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (!e.getMessage().equals("Cursor is closed.")){
+				e.printStackTrace();
+			}
 			errorOutput=ErrMessage.WrongPO;
 		} finally {
 			if (conn != null) {
@@ -213,8 +220,12 @@ public class ShowInterfaceAction extends ActionSupport {
 		try {
 			VPoId vPoId = new VPoId(formData.getPoNo(),formData.getItemNr(),v_machType);
 			VPo vPo = vPoDAO.findById(vPoId);
-			 if (vPo != null)
-			formData.setPoCompleted(vPo.getQtyProduce().toString() + "/" + vPo.getQtyPlan().toString());
+			 if (vPo != null){
+				formData.setPoCompleted(vPo.getQtyProduce().toString() + "/" + vPo.getQtyPlan().toString());
+			 }
+			 else {
+				formData.setPoCompleted("");
+			}
 		}catch (Exception e) {
 			// TODO: handle exception
 			e.printStackTrace();
@@ -266,6 +277,12 @@ public class ShowInterfaceAction extends ActionSupport {
 		if(!(formData.getFid()==null || formData.getFid().equals(""))){
 			if (formData.getPoNo()==null || formData.getPoNo().equals("")){
 				errorOutput=ErrMessage.NullPO+ "<br>";
+			}
+			if (formData.getItemNr()==null || formData.getItemNr().equals("")){
+				errorOutput=errorOutput+ErrMessage.NullItemNr+ "<br>";
+			}
+			if (formData.getVersionAS()==null || formData.getVersionAS().equals("")){
+				errorOutput=errorOutput+ErrMessage.NullVersion+ "<br>";
 			}
 			if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
 				errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
@@ -322,7 +339,8 @@ public class ShowInterfaceAction extends ActionSupport {
 					//prepare input and output arguments
 		            Date   now   =   new   Date(); 
 		            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
-		            String msg_in = InetAddress.getLocalHost().getHostAddress().concat("               ").substring(0,15)
+		            HttpServletRequest request= ServletActionContext.getRequest();
+		            String msg_in = request.getRemoteAddr().concat("               ").substring(0,15)
 		            +"GREQ 1.00 PVI******" + v_mach_id +" VE    inspeteste '" + formData.getCurrentFid()+"' '"
     				+ dateFormat.format(now) + "' 'P' '" + v_side + "'";
 		            //System.out.println(formData.getWorkstationNr()+":"+msg_in);
@@ -418,6 +436,12 @@ public class ShowInterfaceAction extends ActionSupport {
 		errorOutput="";
 		if (formData.getPoNo()==null || formData.getPoNo().equals("")){
 			errorOutput=ErrMessage.NullPO+ "<br>";
+		}
+		if (formData.getItemNr()==null || formData.getItemNr().equals("")){
+			errorOutput=errorOutput+ErrMessage.NullItemNr+ "<br>";
+		}
+		if (formData.getVersionAS()==null || formData.getVersionAS().equals("")){
+			errorOutput=errorOutput+ErrMessage.NullVersion+ "<br>";
 		}
 		if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
 			errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
@@ -551,6 +575,19 @@ public class ShowInterfaceAction extends ActionSupport {
 			}else {
 				errorOutput = ErrMessage.ConfirmedFid;
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+		} 
+		return SUCCESS;
+	}
+	public String help(){
+		
+		errorOutput = "";
+		try {
+			formData.setViDoc("abc.txt");
+			formData.setViDocReal("abcd.txt");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

@@ -21,6 +21,9 @@ public class FormData {
 	private String fid;
 	private String currentFid;
 	private String poCompleted;
+	private String viDocReal;
+	private String viDoc;
+	private String help;
 	
 	public void setPoCompleted(String poCompleted) {
 		this.poCompleted = poCompleted;
@@ -133,6 +136,48 @@ public class FormData {
 	 */
 	public String getPoCompleted() {
 		return poCompleted;
+	}
+
+	/**
+	 * @return the viDocReal
+	 */
+	public String getViDocReal() {
+		return viDocReal;
+	}
+
+	/**
+	 * @param viDocReal the viDocReal to set
+	 */
+	public void setViDocReal(String viDocReal) {
+		this.viDocReal = viDocReal;
+	}
+
+	/**
+	 * @return the viDoc
+	 */
+	public String getViDoc() {
+		return viDoc;
+	}
+
+	/**
+	 * @param viDoc the viDoc to set
+	 */
+	public void setViDoc(String viDoc) {
+		this.viDoc = viDoc;
+	}
+
+	/**
+	 * @return the help
+	 */
+	public String getHelp() {
+		return help;
+	}
+
+	/**
+	 * @param help the help to set
+	 */
+	public void setHelp(String help) {
+		this.help = help;
 	}
 
 	/**

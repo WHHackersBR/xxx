@@ -9,7 +9,7 @@
 	<body>
 		<table>
 			<tr>
-				<td><s:textfield key="formData.operatorID" labelposition="left" cssStyle="width:2cm;" onblur="publish_change_operatorID();" /></td>													
+				<td><s:textfield key="formData.operatorID" labelposition="left" cssStyle="width:1.5cm;" onblur="publish_change_operatorID();" /></td>													
 			</tr>	
 		</table>
 	</body>

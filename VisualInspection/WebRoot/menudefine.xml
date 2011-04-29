@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+		     <!-- Sichtpruefungs menue -->
+<menu>		
+     	<header>Adobe SVG Viewer</header>
+		<menu id="side">
+			<header>零件面显示 : Show</header>
+			<item id="csSide" checked="no" onactivate="chooseSide('CS')"> CS/零件面 </item>
+			<item id="ssSide" checked="no" onactivate="chooseSide('SS')"> SS/焊接面 </item>
+			<item id="Side" checked="no" onactivate="chooseSide('AB')"> SS+CS/全部 </item>
+			<separator/>
+		</menu>
+		<menu id="layer">
+			<header>层选择 : Layer</header>
+			<item id="layer01" checked="no" onactivate="chooseSide('layer01')"> replaced by layer name of SVG file </item>
+		</menu>
+		<separator/>
+		<menu id="search">
+			<header>搜索 : search</header>
+			<item  checked="no" onactivate="searchComp('componentLocation')"> 零件位置/RefDes </item>
+			<item  checked="no" onactivate="searchComp('partNumber')"> 零件号/Part Number </item>
+			<item  checked="no" onactivate="searchComp('partDesc')"> 零件描述/Part Desc. </item>
+		</menu>
+		<separator/>
+		
+       <separator/>
+      <item action="ZoomIn">Zoom +  (Ctrl + Mouse left expand)</item>
+      <item action="ZoomOut">Zoom - (Ctrl + shift + Mouse left expand)</item>
+      <item id="OriginalView" action="OriginalView">Original view</item>
+		
+		<separator/>
+	
+		<separator/>
+		<item action='ViewSource'>View Source</item>
+		<item action='CopySVG'>Copy SVG</item>
+		<item action="About">About Adobe SVG Viewer...</item>
+</menu>		

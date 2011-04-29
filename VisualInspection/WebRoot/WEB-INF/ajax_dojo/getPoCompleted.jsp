@@ -10,7 +10,7 @@
 <table>
 	<tr>
 		<td>
-			<s:textfield labelposition="left" cssStyle="width:6cm;" key="formData.workstationDescription"  readonly="true"/>
+			<s:textfield labelposition="left" cssStyle="width:100%;"  key="formData.poCompleted"  readonly="true"/>
 		</td>
 	</tr>
 </table>

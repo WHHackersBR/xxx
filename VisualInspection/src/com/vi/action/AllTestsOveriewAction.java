@@ -74,6 +74,12 @@ public class AllTestsOveriewAction extends ActionSupport{
 		if (formData.getPoNo()==null || formData.getPoNo().equals("")){
 			errorOutput=ErrMessage.NullPO+ "<br>";
 		}
+		if (formData.getItemNr()==null || formData.getItemNr().equals("")){
+			errorOutput=errorOutput+ErrMessage.NullItemNr+ "<br>";
+		}
+		if (formData.getVersionAS()==null || formData.getVersionAS().equals("")){
+			errorOutput=errorOutput+ErrMessage.NullVersion+ "<br>";
+		}
 		if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
 			errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
 		}
