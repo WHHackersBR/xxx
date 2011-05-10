@@ -16,9 +16,11 @@
 		<separator/>
 		<menu id="search">
 			<header>搜索 : search</header>
-			<item  checked="no" onactivate="searchComp('componentLocation')"> 零件位置/RefDes </item>
+			<item  checked="no" onactivate="searchComp('refdes')"> 零件位置/RefDes </item>
 			<item  checked="no" onactivate="searchComp('partNumber')"> 零件号/Part Number </item>
 			<item  checked="no" onactivate="searchComp('partDesc')"> 零件描述/Part Desc. </item>
+			<item  checked="no" onactivate="searchComp('samePart')"> 同型显示/Same Part. </item>
+			<item  checked="no" onactivate="searchComp('clearHighlight')"> 清除搜索/Clear Highlight </item>
 		</menu>
 		<separator/>
 		

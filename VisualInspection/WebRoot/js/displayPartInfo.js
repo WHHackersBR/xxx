@@ -7,6 +7,7 @@ var originalStrokeWidth=null;
 var isOriginal=false;
 var layerListCS=new Array(5);
 var layerListSS=new Array(5);
+var compLocation;
 
 //var xmlDoc;
 var color=new Array("blueviolet","brown","chartreuse","darkorange","magenta","olivedrab"
@@ -84,6 +85,7 @@ function ShowMyTooltip(evt,display) {
 		var useTag= targetElement.getElementsByTagName("use").item(0);
 
 		if(display){	
+			compLocation = targetElement.getAttribute("id");
 			//change color and stroke width of selected part
 			//only change it once/ the first time it's touched
 			//otherwise storkeWidth would get huge quickly	
@@ -101,6 +103,8 @@ function ShowMyTooltip(evt,display) {
 			}
 		}
 		else{			
+			//compLocation = "";
+
 			//change color and stroke width back to normal
 			useTag.removeAttribute( "color" );
 			
@@ -120,6 +124,141 @@ function ShowMyTooltip(evt,display) {
 	}
 }
 
+function searchComp(keyword){
+	switch (keyword){
+	case "refdes":
+		refdes = prompt("Reference description:\n请输入零件位置号, 例如:  C701 ","");
+		if (refdes != null && trim(refdes) != ""){
+			refdes = trim(refdes.toUpperCase());
+			element = document.getElementById(refdes);
+			if (element != null){
+				element = element.getElementsByTagName("use").item(0);
+				element.setAttribute("fill", "blue");
+				element.setAttribute("fill-opacity", "0.5");
+			}else{
+				alert(refdes + " does not exist");
+			}
+		}
+		break;
+	case "partNumber":
+		part = prompt("Part Number:\n请输入零件号,例如: A5E00210763","");
+		if (part != null && trim(part) != ""){
+			part = trim(part.toUpperCase());
+			element = document.getElementById("ID_0");
+			if (element != null){
+				
+				elementxt = element.getElementsByTagName("text");
+				if (elementxt != null ){
+					for(var m=0; m < elementxt.length; m = m+1 ){
+						var elementspan=elementxt.item(m).getElementsByTagName("tspan").item(0);
+						if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+							elementspan = elementspan.firstChild.nodeValue;
+							elementspan = elementspan.substring(elementspan.indexOf("|"),elementspan.lastIndexOf("|"));
+							elementspan = trim(elementspan.substring(elementspan.indexOf(":")+1)).toUpperCase();
+							if (elementspan.search(part) != -1){
+								elementuse=elementxt.item(m).parentNode.getElementsByTagName("use").item(0);
+									elementuse.setAttribute("fill", "blue");
+									elementuse.setAttribute("fill-opacity", "0.5");
+							}
+						}
+					}
+				}else{
+					alert(part + " does not exist");
+				}
+				
+			}else{
+				alert(part + " does not exist");
+			}
+		}
+		break;
+	case "partDesc":
+		desc = prompt("Part label:\n请输入零件描述, 例如:  330u或35v ","");
+		if (desc != null && trim(desc) != ""){
+			desc = trim(desc).toUpperCase();
+			element = document.getElementById("ID_0");
+			if (element != null){
+				
+				elementxt = element.getElementsByTagName("text");
+				if (elementxt != null ){
+					for(var m=0; m < elementxt.length; m = m+1 ){
+						var elementspan=elementxt.item(m).getElementsByTagName("tspan").item(0);
+						if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+							elementspan = elementspan.firstChild.nodeValue;
+							elementspan = trim(elementspan.substring(elementspan.indexOf("| Label:")+8)).toUpperCase();
+							//alert(elementspan);
+							if (elementspan.search(desc) != -1){
+								elementuse=elementxt.item(m).parentNode.getElementsByTagName("use").item(0);
+									elementuse.setAttribute("fill", "blue");
+									elementuse.setAttribute("fill-opacity", "0.5");
+							}
+						}
+					}
+				}else{
+					alert(desc + " does not exist");
+				}
+				
+			}else{
+				alert(desc + " does not exist");
+			}
+		}
+		break;
+		
+	case "samePart":
+		//alert(evt);
+		if (compLocation != null && compLocation!=""){
+			var targetElement = document.getElementById(compLocation);
+
+			var elementspan=targetElement.getElementsByTagName("tspan").item(0);
+			if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+				elementspan = elementspan.firstChild.nodeValue;
+				elementspan = elementspan.substring(elementspan.indexOf("|"),elementspan.lastIndexOf("|"));
+				part = trim(elementspan.substring(elementspan.indexOf(":")+1)).toUpperCase();
+				element = document.getElementById("ID_0");
+				if (element != null){
+					
+					elementxt = element.getElementsByTagName("text");
+					if (elementxt != null ){
+						for(var m=0; m < elementxt.length; m = m+1 ){
+							elementspan=elementxt.item(m).getElementsByTagName("tspan").item(0);
+							if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+								elementspan = elementspan.firstChild.nodeValue;
+								elementspan = elementspan.substring(elementspan.indexOf("|"),elementspan.lastIndexOf("|"));
+								elementspan = trim(elementspan.substring(elementspan.indexOf(":")+1)).toUpperCase();
+								if (elementspan.search(part) != -1){
+									elementuse=elementxt.item(m).parentNode.getElementsByTagName("use").item(0);
+										elementuse.setAttribute("fill", "blue");
+										elementuse.setAttribute("fill-opacity", "0.5");
+								}
+							}
+						}
+					}
+				}
+			}
+		}else{
+			alert("Please move over a part")
+		}
+		break;
+		
+	case "clearHighlight":
+		element = document.getElementById("ID_0");
+		if (element != null){
+			
+			elementUse = element.getElementsByTagName("use");
+			if (elementUse != null ){
+				for(var m=0; m < elementUse.length; m = m+1 ){
+					//elementUse.item(m).setAttribute("fill","white");
+					elementUse.item(m).setAttribute("fill-opacity","0");
+					//if (elementUse.item(m).parentNode.getAttribute("id") == "C323"){
+					//	alert(elementUse.item(m).parentNode.getAttribute("onmousemove")+ 
+					//			elementUse.item(m).parentNode.childNodes.item(2).nodeName);
+					//}
+				}
+			}
+		}
+		break;
+	default:
+}
+}
 
 function chooseSide(side) {
 	//var colorIndex=0;
@@ -234,7 +373,7 @@ function chooseSide(side) {
 
 //open popup when a part is clicked on
 function aMouseClick(evt) {
-		//alert("test001");
+		//alert(evt);
 		//only react to left mouse button click
 		if (evt.getButton()==0) {
 			//close old window
@@ -268,17 +407,12 @@ function aMouseClick(evt) {
     	}
 }
 		
-function searchComp(evt,keyword){
-    var anode = newMenuRoot.childNodes.item(1).childNodes;
-    for (var i=0;i < anode.length;i=i+1){
-        if ( anode.item(i).hasAttributes() ){
-        //alert(anode.item(i).nodeName);
-        	if( anode.item(i).getAttribute("id") == "layer" ){
-        	}
-        	
-        }
-	
-	
-    }
+function trim(str){  //删除左右两端的空格
+	 return str.replace(/(^\s*)|(\s*$)/g, "");
+	}
+function ltrim(str){  //删除左边的空格
+ return str.replace(/(^\s*)/g,"");
 }
-
+function rtrim(str){  //删除右边的空格
+ return str.replace(/(\s*$)/g,"");
+}

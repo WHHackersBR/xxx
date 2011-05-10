@@ -1,6 +1,6 @@
 package com.vi.action;
 
-import java.net.InetAddress;
+import java.io.File;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -16,8 +16,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.struts2.ServletActionContext;
 
 import com.opensymphony.xwork2.ActionSupport;
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.spi.HttpServerProvider;
+import com.vi.dao.SvgFileDAO;
 import com.vi.dao.TabViPoDAO;
 import com.vi.dao.TabWorkstationDAO;
 import com.vi.dao.VFailureDAO;
@@ -27,6 +26,8 @@ import com.vi.dao.VtestedDAO;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.ErrMessage;
+import com.vi.pojo.SvgFile;
+import com.vi.pojo.SvgFileId;
 import com.vi.pojo.TabTestedId;
 import com.vi.pojo.TabViPo;
 import com.vi.pojo.TabViPoId;
@@ -59,6 +60,7 @@ public class ShowInterfaceAction extends ActionSupport {
 	private VFailureDAO vFailureDAO;
 	private VFidHistDAO vFidHistDAO;
 	private TabViPoDAO	tabViPoDAO;
+	private SvgFileDAO	svgFileDAO;
 	//private 
 	
 
@@ -433,6 +435,8 @@ public class ShowInterfaceAction extends ActionSupport {
 		//800003923175 -> A5E00758720-05.svg
 		//800004602370 -> A5E00758712-14.svg
 		//800004996525 -> A5E02507171-06.svg
+		//800005416353 -> A5E02358154-03.svg
+		//800005212291 -> A5E02358165-02.svg
 		errorOutput="";
 		if (formData.getPoNo()==null || formData.getPoNo().equals("")){
 			errorOutput=ErrMessage.NullPO+ "<br>";
@@ -585,8 +589,21 @@ public class ShowInterfaceAction extends ActionSupport {
 		
 		errorOutput = "";
 		try {
-			formData.setViDoc("abc.txt");
-			formData.setViDocReal("abcd.txt");
+			SvgFileId svgFileId = new SvgFileId(formData.getItemNr(), formData.getVersionAS(), "0");
+			SvgFile	svgFile = svgFileDAO.findById(svgFileId);
+			if (svgFile != null && svgFile.getUserManual() != null && !svgFile.getUserManual().isEmpty()){
+				File oldFile=new File(ServletActionContext.getServletContext().getRealPath("userManual")+"/"+svgFile.getUserManual());
+				if (!oldFile.exists()){
+					formData.setViDoc("");
+					formData.setViDocReal("");
+				}else {
+					formData.setViDoc(svgFile.getUserManual().replaceFirst(formData.getItemNr()+"-"+formData.getVersionAS()+"-", ""));
+					formData.setViDocReal("userManual/"+svgFile.getUserManual());
+				}
+			}else {
+				formData.setViDoc("");
+				formData.setViDocReal("");
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -715,6 +732,20 @@ public class ShowInterfaceAction extends ActionSupport {
 	 */
 	public void setTabViPoDAO(TabViPoDAO tabViPoDAO) {
 		this.tabViPoDAO = tabViPoDAO;
+	}
+
+	/**
+	 * @return the svgFileDAO
+	 */
+	public SvgFileDAO getSvgFileDAO() {
+		return svgFileDAO;
+	}
+
+	/**
+	 * @param svgFileDAO the svgFileDAO to set
+	 */
+	public void setSvgFileDAO(SvgFileDAO svgFileDAO) {
+		this.svgFileDAO = svgFileDAO;
 	}
 
 }

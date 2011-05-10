@@ -149,7 +149,7 @@
 		<s:form>
 	    <td><sx:submit cssStyle="width:2.2cm;" key="singleBoardErrList"  targets="dummy" onclick="document.getElementById('inputFID').focus();openWindow('openItemFailureList_ItemFailureList.action')"/></td>
 	    <td><sx:submit cssStyle="width:2.2cm;" key="currentPoDetails"  onclick="openWindow('openPoAllTestsOverview_AllTestsOverview.action');"/></td>
-    	<td><sx:submit cssStyle="width:2.2cm;" key="formData.help" onclick="openWindow('help.action');"/></td>    	
+    	<td><sx:submit cssStyle="width:1cm;" key="formData.help" onclick="openWindow('help.action');"/></td>    	
     	</s:form>
 	</tr>			
 	    
