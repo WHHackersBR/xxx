@@ -43,14 +43,18 @@ public class SVGInsertGenerator extends AbstractSVGSAXGenerator {
     public void toSAX(ContentHandler handler, Map svgContext, DXFEntity entity,
         TransformContext transformContext) throws SAXException {
         DXFInsert insert = (DXFInsert) entity;
+        if (insert.getSectionName()==null || !insert.getSectionName().equals("entity") ){
+        	return;
+        }
 
+        //System.out.println(insert.getSectionName()+":"+insert.getBlockID()+":"+((DXFAttrib)insert.attribs.get(0)).getAttribTag()+":"+((DXFAttrib)insert.attribs.get(0)).getText());
         DXFBlock block = insert.getDXFDocument().getDXFBlock(insert.getBlockID());
 
         StringBuffer buf = new StringBuffer();
-
+        
         Point referencePoint = block.getReferencePoint();
-
-        int rows = insert.getRows();
+        
+         int rows = insert.getRows();
         int columns = insert.getColumns();
         double rotate = insert.getRotate();
         Point insertPoint = insert.getPoint();
@@ -68,7 +72,6 @@ public class SVGInsertGenerator extends AbstractSVGSAXGenerator {
         AttributesImpl attrX = new AttributesImpl();
         boolean f_loaded = false;
         //entity内部的解析使用loaded/partnumber选项,如果loaded/partnumber不存在的均不显示
-        if (insert.getSectionName().equals("entity") ){
             Iterator i = list.iterator();
             //每个attribute的内部遍历?
         	//f_loaded = true;
@@ -110,12 +113,11 @@ public class SVGInsertGenerator extends AbstractSVGSAXGenerator {
                 }
             }
         	
-        }
 
         if (f_loaded == true){
-        	if (insert.getSectionName().equals("entity")){
+        	//if (insert.getSectionName().equals("entity")){
                 SVGUtils.startElement(handler, SVGConstants.SVG_GROUP, attrX);
-        	}
+        	//}
                 /*  } catch (SVGGenerationException e) {
                 e.printStackTrace();
                 }*/

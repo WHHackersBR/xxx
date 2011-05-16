@@ -13,6 +13,8 @@ var color=new Array("blueviolet","brown","chartreuse","darkorange","magenta","ol
 		,"orangered","royalblue","tan","yellowgreen");
 
 function Init(evt,absURL,layerListA,layerListB,initSide) {
+	//layerListA=[AssemblySmdA,BOARDFIGURE,AssemblyThtA,AssemblyInfoA]
+	//layerListB=[AssemblySmdB]
 	SVGDocument = evt.target.ownerDocument;
 	SVGRoot = document.documentElement;
 	absoluteURL=absURL;
@@ -29,12 +31,13 @@ function Init(evt,absURL,layerListA,layerListB,initSide) {
 	if(layerListA.length > 0){
 		layerListCS=layerListA.split(",");
 	}*/
-	layerListCS=layerListA.substring(1,layerListA.length-1).split(",");
-	layerListSS=layerListB.substring(1,layerListB.length-1).split(",");
-	
-	//alert(layerListCS.length);
-	//alert(layerListSS.length);
-	chooseSide(initSide);
+		layerListCS=layerListA.substring(1,layerListA.length-1).split(",");
+		layerListSS=layerListB.substring(1,layerListB.length-1).split(",");
+		
+		//layerListCS.length=1 and layerListSS.length=1 when the layer list is empty;
+		if (layerListCS != null && layerListSS != null && (layerListCS.length + layerListSS.length) > 2){
+			chooseSide(initSide);
+		}
 }
 // load the right click menus
 function menuLoaded(xmlDoc)
@@ -49,7 +52,8 @@ function menuLoaded(xmlDoc)
     for (var i=0;i < anode.length;i=i+1){
         if ( anode.item(i).hasAttributes() ){
         //alert(anode.item(i).nodeName);
-        	if( anode.item(i).getAttribute("id") == "layer" ){
+        	if( anode.item(i).getAttribute("id") == "layer" 
+        		&& layerListCS != null && layerListSS != null && (layerListCS.length + layerListSS.length) > 2){
         	    var txt = "<menu id='layer'>\n";
         	    txt = txt + "<header>单层选择 : Layer</header>\n"
         		var layerIndex = 1;	

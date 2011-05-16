@@ -149,7 +149,12 @@ public class SVGEdit  {
 				//XPathExpression expr = xpath
 				//.compile("/svg/g/g/text/tspan/@font-size[ contains(..,'A5E')]");
 				Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
-				String textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				String textSize;
+				if (fontsize != null){
+				textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				}else{
+					textSize="0.02";
+				}
 				//String textSize="0.02";
 
 				//Double textSize = (Double) expr

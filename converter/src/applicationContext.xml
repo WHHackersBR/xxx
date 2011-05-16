@@ -44,6 +44,9 @@
 		<property name="uploadfiledao">
 			<ref bean="svgFileDAO"/>
 		</property>
+		<property name="savesidedao">
+			<ref bean="SvgSideDAO"/>
+		</property>
 	</bean>
 	<bean id="sideContentaction" class="com.converter.action.uploadAction"> 
 		<property name="savesidedao">

@@ -126,10 +126,20 @@ public class uploadAction extends ActionSupport{
 		// the layers as container g-elements
 		Iterator i = doc.getDXFLayerIterator();
 		uploadAction.sideList.clear();
+		int j=1,colorIndex=0;
         while (i.hasNext()) {
             DXFLayer layer = (DXFLayer) i.next();
             if(!layer.getName().equals("0") ){ //&& !layer.getName().equals("BOARDFIGURE")
-        		uploadAction.sideList.add(layer.getName().trim());
+				uploadAction.sideList.add(layer.getName().trim());
+				
+				SvgSideId svgSideId=new SvgSideId(pageLabel.getPartNo(),pageLabel.getPartAs(),layer.getName().trim());
+				SvgSide   svgSide = new SvgSide(svgSideId);
+				svgSide.setSide("CS");
+				svgSide.setLayerSn(new BigDecimal(j));
+				svgSide.setColor(colorList.get(colorIndex));
+				this.getSavesidedao().attachDirty(svgSide);
+				j++;
+				colorIndex++;
             }
         }
 
@@ -296,13 +306,18 @@ public class uploadAction extends ActionSupport{
 		SvgFileId svgFileId = new SvgFileId(pageLabel.getPartNo(), pageLabel.getPartAs(), "0");
 		
 		SvgFile svgFile= svgFileDAO.findById(svgFileId);
+
+		File oldFile=new File(ServletActionContext.getServletContext().getRealPath("userManual")+"/"+svgFile.getUserManual());
 		//List<String> viList = new ArrayList<String>();
 		//viList.add("abc");
 		
-		if (svgFile != null && svgFile.getUserManual() != null && !svgFile.getUserManual().isEmpty()){
+		if (svgFile != null && svgFile.getUserManual() != null && !svgFile.getUserManual().isEmpty() && oldFile.exists()){
 			//viList.addAll(Arrays.asList(svgFile.getUserManual().split(":")));
 			pageLabel.setViDocReview(svgFile.getUserManual().replaceFirst(pageLabel.getPartNo()+"-"+pageLabel.getPartAs()+"-", ""));
 			pageLabel.setViDocReal("userManual/"+svgFile.getUserManual());
+		}else {
+			pageLabel.setViDocReview("FileNotExist");
+			pageLabel.setViDocReal("");
 		}
 			//pageLabel.setViDocList(viList);
 		
@@ -316,9 +331,22 @@ public class uploadAction extends ActionSupport{
 		try {
 			InputStream stream = new FileInputStream(pageLabel.getViDocument());
 			String realName=pageLabel.getPartNo() + "-" + pageLabel.getPartAs() + "-" + pageLabel.getViDocumentFileName();
-			String targetPath=ServletActionContext.getServletContext().getRealPath("/userManual")+"/" + realName;
+			String targetPath=ServletActionContext.getServletContext().getRealPath("userManual")+"/" + realName;
 			// System.out.println(stream.available());
 			if (stream.available() < maxFileSize * 1024) {
+				SvgFileId svgFileId = new SvgFileId(pageLabel.getPartNo(), pageLabel.getPartAs(), "0");
+				
+				SvgFile svgFile= svgFileDAO.findById(svgFileId);
+				
+				if (svgFile == null){
+					svgFile = new SvgFile(svgFileId);
+				}else {
+					File oldFile=new File(ServletActionContext.getServletContext().getRealPath("userManual")+"/"+svgFile.getUserManual());
+					if (oldFile.exists()&& !svgFile.getUserManual().equals(realName)){
+						oldFile.delete();
+					}
+				}
+
 				OutputStream bos = new FileOutputStream(targetPath);
 				byte[] buffer = new byte[8192];
 				int bytesRead = 0;
@@ -327,29 +355,18 @@ public class uploadAction extends ActionSupport{
 				}
 				bos.close();
 				stream.close();
+
+				svgFile.setUserManual(realName);
+				this.svgFileDAO.attachDirty(svgFile);
+				//pageLabel.setViDocReview(pageLabel.getViDocumentFileName());
+				pageLabel.setViDocReview(pageLabel.getViDocumentFileName());
+				pageLabel.setViDocReal("userManual/"+ svgFile.getUserManual());
 				
 			} else {
 				setOutmessage("Cannot upload file, because file size is largger than "+ maxFileSize + "K bytes");
 				pageLabel.setViDocReview(this.getOutmessage());
 				return ERROR;
 			}
-			SvgFileId svgFileId = new SvgFileId(pageLabel.getPartNo(), pageLabel.getPartAs(), "0");
-			
-			SvgFile svgFile= svgFileDAO.findById(svgFileId);
-			
-			if (svgFile == null){
-				svgFile = new SvgFile(svgFileId);
-			}else {
-				File oldFile=new File(ServletActionContext.getServletContext().getRealPath("/userManual")+"/"+svgFile.getUserManual());
-				if (oldFile.exists()&& svgFile.getUserManual().equals(realName)){
-					oldFile.delete();
-				}
-			}
-			svgFile.setUserManual(realName);
-			this.svgFileDAO.attachDirty(svgFile);
-			//pageLabel.setViDocReview(pageLabel.getViDocumentFileName());
-			pageLabel.setViDocReview(pageLabel.getViDocumentFileName());
-			pageLabel.setViDocReal("userManual/"+ svgFile.getUserManual());
 			
 
 		} catch (Exception e) {
