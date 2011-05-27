@@ -90,6 +90,7 @@ public class SVGConstants {
 
     public static final String SVG_ATTRIBUTE_LAYER = "layer"; //
     public static final String SVG_ATTRIBUTE_LOADED = "loaded"; //
+    public static final String SVG_ATTRIBUTE_TECHNOLOGY = "tech"; //
     public static final String SVG_ATTRIBUTE_PARTNUMBER1 = "partno1"; //
     public static final String SVG_ATTRIBUTE_PARTNUMBER2 = "partno2"; //
     public static final String SVG_ATTRIBUTE_DEVICE = "device"; //

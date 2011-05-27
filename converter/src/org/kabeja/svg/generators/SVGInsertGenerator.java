@@ -85,6 +85,12 @@ public class SVGInsertGenerator extends AbstractSVGSAXGenerator {
                 	//f_loaded = true;
                        // gen.toSAX(handler, svgContext, attrib, null);
                 	}
+                }else if (attrib.getAttribTag().toUpperCase().equals("TECHNOLOGY")){
+                	if(!attrib.getText().isEmpty()){
+                    	SVGUtils.addAttribute(attrX, SVGConstants.SVG_ATTRIBUTE_TECHNOLOGY,
+                            attrib.getText());
+                	}
+
                 }else if (attrib.getAttribTag().toUpperCase().equals("LOADED")){
                 	if(!attrib.getText().isEmpty()){
                     	SVGUtils.addAttribute(attrX, SVGConstants.SVG_ATTRIBUTE_LOADED,

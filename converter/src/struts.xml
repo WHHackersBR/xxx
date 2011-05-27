@@ -27,6 +27,14 @@
 				<result name="success">index.jsp</result>
 				<result name="error">showErrMessage.jsp</result>
 			</action>
+			<action name="delManualFile" class="com.converter.action.uploadAction" method="delManualFile">					  
+	  			<result name="success">/WEB-INF/ajax_dojo/userManual.jsp</result>
+	  			<result name="error">showErrMessage.jsp</result>
+			</action>
+			<action name="definePart" class="com.converter.action.uploadAction" method="definePart">					  
+	  			<result name="success">definePart.jsp</result>
+	  			<result name="error">showErrMessage.jsp</result>
+			</action>
   
   	  </package>
 

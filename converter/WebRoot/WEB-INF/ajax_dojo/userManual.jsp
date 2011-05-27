@@ -26,24 +26,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 
   </head>
   
-  <script type="text/javascript">
-  //alert(opener.document.getElementById("pageLabel.partNo").value);
-  //alert(opener.${pageLabel.partNo});
-  //${pageLabel.partNo}=opener.${pageLabel.partNo};
-	function checkInput(){
-		if(document.getElementById("inputPOS").value==""){
-		alert("请输入子板位置");
-		return false;
-		}else if(document.getElementById("inputFailCode").value=="9999"){
-		alert("请选择错误代码");
-		return false;
-		}else{
-		return true;
-	    }
-	}
-  </script>
-
-  	
   <body>
      <div>
      <table>
@@ -51,21 +33,35 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
      <tr>
 		<td><s:textfield labelposition="left" key="pageLabel.partNo"></s:textfield></td>
 		<td><s:textfield cssStyle="width:1cm" labelposition="left" key="pageLabel.partAs"></s:textfield></td>
+		<td><s:reset value="关闭窗口" onclick="window.close();" align="middle"/></td>
     </tr>
 	<tr>
 		<td><s:file labelposition="left" key="pageLabel.viDocument"/></td> 
-		<td><s:submit cssStyle="width:1.5cm;" key="buttonSave"/></td>
-		<td><s:reset value="关闭窗口" onclick="window.close();" align="middle"/></td>
+		<td><s:submit cssStyle="width:1.5cm;" key="buttonUpload"/></td>
 	</tr>
-
-	<tr>
+	</s:form>
+	</table>
+	<table>
+	<s:form>
 		<td><s:text name="pageLabel.viDocReview"/></td>
-	</tr>
 
-	<tr>
+	<!--tr style="background-color:beige;">
 		<td><a href="<s:property value="pageLabel.viDocReal"/>" ><s:property value="pageLabel.viDocReview"  />
-			</a></td>
+			</a></td><td><s:submit key="buttonSave"/></td>
 		
+	</tr-->
+	    <s:iterator value="manualList">
+	    
+  			<s:url id="removeUrl" action="delManualFile">
+			<s:param name="viDocReview" value="viDocReal" />
+		</s:url>	
+	
+		<tr style="background-color:beige;">
+	    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
+		    <td><a href="<s:property value="viDocReal"/>" >
+		    <s:property value="viDocReview"/></a></td>
+	    </tr>
+	    </s:iterator>
 		<!-- Example 1: simple example -->
 		<!--s:updownselect
 		list="pageLabel.viDocList"
@@ -80,7 +76,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	
 	/-->
 
-	</tr>
 	</s:form>
 	</table>		
 	</div>

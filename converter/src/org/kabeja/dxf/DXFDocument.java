@@ -218,7 +218,7 @@ public class DXFDocument {
                 }
             }
         }
-
+        this.bounds.addToBounds(bounds); 
         return bounds;
     }
 

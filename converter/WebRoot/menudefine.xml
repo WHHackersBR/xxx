@@ -3,22 +3,31 @@
 <menu>		
      	<header>Adobe SVG Viewer</header>
 		<menu id="side">
-			<header>零件面显示 : Show</header>
-			<item id="csSide" checked="no" onactivate="chooseSide('CS')"> CS/零件面 </item>
-			<item id="ssSide" checked="no" onactivate="chooseSide('SS')"> SS/焊接面 </item>
-			<item id="Side" checked="no" onactivate="chooseSide('AB')"> SS+CS/全部 </item>
+			<header>零件面显示 : Show side</header>
+			<item id="csSide" checked="no" onactivate="chooseSide('CS')"> 零件面/CS </item>
+			<item id="ssSide" checked="no" onactivate="chooseSide('SS')"> 焊接面/SS </item>
+			<item id="Side" checked="no" onactivate="chooseSide('AB')"> 全部/SS+CS </item>
+			<separator/>
+		</menu>
+		<menu id="technology">
+			<header>Choose SMD/THT</header>
+			<item id="SMD" checked="no" onactivate="chooseTech('SMD')"> 贴片件/SMD </item>
+			<item id="THT" checked="no" onactivate="chooseTech('THT')"> 接插件/THT </item>
+			<item id="SMDTHT" checked="no" onactivate="chooseTech('ALL')"> 显示所有/Show All </item>
 			<separator/>
 		</menu>
 		<menu id="layer">
 			<header>层选择 : Layer</header>
-			<item id="layer01" checked="no" onactivate="chooseSide('layer01')"> replaced by layer name of SVG file </item>
+			<item id="layer01" checked="no" onactivate="chooseLayer('layer01')"> replaced by layer name of SVG file </item>
 		</menu>
 		<separator/>
 		<menu id="search">
 			<header>搜索 : search</header>
-			<item  checked="no" onactivate="searchComp('componentLocation')"> 零件位置/RefDes </item>
+			<item  checked="no" onactivate="searchComp('refdes')"> 零件位置/RefDes </item>
 			<item  checked="no" onactivate="searchComp('partNumber')"> 零件号/Part Number </item>
 			<item  checked="no" onactivate="searchComp('partDesc')"> 零件描述/Part Desc. </item>
+			<item  checked="no" onactivate="searchComp('samePart')"> 同型显示/Same Part. </item>
+			<item  checked="no" onactivate="searchComp('clearHighlight')"> 清除搜索/Clear Highlight </item>
 		</menu>
 		<separator/>
 		

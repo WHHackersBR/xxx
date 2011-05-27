@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -121,7 +122,7 @@ public class SVGEdit  {
 						XPathConstants.NODE);
 
 				documentElement.insertBefore(script, firstChild);
-				/*Calculate the size of view box
+				//Calculate the size of view box
 				String viewBox = documentElement.getAttribute("viewBox");
 				String X1 = viewBox.substring(0, viewBox.indexOf(" ")).trim();
 				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
@@ -129,8 +130,10 @@ public class SVGEdit  {
 				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
 				String Y1 = viewBox.substring(0,viewBox.indexOf(" ")).trim();
 				String Y2 = viewBox.substring(viewBox.indexOf(" ")).trim();
-				Double textSize= Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1)+Double.valueOf(X2)-Double.valueOf(X1))*0.01;
-				*/
+				Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
+				String textSize=fontSize.toString();
+				Double W = Double.valueOf(X1)*2 + Double.valueOf(Y1);
+				Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
 
 				documentElement = null;
 				script = null;
@@ -142,19 +145,28 @@ public class SVGEdit  {
 				Element draft = (Element) findDraft.evaluate("/svg/g[@id='draft']",
 						doc, XPathConstants.NODE);
 				findDraft = null;
+				
+				//mirror the SS side
+				String transform = draft.getAttribute("transform");
+				if (transform != null && transform.equals("matrix(1 0 0 -1 0 0)") && initSide.equals("SS")){
+					
+					transform = "matrix(-1 0 0 -1 "+ W.toString()+ " 0)";
+					//transform = "matrix(1 0 0 1 0 " + H.toString() + ")";
+					draft.setAttribute("transform", transform);
+					
+				}
 
 				//get text size that matches size of the other stuff, get the size from the A5E...-label			
 
 				//XPath xpath = factory.newXPath();
 				//XPathExpression expr = xpath
 				//.compile("/svg/g/g/text/tspan/@font-size[ contains(..,'A5E')]");
-				Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
-				String textSize;
-				if (fontsize != null){
-				textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
-				}else{
-					textSize="0.02";
-				}
+				//Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
+				//String textSize;
+				//if (fontsize != null){
+				//textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				//}else{
+				//}
 				//String textSize="0.02";
 
 				//Double textSize = (Double) expr
@@ -213,7 +225,7 @@ public class SVGEdit  {
 							//add events
 							element.setAttribute("onmousemove","ShowMyTooltip(evt, true)");
 							element.setAttribute("onclick","aMouseClick(evt)");
-							element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");					
+							element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");
 							//System.out.print(refdes + '\n');
 							
 							//PROCEDURE GET_LABEL(in_itemNr IN VARCHAR2,in_versionAS IN VARCHAR2,
@@ -240,8 +252,15 @@ public class SVGEdit  {
 										.getNextSibling();
 								
 								//add this attributes to get events also inside the element, not just when touching the border:
-								firstChild2.setAttribute("fill","white");
-								firstChild2.setAttribute("fill-opacity","0");
+								if (rsLabel.getString("fill_color") != null){
+									Element elementUse=(Element) element.getElementsByTagName("use").item(0);
+									
+									elementUse.setAttribute("fill", rsLabel.getString("fill_color"));
+									elementUse.setAttribute("fill-opacity", "0.5");
+								}else{
+									firstChild2.setAttribute("fill","white");
+									firstChild2.setAttribute("fill-opacity","0");
+								}
 								//String abcString=firstChild2.getAttribute("stroke-width");
 								//double stoke=Float.parseFloat(abcString);
 								//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
@@ -252,8 +271,13 @@ public class SVGEdit  {
 								//only need "translate-part"
 								transformVal = transformVal.substring(0, transformVal
 										.indexOf(')') + 1);
-								//mirror text											
-								transformVal = transformVal + " scale(1 -1)";
+								if (initSide.equals("SS")){
+									//mirror text in x,y directions											
+									transformVal = transformVal + " scale(-1 -1)";
+								}else {
+									//mirror text in the y directions
+									transformVal = transformVal + " scale(1 -1)";
+								}
 		
 								//change text to label-text
 								if (null != label) {

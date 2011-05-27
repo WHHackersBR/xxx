@@ -7,14 +7,13 @@ var originalStrokeWidth=null;
 var isOriginal=false;
 var layerListCS=new Array(5);
 var layerListSS=new Array(5);
+var compLocation;
 
 //var xmlDoc;
 var color=new Array("blueviolet","brown","chartreuse","darkorange","magenta","olivedrab"
 		,"orangered","royalblue","tan","yellowgreen");
 
 function Init(evt,absURL,layerListA,layerListB,initSide) {
-	//layerListA=[AssemblySmdA,BOARDFIGURE,AssemblyThtA,AssemblyInfoA]
-	//layerListB=[AssemblySmdB]
 	SVGDocument = evt.target.ownerDocument;
 	SVGRoot = document.documentElement;
 	absoluteURL=absURL;
@@ -31,13 +30,12 @@ function Init(evt,absURL,layerListA,layerListB,initSide) {
 	if(layerListA.length > 0){
 		layerListCS=layerListA.split(",");
 	}*/
-		layerListCS=layerListA.substring(1,layerListA.length-1).split(",");
-		layerListSS=layerListB.substring(1,layerListB.length-1).split(",");
-		
-		//layerListCS.length=1 and layerListSS.length=1 when the layer list is empty;
-		if (layerListCS != null && layerListSS != null && (layerListCS.length + layerListSS.length) > 2){
-			chooseSide(initSide);
-		}
+	layerListCS=layerListA.substring(1,layerListA.length-1).split(",");
+	layerListSS=layerListB.substring(1,layerListB.length-1).split(",");
+	
+	//alert(layerListCS.length);
+	//alert(layerListSS.length);
+	chooseSide(initSide);
 }
 // load the right click menus
 function menuLoaded(xmlDoc)
@@ -52,17 +50,17 @@ function menuLoaded(xmlDoc)
     for (var i=0;i < anode.length;i=i+1){
         if ( anode.item(i).hasAttributes() ){
         //alert(anode.item(i).nodeName);
-        	if( anode.item(i).getAttribute("id") == "layer" 
-        		&& layerListCS != null && layerListSS != null && (layerListCS.length + layerListSS.length) > 2){
+        	if( anode.item(i).getAttribute("id") == "layer" ){
         	    var txt = "<menu id='layer'>\n";
         	    txt = txt + "<header>单层选择 : Layer</header>\n"
         		var layerIndex = 1;	
         		for(var j=0;j<layerListCS.length-1 ;j=j+2,layerIndex=layerIndex+1){
-        			txt = txt + "<item" + " checked='no' onactivate='chooseSide(\"" + layerListCS[j].replace(/ /g,"") + "\")'>" + layerListCS[j].replace(/ /g,"") + "</item>\n" ;
+        			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"" + layerListCS[j].replace(/ /g,"") + "\")'>" + layerListCS[j].replace(/ /g,"") + "</item>\n" ;
         		}
         		for(var j=0;j<layerListSS.length-1 ;j=j+2,layerIndex=layerIndex+1){
-        			txt = txt + "<item" + " checked='no' onactivate='chooseSide(\"" + layerListSS[j].replace(/ /g,"") + "\")'>" + layerListSS[j].replace(/ /g,"") + "</item>\n" ;
+        			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"" + layerListSS[j].replace(/ /g,"") + "\")'>" + layerListSS[j].replace(/ /g,"") + "</item>\n" ;
         		}
+    			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"clearAll\")'>"+ "Clear All" +"</item>\n" ;
         	    txt = txt + "</menu>";
         		//alert(txt);
         	    var layerMenu = parseXML(txt, contextMenu);
@@ -88,6 +86,7 @@ function ShowMyTooltip(evt,display) {
 		var useTag= targetElement.getElementsByTagName("use").item(0);
 
 		if(display){	
+			compLocation = targetElement.getAttribute("id");
 			//change color and stroke width of selected part
 			//only change it once/ the first time it's touched
 			//otherwise storkeWidth would get huge quickly	
@@ -105,6 +104,8 @@ function ShowMyTooltip(evt,display) {
 			}
 		}
 		else{			
+			//compLocation = "";
+
 			//change color and stroke width back to normal
 			useTag.removeAttribute( "color" );
 			
@@ -124,56 +125,202 @@ function ShowMyTooltip(evt,display) {
 	}
 }
 
+function searchComp(keyword){
+	element = document.getElementById("ID_0");
+	if (element != null && keyword != "clearHighlight"){
+		
+		elementUse = element.getElementsByTagName("use");
+		if (elementUse != null ){
+			for(var m=0; m < elementUse.length; m = m+1 ){
+				elementUse.item(m).setAttribute("fill-opacity","0");
+			}
+		}
+	}
+	switch (keyword){
+	case "refdes":
+		refdes = prompt("Reference description:\n请输入零件位置号, 例如:  C701 ","");
+		if (refdes != null && trim(refdes) != ""){
+			refdes = trim(refdes.toUpperCase());
+			element = document.getElementById(refdes);
+			if (element != null){
+				element = element.getElementsByTagName("use").item(0);
+				element.setAttribute("fill", "blue");
+				element.setAttribute("fill-opacity", "0.5");
+			}else{
+				alert(refdes + " does not exist");
+			}
+		}
+		break;
+	case "partNumber":
+		part = prompt("Part Number:\n请输入零件号,例如: A5E00210763","");
+		if (part != null && trim(part) != ""){
+			part = trim(part.toUpperCase());
+			element = document.getElementById("ID_0");
+			if (element != null){
+				
+				elementxt = element.getElementsByTagName("text");
+				if (elementxt != null ){
+					for(var m=0; m < elementxt.length; m = m+1 ){
+						var elementspan=elementxt.item(m).getElementsByTagName("tspan").item(0);
+						if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+							elementspan = elementspan.firstChild.nodeValue;
+							elementspan = elementspan.substring(elementspan.indexOf("|"),elementspan.lastIndexOf("|"));
+							elementspan = trim(elementspan.substring(elementspan.indexOf(":")+1)).toUpperCase();
+							if (elementspan.search(part) != -1){
+								elementuse=elementxt.item(m).parentNode.getElementsByTagName("use").item(0);
+									elementuse.setAttribute("fill", "blue");
+									elementuse.setAttribute("fill-opacity", "0.5");
+							}
+						}
+					}
+				}else{
+					alert(part + " does not exist");
+				}
+				
+			}else{
+				alert(part + " does not exist");
+			}
+		}
+		break;
+	case "partDesc":
+		desc = prompt("Part label:\n请输入零件描述, 例如:  330u或35v ","");
+		if (desc != null && trim(desc) != ""){
+			desc = trim(desc).toUpperCase();
+			element = document.getElementById("ID_0");
+			if (element != null){
+				
+				elementxt = element.getElementsByTagName("text");
+				if (elementxt != null ){
+					for(var m=0; m < elementxt.length; m = m+1 ){
+						var elementspan=elementxt.item(m).getElementsByTagName("tspan").item(0);
+						if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+							elementspan = elementspan.firstChild.nodeValue;
+							elementspan = trim(elementspan.substring(elementspan.indexOf("| Label:")+8)).toUpperCase();
+							//alert(elementspan);
+							if (elementspan.search(desc) != -1){
+								elementuse=elementxt.item(m).parentNode.getElementsByTagName("use").item(0);
+									elementuse.setAttribute("fill", "blue");
+									elementuse.setAttribute("fill-opacity", "0.5");
+							}
+						}
+					}
+				}else{
+					alert(desc + " does not exist");
+				}
+				
+			}else{
+				alert(desc + " does not exist");
+			}
+		}
+		break;
+		
+	case "samePart":
+		//alert(evt);
+		if (compLocation != null && compLocation!=""){
+			var targetElement = document.getElementById(compLocation);
+
+			var elementspan=targetElement.getElementsByTagName("tspan").item(0);
+			if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+				elementspan = elementspan.firstChild.nodeValue;
+				elementspan = elementspan.substring(elementspan.indexOf("|"),elementspan.lastIndexOf("|"));
+				part = trim(elementspan.substring(elementspan.indexOf(":")+1)).toUpperCase();
+				element = document.getElementById("ID_0");
+				if (element != null){
+					
+					elementxt = element.getElementsByTagName("text");
+					if (elementxt != null ){
+						for(var m=0; m < elementxt.length; m = m+1 ){
+							elementspan=elementxt.item(m).getElementsByTagName("tspan").item(0);
+							if (elementspan != null && elementspan.firstChild !=null && elementspan.firstChild.nodeValue !=null){
+								elementspan = elementspan.firstChild.nodeValue;
+								elementspan = elementspan.substring(elementspan.indexOf("|"),elementspan.lastIndexOf("|"));
+								elementspan = trim(elementspan.substring(elementspan.indexOf(":")+1)).toUpperCase();
+								if (elementspan.search(part) != -1){
+									elementuse=elementxt.item(m).parentNode.getElementsByTagName("use").item(0);
+										elementuse.setAttribute("fill", "blue");
+										elementuse.setAttribute("fill-opacity", "0.5");
+								}
+							}
+						}
+					}
+				}
+			}
+		}else{
+			alert("Please move over a part")
+		}
+		break;
+		
+	case "clearHighlight":
+		element = document.getElementById("ID_0");
+		if (element != null){
+			
+			elementUse = element.getElementsByTagName("use");
+			if (elementUse != null ){
+				for(var m=0; m < elementUse.length; m = m+1 ){
+					//elementUse.item(m).setAttribute("fill","white");
+					elementUse.item(m).setAttribute("fill-opacity","0");
+					//if (elementUse.item(m).parentNode.getAttribute("id") == "C323"){
+					//	alert(elementUse.item(m).parentNode.getAttribute("onmousemove")+ 
+					//			elementUse.item(m).parentNode.childNodes.item(2).nodeName);
+					//}
+				}
+			}
+		}
+		break;
+	default:
+}
+}
+
 function chooseSide(side) {
 	//var colorIndex=0;
-	var useTag=document.getElementsByTagName("path");
-	var useTagC=document.getElementsByTagName("circle");
-  	for(var i = 0; i < useTag.length;i=i+1 ) {
-	  	useTag.item(i).setAttribute("display","none");
+	var pathTag=document.getElementsByTagName("path");
+	var circleTag=document.getElementsByTagName("circle");
+  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+	  	pathTag.item(i).setAttribute("display","none");
   	}
-  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-	  	useTagC.item(i).setAttribute("display","none");
+  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+	  	circleTag.item(i).setAttribute("display","none");
   	}
 	switch (side){
 	case "CS":
 		//length 1 means a empty layer list
 		for(var j=0;j<layerListCS.length-1 ;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"") == layerListCS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CSin: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"") == layerListCS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CSin: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("CSC: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CSinC: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("CSC: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CSinC: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
 		break;
 	case "SS":
 		for(var j=0;j<layerListSS.length-1;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
@@ -183,133 +330,156 @@ function chooseSide(side) {
 		//alert("CS layerlist:" + layerListCS.length);
 		//alert("ss layerlist: " +layerListSS.length);
 		for(var j=0;j<layerListCS.length-1 ;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
 		for(var j=0;j<layerListSS.length-1;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
 		break;
-	case "layer01":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[0].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[0].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer02":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[1].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[1].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer03":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[2].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[2].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer04":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[0].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[0].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer05":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[1].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[1].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
-	case "layer06":
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[2].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[2].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-		  	}
-		  	}
-	  	break;
 	default:
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
-			  	useTag.item(i).setAttribute("display","inline");
+	  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
+			  	pathTag.item(i).setAttribute("display","inline");
 		  	}
 		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==side){
-			  	useTagC.item(i).setAttribute("display","inline");
+	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
+			  	circleTag.item(i).setAttribute("display","inline");
 		  	}
 		  	}
 	}
 }
 
+function chooseLayer(layer) {
+
+	var pathTag=document.getElementsByTagName("path");
+	var circleTag=document.getElementsByTagName("circle");
+	if(layer == "clearAll"){
+	  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+		  	pathTag.item(i).setAttribute("display","none");
+	  	}
+	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+		  	circleTag.item(i).setAttribute("display","none");
+	  	}
+	}else{
+	  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layer){
+		  		if (pathTag.item(i).getAttribute("display") == "inline"){
+				  	pathTag.item(i).setAttribute("display","none");
+		  		}else{
+				  	pathTag.item(i).setAttribute("display","inline");
+		  		}
+		  	}
+		  	}
+	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layer){
+		  		if (circleTag.item(i).getAttribute("display") == "inline"){
+				  	circleTag.item(i).setAttribute("display","none");
+		  		}else{
+				  	circleTag.item(i).setAttribute("display","inline");
+		  		}
+		  	}
+		  	}
+	}
+
+		
+
+}
+function chooseTech(tech) {
+	switch (tech){
+	case "SMD": 
+		element = document.getElementById("ID_0");
+		if (element != null){
+			elementComp = element.getElementsByTagName("use");
+			//alert(element.childNodes.);
+			if (elementComp != null ){
+				for(var m=0; m < elementComp.length; m = m+1 ){
+					var elementTech=elementComp.item(m).parentNode;
+					//alert(elementTech.getAttribute("tech"));
+					//break;
+					if (elementTech != null && elementTech.getAttribute("tech") == "SMD"){
+						elementTech.setAttribute("display","inline");
+					}else{
+						elementTech.setAttribute("display","none");
+					}
+				}
+			}
+		}
+		break;
+	case "THT": 
+		element = document.getElementById("ID_0");
+		if (element != null){
+			elementComp = element.getElementsByTagName("use");
+			//alert(element.childNodes.);
+			if (elementComp != null ){
+				for(var m=0; m < elementComp.length; m = m+1 ){
+					var elementTech=elementComp.item(m).parentNode;
+					//alert(elementTech.getAttribute("tech"));
+					//break;
+					if (elementTech != null && elementTech.getAttribute("tech") == "THRU"){
+						elementTech.setAttribute("display","inline");
+					}else{
+						elementTech.setAttribute("display","none");
+					}
+				}
+			}
+		}
+		break;
+	case "ALL": 
+		element = document.getElementById("ID_0");
+		if (element != null){
+			elementComp = element.getElementsByTagName("use");
+			//alert(element.childNodes.);
+			if (elementComp != null ){
+				for(var m=0; m < elementComp.length; m = m+1 ){
+					var elementTech=elementComp.item(m).parentNode;
+					//alert(elementTech.getAttribute("tech"));
+					//break;
+					if (elementTech != null ){
+						elementTech.setAttribute("display","inline");
+					}
+				}
+			}
+		}
+		break;
+	}
+}
+	
 //open popup when a part is clicked on
 function aMouseClick(evt) {
-		//alert("test001");
+		//alert(evt);
 		//only react to left mouse button click
 		if (evt.getButton()==0) {
 			//close old window
@@ -322,8 +492,8 @@ function aMouseClick(evt) {
       		//alert("abc"+ window);
       		//parent.open(absoluteURL);
       		//dataWin=parent.open("http://" + location.host +"/VisualInspection/goToFailureReport.action?partname="+  evt.currentTarget.id);
-      		dataWin=parent.open(absoluteURL + "/goToFailureReport.action?partname="+  evt.currentTarget.id, 
-      							"failureReportWindow",  
+      		dataWin=parent.open(absoluteURL + "/definePart.action?partname="+  evt.currentTarget.id, 
+      							"definePartNumber",  
 		         				"width=600, height=500, left=400, top=0, scrollbars=no, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
 			
       		//make sure the popup has the correct parent set
@@ -331,17 +501,33 @@ function aMouseClick(evt) {
 			if (dataWin == null) {
 				alert("Cannot open new window");
 				//parent.setFocusFID();
-			}//else{*/
-				
-				//if (dataWin.opener == null) dataWin.opener = parent;  
-	      		//parent.document.getElementById("inputFID");
-				//parent.setFocusFID();
-				
-	      		//dataWin.focus();
-			//}
-      		
-    	}	
-		
-	
+			}else{
+				dataWin.close();
+			}
+			element = document.getElementById(evt.currentTarget.id);
+			if (element != null){
+				elementComp = element.getElementsByTagName("use");
+				//alert(element.childNodes.);
+				if (elementComp != null ){
+					elementUse=elementComp.item(0);
+					if (elementUse.getAttribute("fill") != "red"){
+						elementUse.setAttribute("fill","red");
+						elementUse.setAttribute("fill-opacity", "0.5");
+					}else{
+						elementUse.setAttribute("fill","white");
+						elementUse.setAttribute("fill-opacity", "0");
+					}
+				}
+			}
+    	}
 }
-
+		
+function trim(str){  //删除左右两端的空格
+	 return str.replace(/(^\s*)|(\s*$)/g, "");
+	}
+function ltrim(str){  //删除左边的空格
+ return str.replace(/(^\s*)/g,"");
+}
+function rtrim(str){  //删除右边的空格
+ return str.replace(/(\s*$)/g,"");
+}
