@@ -121,7 +121,7 @@ public class SVGEdit  {
 						XPathConstants.NODE);
 
 				documentElement.insertBefore(script, firstChild);
-				/*Calculate the size of view box
+				//Calculate the size of view box
 				String viewBox = documentElement.getAttribute("viewBox");
 				String X1 = viewBox.substring(0, viewBox.indexOf(" ")).trim();
 				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
@@ -129,8 +129,8 @@ public class SVGEdit  {
 				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
 				String Y1 = viewBox.substring(0,viewBox.indexOf(" ")).trim();
 				String Y2 = viewBox.substring(viewBox.indexOf(" ")).trim();
-				Double textSize= Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1)+Double.valueOf(X2)-Double.valueOf(X1))*0.01;
-				*/
+				Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
+				String textSize=fontSize.toString();
 
 				documentElement = null;
 				script = null;
@@ -148,8 +148,13 @@ public class SVGEdit  {
 				//XPath xpath = factory.newXPath();
 				//XPathExpression expr = xpath
 				//.compile("/svg/g/g/text/tspan/@font-size[ contains(..,'A5E')]");
-				Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
-				String textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				//Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
+				//String textSize;
+				//if (fontsize != null){
+				//	textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				//}else{
+				//	textSize="0.02";
+				//}
 				//String textSize="0.02";
 
 				//Double textSize = (Double) expr
