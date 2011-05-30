@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.lang.reflect.Array;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,7 +17,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
@@ -133,7 +131,7 @@ public class SVGEdit  {
 				Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
 				String textSize=fontSize.toString();
 				Double W = Double.valueOf(X1)*2 + Double.valueOf(Y1);
-				Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
+				//Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
 
 				documentElement = null;
 				script = null;
