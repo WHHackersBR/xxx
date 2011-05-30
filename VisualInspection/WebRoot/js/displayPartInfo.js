@@ -55,11 +55,12 @@ function menuLoaded(xmlDoc)
         	    txt = txt + "<header>单层选择 : Layer</header>\n"
         		var layerIndex = 1;	
         		for(var j=0;j<layerListCS.length-1 ;j=j+2,layerIndex=layerIndex+1){
-        			txt = txt + "<item" + " checked='no' onactivate='chooseSide(\"" + layerListCS[j].replace(/ /g,"") + "\")'>" + layerListCS[j].replace(/ /g,"") + "</item>\n" ;
+        			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"" + layerListCS[j].replace(/ /g,"") + "\")'>" + layerListCS[j].replace(/ /g,"") + "</item>\n" ;
         		}
         		for(var j=0;j<layerListSS.length-1 ;j=j+2,layerIndex=layerIndex+1){
-        			txt = txt + "<item" + " checked='no' onactivate='chooseSide(\"" + layerListSS[j].replace(/ /g,"") + "\")'>" + layerListSS[j].replace(/ /g,"") + "</item>\n" ;
+        			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"" + layerListSS[j].replace(/ /g,"") + "\")'>" + layerListSS[j].replace(/ /g,"") + "</item>\n" ;
         		}
+    			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"clearAll\")'>"+ "Clear All" +"</item>\n" ;
         	    txt = txt + "</menu>";
         		//alert(txt);
         	    var layerMenu = parseXML(txt, contextMenu);
@@ -125,6 +126,16 @@ function ShowMyTooltip(evt,display) {
 }
 
 function searchComp(keyword){
+	element = document.getElementById("ID_0");
+	if (element != null && keyword != "clearHighlight"){
+		
+		elementUse = element.getElementsByTagName("use");
+		if (elementUse != null ){
+			for(var m=0; m < elementUse.length; m = m+1 ){
+				elementUse.item(m).setAttribute("fill-opacity","0");
+			}
+		}
+	}
 	switch (keyword){
 	case "refdes":
 		refdes = prompt("Reference description:\n请输入零件位置号, 例如:  C701 ","");
@@ -262,54 +273,54 @@ function searchComp(keyword){
 
 function chooseSide(side) {
 	//var colorIndex=0;
-	var useTag=document.getElementsByTagName("path");
-	var useTagC=document.getElementsByTagName("circle");
-  	for(var i = 0; i < useTag.length;i=i+1 ) {
-	  	useTag.item(i).setAttribute("display","none");
+	var pathTag=document.getElementsByTagName("path");
+	var circleTag=document.getElementsByTagName("circle");
+  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+	  	pathTag.item(i).setAttribute("display","none");
   	}
-  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-	  	useTagC.item(i).setAttribute("display","none");
+  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+	  	circleTag.item(i).setAttribute("display","none");
   	}
 	switch (side){
 	case "CS":
 		//length 1 means a empty layer list
 		for(var j=0;j<layerListCS.length-1 ;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"") == layerListCS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CSin: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"") == layerListCS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CSin: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("CSC: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CSinC: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("CSC: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CSinC: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
 		break;
 	case "SS":
 		for(var j=0;j<layerListSS.length-1;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
@@ -319,55 +330,150 @@ function chooseSide(side) {
 		//alert("CS layerlist:" + layerListCS.length);
 		//alert("ss layerlist: " +layerListSS.length);
 		for(var j=0;j<layerListCS.length-1 ;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
 		for(var j=0;j<layerListSS.length-1;j=j+2){
-			//useTag=document.getElementsByTagName("path");
-		  	for(var i = 0; i < useTag.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTag.item(i).setAttribute("display","inline");
-			  	useTag.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+			//pathTag=document.getElementsByTagName("path");
+		  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	pathTag.item(i).setAttribute("display","inline");
+			  	pathTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
-		  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	useTagC.item(i).setAttribute("display","inline");
-			  	useTagC.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+useTag.item(i).getAttribute("layer")+":"+useTag.item(i).getAttribute("color"));
+		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  	circleTag.item(i).setAttribute("display","inline");
+			  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
 		}
 		break;
 	default:
-	  	for(var i = 0; i < useTag.length;i=i+1 ) {
-		  	if(useTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
-			  	useTag.item(i).setAttribute("display","inline");
+	  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
+			  	pathTag.item(i).setAttribute("display","inline");
 		  	}
 		  	}
-	  	for(var i = 0; i < useTagC.length;i=i+1 ) {
-		  	if(useTagC.item(i).getAttribute("layer").replace(/ /g,"")==side){
-			  	useTagC.item(i).setAttribute("display","inline");
+	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
+			  	circleTag.item(i).setAttribute("display","inline");
 		  	}
 		  	}
+	}
+}
+
+function chooseLayer(layer) {
+
+	var pathTag=document.getElementsByTagName("path");
+	var circleTag=document.getElementsByTagName("circle");
+	if(layer == "clearAll"){
+	  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+		  	pathTag.item(i).setAttribute("display","none");
+	  	}
+	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+		  	circleTag.item(i).setAttribute("display","none");
+	  	}
+	}else{
+	  	for(var i = 0; i < pathTag.length;i=i+1 ) {
+		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==layer){
+		  		if (pathTag.item(i).getAttribute("display") == "inline"){
+				  	pathTag.item(i).setAttribute("display","none");
+		  		}else{
+				  	pathTag.item(i).setAttribute("display","inline");
+		  		}
+		  	}
+		  	}
+	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
+		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layer){
+		  		if (circleTag.item(i).getAttribute("display") == "inline"){
+				  	circleTag.item(i).setAttribute("display","none");
+		  		}else{
+				  	circleTag.item(i).setAttribute("display","inline");
+		  		}
+		  	}
+		  	}
+	}
+
+		
+
+}
+function chooseTech(tech) {
+	switch (tech){
+	case "SMD": 
+		element = document.getElementById("ID_0");
+		if (element != null){
+			elementComp = element.getElementsByTagName("use");
+			//alert(element.childNodes.);
+			if (elementComp != null ){
+				for(var m=0; m < elementComp.length; m = m+1 ){
+					var elementTech=elementComp.item(m).parentNode;
+					//alert(elementTech.getAttribute("tech"));
+					//break;
+					if (elementTech != null && elementTech.getAttribute("tech") == "SMD"){
+						elementTech.setAttribute("display","inline");
+					}else{
+						elementTech.setAttribute("display","none");
+					}
+				}
+			}
+		}
+		break;
+	case "THT": 
+		element = document.getElementById("ID_0");
+		if (element != null){
+			elementComp = element.getElementsByTagName("use");
+			//alert(element.childNodes.);
+			if (elementComp != null ){
+				for(var m=0; m < elementComp.length; m = m+1 ){
+					var elementTech=elementComp.item(m).parentNode;
+					//alert(elementTech.getAttribute("tech"));
+					//break;
+					if (elementTech != null && elementTech.getAttribute("tech") == "THRU"){
+						elementTech.setAttribute("display","inline");
+					}else{
+						elementTech.setAttribute("display","none");
+					}
+				}
+			}
+		}
+		break;
+	case "ALL": 
+		element = document.getElementById("ID_0");
+		if (element != null){
+			elementComp = element.getElementsByTagName("use");
+			//alert(element.childNodes.);
+			if (elementComp != null ){
+				for(var m=0; m < elementComp.length; m = m+1 ){
+					var elementTech=elementComp.item(m).parentNode;
+					//alert(elementTech.getAttribute("tech"));
+					//break;
+					if (elementTech != null ){
+						elementTech.setAttribute("display","inline");
+					}
+				}
+			}
+		}
+		break;
 	}
 }
 

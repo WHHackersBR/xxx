@@ -20,7 +20,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import oracle.jdbc.driver.OracleTypes;
+import oracle.jdbc.OracleTypes;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.struts2.ServletActionContext;
@@ -37,7 +37,6 @@ import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 
 public class SVGEdit  {	
-	  
 	  
 	  public void writeEnhancedSVG_useStream(PrintWriter out, InputStream svgStream, String itemNr, String version,
 				BasicDataSource dataSource, String absoluteURL, String initSide) {
@@ -131,6 +130,8 @@ public class SVGEdit  {
 				String Y2 = viewBox.substring(viewBox.indexOf(" ")).trim();
 				Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
 				String textSize=fontSize.toString();
+				Double W = Double.valueOf(X1)*2 + Double.valueOf(Y1);
+				//Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
 
 				documentElement = null;
 				script = null;
@@ -142,6 +143,16 @@ public class SVGEdit  {
 				Element draft = (Element) findDraft.evaluate("/svg/g[@id='draft']",
 						doc, XPathConstants.NODE);
 				findDraft = null;
+				
+				//mirror the SS side
+				String transform = draft.getAttribute("transform");
+				if (transform != null && transform.equals("matrix(1 0 0 -1 0 0)") && initSide.equals("SS")){
+					
+					transform = "matrix(-1 0 0 -1 "+ W.toString()+ " 0)";
+					//transform = "matrix(1 0 0 1 0 " + H.toString() + ")";
+					draft.setAttribute("transform", transform);
+					
+				}
 
 				//get text size that matches size of the other stuff, get the size from the A5E...-label			
 
@@ -151,9 +162,8 @@ public class SVGEdit  {
 				//Element fontsize=(Element) draft.getElementsByTagName("text").item(0);
 				//String textSize;
 				//if (fontsize != null){
-				//	textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
+				//textSize=String.valueOf(Double.valueOf(fontsize.getAttribute("font-size").trim())*3);
 				//}else{
-				//	textSize="0.02";
 				//}
 				//String textSize="0.02";
 
@@ -183,12 +193,112 @@ public class SVGEdit  {
 
 				//find all children of draft that have an id
 				XPath findDraftChildren = factory.newXPath();
-				//NodeList draftChildren = (NodeList) findDraftChildren.evaluate(
-				//		"g[@id='ID_0']/g", draft, XPathConstants.NODESET);
 				NodeList draftChildren = (NodeList) findDraftChildren.evaluate(
 						"g[@id='ID_0']/g", draft, XPathConstants.NODESET);
 				findDraftChildren = null;
 
+				//get the part information from the database
+				//Connection conn = null;
+				CallableStatement coll = null;
+
+				//query DB for each element
+				//calling the stored procedure which gets the label
+				coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?)}",
+						ResultSet.TYPE_SCROLL_INSENSITIVE,
+						ResultSet.CONCUR_READ_ONLY);
+				//prepare input and output arguments 
+				coll.setString(1, itemNr);
+				coll.setString(2, version);
+				coll.registerOutParameter(3, OracleTypes.CURSOR);
+
+				coll.execute();
+				ResultSet rsLabel = (ResultSet) coll.getObject(3);
+
+				while(rsLabel.next()){
+					for (int i = 0; i < draftChildren.getLength(); i++) {
+						Element element = (Element) draftChildren.item(i);
+						String refdes = element.getAttribute("id");
+						if(refdes.equals(rsLabel.getString("refdes"))){
+	
+							//add events
+							element.setAttribute("onmousemove","ShowMyTooltip(evt, true)");
+							element.setAttribute("onclick","aMouseClick(evt)");
+							element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");
+							//System.out.print(refdes + '\n');
+							
+							//PROCEDURE GET_LABEL(in_itemNr IN VARCHAR2,in_versionAS IN VARCHAR2,
+							//in_refdes IN VARCHAR2,out_component_nr OUT VARCHAR2,out_label OUT VARCHAR2);
+							//coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?,?,?)}");
+							//prepare input and output arguments 
+							//coll.setString(1, itemNr);
+							//coll.setString(2, version);
+							//coll.setString(3, refdes);
+							//coll.registerOutParameter(4, OracleTypes.VARCHAR);
+							//coll.registerOutParameter(5, OracleTypes.VARCHAR);
+		
+							//coll.execute();
+		
+							//retrieve label and componentNr from query result
+							String	componentNr = rsLabel.getString("componentnumber");
+							String	label = rsLabel.getString("label");
+							//coll.close();
+							if (null != componentNr && !componentNr.isEmpty()) {
+								//modify file/tree:
+								
+								// firstChild2 is <use tag
+								Element firstChild2 = (Element) element.getFirstChild()
+										.getNextSibling();
+								
+								//add this attributes to get events also inside the element, not just when touching the border:
+								if (rsLabel.getString("fill_color") != null){
+									Element elementUse=(Element) element.getElementsByTagName("use").item(0);
+									
+									elementUse.setAttribute("fill", rsLabel.getString("fill_color"));
+									elementUse.setAttribute("fill-opacity", "0.5");
+								}else{
+									firstChild2.setAttribute("fill","white");
+									firstChild2.setAttribute("fill-opacity","0");
+								}
+								//String abcString=firstChild2.getAttribute("stroke-width");
+								//double stoke=Float.parseFloat(abcString);
+								//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
+								firstChild2.setAttribute("stroke-width","0.01px");
+								
+								//get display position
+								String transformVal = firstChild2.getAttribute("transform");
+								//only need "translate-part"
+								transformVal = transformVal.substring(0, transformVal
+										.indexOf(')') + 1);
+								if (initSide.equals("SS")){
+									//mirror text in x,y directions											
+									transformVal = transformVal + " scale(-1 -1)";
+								}else {
+									//mirror text in the y directions
+									transformVal = transformVal + " scale(1 -1)";
+								}
+		
+								//change text to label-text
+								if (null != label) {
+									textNode.setNodeValue(refdes + " | Comp.Nr.: "
+											+ componentNr + " | Label: " + label);
+								} else {
+									textNode.setNodeValue(refdes + " | Comp.Nr.: "
+											+ componentNr + " | Label:");
+								}
+		
+								//get copy of the prepared node
+								Element individualized = (Element) text.cloneNode(true);
+								//set transform attribute
+								individualized.setAttribute("transform", transformVal);
+		
+								//add it to the element
+								element.appendChild(individualized);
+		
+							}
+						break;
+						}
+					}
+				}
 				//to disable component that is not used
 				for (int i = 0; i < draftChildren.getLength(); i++) {
 					Element element = (Element) draftChildren.item(i);
@@ -201,92 +311,6 @@ public class SVGEdit  {
 						}
 					}
 
-				//get the part information from the database
-				//Connection conn = null;
-				CallableStatement coll = null;
-
-				//query DB for each element
-				//calling the stored procedure which gets the label
-				coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?)}",
-						ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
-				//prepare input and output arguments 
-				coll.setString(1, itemNr);
-				coll.setString(2, version);
-				coll.registerOutParameter(3, OracleTypes.CURSOR);
-
-				coll.execute();
-				ResultSet rsLabel = (ResultSet) coll.getObject(3);
-				//rsLabel.setFetchDirection(ResultSet.)
-				//int i = 0;
-				while(rsLabel.next()){
-					for (int i=0; i < draftChildren.getLength(); i++) {
-						
-						Element element = (Element) draftChildren.item(i);
-						String refdes = element.getAttribute("id");
-							if(refdes.equals(rsLabel.getString("refdes"))){
-								
-								//add events
-								element.setAttribute("onmousemove","ShowMyTooltip(evt, true)");
-								element.setAttribute("onclick","aMouseClick(evt)");
-								element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");					
-								//System.out.print(refdes + '\n');
-
-								//retrieve label and componentNr from query result
-								String	componentNr = rsLabel.getString("componentnumber");
-								String	label = rsLabel.getString("label");
-								//coll.close();
-								if (null != componentNr && !componentNr.isEmpty()) {
-									//modify file/tree:
-									
-									// firstChild2 is <use tag
-									Element firstChild2 = (Element) element.getFirstChild()
-											.getNextSibling();
-									
-									//add this attributes to get events also inside the element, not just when touching the border:
-									firstChild2.setAttribute("fill","white");
-									firstChild2.setAttribute("fill-opacity","0");
-									//String abcString=firstChild2.getAttribute("stroke-width");
-									//double stoke=Float.parseFloat(abcString);
-									//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
-									firstChild2.setAttribute("stroke-width","0.01px");
-									
-									//get display position
-									String transformVal = firstChild2.getAttribute("transform");
-									//only need "translate-part"
-									transformVal = transformVal.substring(0, transformVal
-											.indexOf(')') + 1);
-									//mirror text											
-									transformVal = transformVal + " scale(1 -1)";
-			
-									//change text to label-text
-									if (null != label) {
-										textNode.setNodeValue(refdes + " | Comp.Nr.: "
-												+ componentNr + " | Label: " + label);
-									} else {
-										textNode.setNodeValue(refdes + " | Comp.Nr.: "
-												+ componentNr + " | Label:");
-									}
-			
-									//get copy of the prepared node
-									Element individualized = (Element) text.cloneNode(true);
-									//set transform attribute
-									individualized.setAttribute("transform", transformVal);
-			
-									//add it to the element
-									element.appendChild(individualized);
-			
-								}
-								//element.getParentNode().removeChild(element);
-							break;
-							}
-							// reverse to the start if no result found for the first cycle
-							//if (i == draftChildren.getLength()-1){
-							//	i = 0;
-							//	j++;
-							//}
-
-						}
-				}
 				if (conn != null) {
 					conn.close();
 				}
@@ -310,21 +334,20 @@ public class SVGEdit  {
 				
 			} catch (ParserConfigurationException e) {
 				out.println("Parser Configuration Error: " + e.getMessage());
-				//e.printStackTrace(out);
-				e.printStackTrace();
+				e.printStackTrace(out);
 			} catch (SAXException e) {
 				out.println("SAX Excepion: " + e.getMessage());
-				e.printStackTrace();
+				e.printStackTrace(out);
 			} catch (XPathExpressionException e) {
 				out.println("XPath Exception: " + e.getMessage());
-				e.printStackTrace();
+				e.printStackTrace(out);
 			} catch (SQLException e) {
 				out.println("SQL Exception: " + e.getMessage());
-				//e.printStackTrace(out);
-				e.printStackTrace();
+				e.printStackTrace(out);
 			}
 
 		}
+
 
 
 }
