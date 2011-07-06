@@ -120,20 +120,28 @@ public class SVGEdit  {
 						XPathConstants.NODE);
 
 				documentElement.insertBefore(script, firstChild);
+
+				
 				//Calculate the size of view box
 				String viewBox = documentElement.getAttribute("viewBox");
-				String X1 = viewBox.substring(0, viewBox.indexOf(" ")).trim();
+				String[] location = viewBox.split(" ");
+				/*String X1 = viewBox.substring(0, viewBox.indexOf(" ")).trim();
 				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
 				String X2 = viewBox.substring(0,viewBox.indexOf(" ")).trim();
 				viewBox = viewBox.substring(viewBox.indexOf(" ")+1).trim();
 				String Y1 = viewBox.substring(0,viewBox.indexOf(" ")).trim();
-				String Y2 = viewBox.substring(viewBox.indexOf(" ")).trim();
-				Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
+				String Y2 = viewBox.substring(viewBox.indexOf(" ")).trim();*/
+				String X1 = location[0];
+				String X2 = location[1];
+				String Y1 = location[3];
+				String Y2 = location[4];
+				//Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
+				Double fontSize= (Math.abs(Double.valueOf(Y2)+Double.valueOf(Y1)))*0.03;
 				String textSize=fontSize.toString();
 				Double W = Double.valueOf(X1)*2 + Double.valueOf(Y1);
 				//Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
 
-				documentElement = null;
+				//documentElement = null;
 				script = null;
 				firstChild = null;
 				findFirstChild = null;
@@ -143,7 +151,10 @@ public class SVGEdit  {
 				Element draft = (Element) findDraft.evaluate("/svg/g[@id='draft']",
 						doc, XPathConstants.NODE);
 				findDraft = null;
+				//create a group named movement
 				
+				
+				//draft.insertBefore(newChild, refChild)
 				//mirror the SS side
 				String transform = draft.getAttribute("transform");
 				if (transform != null && transform.equals("matrix(1 0 0 -1 0 0)") && initSide.equals("SS")){
@@ -169,7 +180,6 @@ public class SVGEdit  {
 
 				//Double textSize = (Double) expr
 				//		.evaluate(doc, XPathConstants.NUMBER);
-
 				//this will be needed many times:
 				Element text = doc.createElement("text");
 				text.setAttribute("color", "rgb(0,255,255)");
@@ -180,7 +190,7 @@ public class SVGEdit  {
 				text.setAttribute("fill", "currentColor");
 				//let it ignore events
 				text.setAttribute("pointer-events", "none");
-
+				//text.getAttribute("fill").
 				Element tspan = doc.createElement("tspan");
 				tspan.setAttribute("font-size", textSize.toString());
 
@@ -195,6 +205,11 @@ public class SVGEdit  {
 				XPath findDraftChildren = factory.newXPath();
 				NodeList draftChildren = (NodeList) findDraftChildren.evaluate(
 						"g[@id='ID_0']/g", draft, XPathConstants.NODESET);
+
+				//Element id_0 = (Element) findDraftChildren.evaluate("g[@id='ID_0']/g",
+				//		draft, XPathConstants.NODE);
+
+				//id_0.setAttribute("stoke-width", "0.01px");
 				findDraftChildren = null;
 
 				//get the part information from the database
@@ -226,18 +241,6 @@ public class SVGEdit  {
 							element.setAttribute("onmouseout", "ShowMyTooltip(evt, false)");
 							//System.out.print(refdes + '\n');
 							
-							//PROCEDURE GET_LABEL(in_itemNr IN VARCHAR2,in_versionAS IN VARCHAR2,
-							//in_refdes IN VARCHAR2,out_component_nr OUT VARCHAR2,out_label OUT VARCHAR2);
-							//coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?,?,?)}");
-							//prepare input and output arguments 
-							//coll.setString(1, itemNr);
-							//coll.setString(2, version);
-							//coll.setString(3, refdes);
-							//coll.registerOutParameter(4, OracleTypes.VARCHAR);
-							//coll.registerOutParameter(5, OracleTypes.VARCHAR);
-		
-							//coll.execute();
-		
 							//retrieve label and componentNr from query result
 							String	componentNr = rsLabel.getString("componentnumber");
 							String	label = rsLabel.getString("label");
@@ -310,7 +313,21 @@ public class SVGEdit  {
 							//firstChild2.setAttribute("fill-opacity","0");
 						}
 					}
-
+				Element movement = doc.createElement("g");
+				movement.setAttribute("id", "movement");
+				
+				//TO create a rectangle for picture moving
+				Element rect = doc.createElement("rect");
+				rect.setAttribute("x", "-10000");
+				rect.setAttribute("y", "-10000");
+				rect.setAttribute("width", "30000");
+				rect.setAttribute("height", "30000");
+				rect.setAttribute("fill", "url(#bg)");
+				//Element rectElement = (Element)rect.cloneNode(true);
+				movement.appendChild(rect);
+				movement.appendChild(draft);
+				documentElement.insertBefore(movement, null);
+				//documentElement.replaceChild(movement, draft);
 				if (conn != null) {
 					conn.close();
 				}

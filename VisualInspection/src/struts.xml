@@ -7,8 +7,8 @@
 <struts>
 	<constant name="struts.multipart.maxSize" value="1048576000" />
 
-	<package name="admin" namespace="/" extends="struts-default">
-		<action name="*_Interface" class="com.vi.action.ShowInterfaceAction" method="{1}">					  
+	<package name="admin" namespace="/" extends="struts-default" >
+		<action name="*_Interface" class="com.vi.action.ShowInterfaceAction" method="{1}" >					  
   			<result name="success">/interface.jsp</result>
   			<result name="error">/showErrMessage.jsp</result>
 		</action>

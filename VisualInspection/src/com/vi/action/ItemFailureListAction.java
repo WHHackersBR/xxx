@@ -152,8 +152,8 @@ public class ItemFailureListAction extends ActionSupport {
 		try {
 			VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), this.getMachType(), this.getSide(), 
 					failureReportData.getPartname(), failureReportData.getPositionNr(), failureReportData.getFailureCode());
-			System.out.println(formData.getCurrentFid()+":"+this.getMachType()+":"+this.getSide()+":"+failureReportData.getPartname()
-					+":"+failureReportData.getPositionNr()+":"+failureReportData.getFailureCode());
+			//System.out.println(formData.getCurrentFid()+":"+this.getMachType()+":"+this.getSide()+":"+failureReportData.getPartname()
+			//		+":"+failureReportData.getPositionNr()+":"+failureReportData.getFailureCode());
 			VFailure vFailure = vFailureDAO.findById(vFailureId);
 			if (vFailure.getConfirm().equals("Y")){
 				errorOutput = ErrMessage.ConfirmedFid;

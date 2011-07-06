@@ -1,3 +1,4 @@
+var doc;
 var SVGDocument = null;
 var SVGRoot = null;
 var lastElement = null;
@@ -8,6 +9,12 @@ var isOriginal=false;
 var layerListCS=new Array(5);
 var layerListSS=new Array(5);
 var compLocation;
+var tx = 0, ty = 0;
+var lastX;
+var lastY;
+var down = false;
+var krotax,krotay;
+var g = document.getElementById( "movement" );
 
 //var xmlDoc;
 var color=new Array("blueviolet","brown","chartreuse","darkorange","magenta","olivedrab"
@@ -17,15 +24,34 @@ function Init(evt,absURL,layerListA,layerListB,initSide) {
 	SVGDocument = evt.target.ownerDocument;
 	SVGRoot = document.documentElement;
 	absoluteURL=absURL;
+	doc = evt.getTarget().getOwnerDocument();
+	svg1 = doc.getDocumentElement();
+	g.addEventListener( "mousedown", Down, false );
+	g.addEventListener( "mouseup", Up, false );
+	g.addEventListener( "mousemove", Move, false );
+	
+	  // to set Event at SVG-Doc 
+
+	  //svg1.setAttribute("onkeydown", "suchen(evt)");
+
+	  //svg1.setAttribute("onmousemove", "pcb_locate_drag(evt)");
+	  //svg1.setAttribute("width", "100%");
+	  //svg1.setAttribute("height", "100%");
+
+	svg1Viewbox = ""+svg1.getAttribute("viewBox");
+	  // to detect Pixel of Viewbox
+	  var vbox = svg1Viewbox.split( ' ' );
+	  svg1Vx = Number(vbox[0]);
+	  svg1Vy = Number(vbox[1]);
+	  svg1Vwidth = Number(vbox[3]);
+	  svg1Vheight = Number(vbox[4]); 
+	  //alert("svg1Vx & svg1Vwidth & svg1Vheight " + svg1Vx + ":" + svg1Vy + ":" + svg1Vwidth + ":" + svg1Vheight)
+
 	//oriMenu = contextMenu.firstChild ;
 	xmlDoc=getURL("../menudefine.xml",menuLoaded); //载入菜单
 	 // var parser=new DOMParser();
 	  //alert(xmlDoc.content);
 	  //xmlDoc1=parser.parseFromString(xmlDoc.content,"text/xml");
-	//alert(xmlDoc1);
-	
-	//alert(layerListA.substring(1,layerListA.length-1).length);
-	//alert(layerListB.substring(1,layerListB.length-1).length);
 	/*layerListA=layerListA.substring(1,layerListA.length-1);
 	if(layerListA.length > 0){
 		layerListCS=layerListA.split(",");
@@ -33,8 +59,6 @@ function Init(evt,absURL,layerListA,layerListB,initSide) {
 	layerListCS=layerListA.substring(1,layerListA.length-1).split(",");
 	layerListSS=layerListB.substring(1,layerListB.length-1).split(",");
 	
-	//alert(layerListCS.length);
-	//alert(layerListSS.length);
 	chooseSide(initSide);
 }
 // load the right click menus
@@ -52,7 +76,7 @@ function menuLoaded(xmlDoc)
         //alert(anode.item(i).nodeName);
         	if( anode.item(i).getAttribute("id") == "layer" ){
         	    var txt = "<menu id='layer'>\n";
-        	    txt = txt + "<header>单层选择 : Layer</header>\n"
+        	    txt = txt + "<header>单层选择</header>\n"
         		var layerIndex = 1;	
         		for(var j=0;j<layerListCS.length-1 ;j=j+2,layerIndex=layerIndex+1){
         			txt = txt + "<item" + " checked='no' onactivate='chooseLayer(\"" + layerListCS[j].replace(/ /g,"") + "\")'>" + layerListCS[j].replace(/ /g,"") + "</item>\n" ;
@@ -66,13 +90,9 @@ function menuLoaded(xmlDoc)
         	    var layerMenu = parseXML(txt, contextMenu);
         	    //replace the layer select content
         		newMenuRoot.childNodes.item(1).replaceChild(layerMenu,anode.item(i));
-                //alert(anode.item(i).getAttribute("id"));
         	}
         }
     }
-    //*alert(newMenuRoot.getElementsByTagName("item").item(0).getAttribute("id"));
-    //*alert(newMenuRoot.getElementsByTagName("item")).item(0).textContent;
-    //*alert(newMenuRoot.ownerDocument.getElementsByTagName("item").item(2).getAttribute("id"));
     contextMenu.replaceChild(newMenuRoot, contextMenu.firstChild);//替换菜单
 	}
 }
@@ -512,7 +532,11 @@ function aMouseClick(evt) {
       		
     	}
 }
-		
+
+function rotate(angle){
+	
+}
+
 function trim(str){  //删除左右两端的空格
 	 return str.replace(/(^\s*)|(\s*$)/g, "");
 	}
@@ -522,3 +546,370 @@ function ltrim(str){  //删除左边的空格
 function rtrim(str){  //删除右边的空格
  return str.replace(/(\s*$)/g,"");
 }
+
+//drawing rotate
+function rotate(rotein){
+//reseten()
+rota =  rotein;
+
+  //calculate  and rotate image position 
+  Zgross = doc.getElementById("Hinter");
+  //Zgrossf = "resetdatar()";
+  Zgrossx  = svg1Vx;
+  Zgrossy  = svg1Vy;
+  Zgrossw  = svg1Vwidth;
+  Zgrossh  = svg1Vheight;
+  //calculate image center 
+  krotax = Zgrossw/2;
+  krotay = Zgrossh;
+ //rotate position
+  rotx =  (Zgrossw/2);
+  roty =  (Zgrossh/2);
+
+  //rotate image
+  rott = doc.getElementById("draft");
+  transform = rott.getAttribute('transform');
+  rott.setAttribute('transform', transform + "translate("+(krotax)+" "+(krotay)+") rotate("+(rota)+" "+(rotx)+" "+(roty)+")");
+
+  //LabelWinkel customize
+ /*       var gover = doc.getElementsByTagName("g");
+        var anzahlid = gover.getLength();
+        for (var i=0;i<anzahlid;i++){
+        var aktid = gover.item(i);
+        goverid = aktid.getAttribute("id");
+                if  (goverid == "") {} else {
+                gkz = goverid.substr(0,1);
+                gkz1 = goverid.substr(1,10);
+                gkz2 = goverid.substr(1,1);
+                if  (gkz2 <= "9") {continue;}
+                    if  (gkz == "_") {
+                   EP = gkz+gkz1;
+
+                   setzt = doc.getElementById(goverid);
+                   rottag=setzt.getFirstChild();
+                   rottrans = rottag.getAttribute("transform");
+
+              var rottrans = rottrans.split(" ");
+              rottransw1 = String(rottrans[6]);
+              var rottransw2 = rottransw1.split("(");
+              rottransw = Number(rottransw2[1]);
+              rottransx = String(rottrans[7]);
+              rottransw1 = String(rottrans[8]);
+              var rottransw2 = rottransw1.split(")");
+              rottransy = Number(rottransw2[0]);
+              rottransue = ((rottrans[0])+" "+(rottrans[1])+" "+(rottrans[2])+" "+(rottrans[3])+" "+(rottrans[4])+" "+(rottrans[5]));
+
+              if (rota == 0)    {if (rottransw == 270){rottransw = 90}; if (rottransw == 180){rottransw = 0}  }
+              if (rota == 90)   {if (rottransw == 90){rottransw = 270}; if (rottransw == 180){rottransw = 0}   }
+              if (rota == 180)  {if (rottransw == 90){rottransw = 270}; if (rottransw == 0){rottransw = 180}   }
+              if (rota == 270)  {if (rottransw == 270){rottransw = 90}; if (rottransw == 0){rottransw = 180}   }
+
+              rottag.setAttribute("transform",""+rottransue+" rotate("+rottransw+" "+rottransx+" "+rottransy+")");
+                    }
+                }
+        }
+
+
+  //calculate scale 
+        rotscale1 = svg1Vheight/Zgrossw;
+        rotscale2 = svg1Vwidth/Zgrossh;
+        if (rotscale1 <= rotscale2) {rotscale = rotscale1} else {rotscale = rotscale2}
+        if  (rotscale > 1.1) {krotv = "-"}
+        if  (rotscale < 0.9) {krotv = "+"}
+        if  (rotscale >= 0.9 && rotscale <= 1.1){krotv = "-";}
+
+  //customize view window 
+      if (rotscale == 1){}else{
+         
+       if (rota == 90 || rota == 270){
+       var deltaf = (svg1Vwidth-svg1Vheight)/2
+       svg1.setCurrentScale(rotscale*0.95);
+       trans1 =  svg1.getCurrentTranslate();
+       trans1.setX(krotv+deltaf*rotscale);
+       trans1.setY(krotv+deltaf*rotscale);
+       }
+       if (rota == 0 || rota == 180){
+       
+        if (AeLage == 1){
+           svg1.setCurrentScale(0.9);
+           trans1 =  svg1.getCurrentTranslate();
+           trans1.setX((Zgrossw-Zgrossw*0.9)/2 );
+           trans1.setY((Zgrossh-Zgrossh*0.9)/2 );
+           }else{
+           svg1.setCurrentScale(1);
+           trans1 =  svg1.getCurrentTranslate();
+           trans1.setX(0);
+           trans1.setY(0);
+           }
+       }
+      }
+
+
+  //edit kontext menue 
+        layaerst1 = ("Drehen"+rota);
+        UpdateMenu(null, layaerst1, 'enabled', 'Dreh', false);
+        UpdateMenu(null, layaerst2, 'enabled', 'Dreh', false);
+        layaerst2 = layaerst1;
+
+*/
+}
+
+//key events
+function suchen(evt){
+  
+  if (evt == "[object KeyEvent]"){
+     var key = evt.getKeyCode();
+     }else{key = evt}
+    //alert("key"+key);
+
+    // key W call lable
+    if (key == 87){
+       Beztausch("label1")};
+
+    // key E call refdes
+    if (key == 69){
+      Beztausch("gkz1")};
+
+    // key Z call refdes
+    if (key == 90){
+    Beztausch("gkz2")};
+
+    // key P search same BOMPos
+    if (key == 80){
+      GruppenMark('P')};
+
+    // key A search Attributen a. same BE
+    if (key == 65){
+      GruppenMark('+')};
+
+    // key T call Teil-Step
+    if (key == 84){
+        if (Tstep == 0){Tstep = 1;
+        Meldung2('Section-Step on','#f00',2500)
+        }else {
+        Tstep = 0;
+        Meldung2('Section-Step off','#0f0',2500)
+        } 
+        UpdateMenu(null, 'Tstepm', 'checked', null, false);
+        PosiLoopresetall()
+        if (Tstep == 1){
+          for (var i=0;i<1000;i++){
+          loopct = loopc + 1;
+          suchidmd = doc.getElementById("P_"+loopct);
+          leer4 = "!"+suchidmd+"!";
+            if (leer4 == "!null!"){
+            loopc = 0;
+            suchen (40);
+              break;
+            }
+          suchen (40);
+          }
+       }
+     }  
+    // key S BE-search
+    if (key == 83){
+       suchenEP(evt)};
+
+    //key Esc reset
+    if (key == 27){
+      reseten()};
+
+    //Loop +
+    if (key == 40){
+       suchidmd = doc.getElementById("Infomeld");
+       leer4 = "!"+suchidmd+"!";
+       if (leer4 != "!null!"){
+       suchidmd1 = suchidmd.getFirstChild();
+       suchidmd2 = suchidmd1.getData();
+       if (suchidmd2=="P: Letzte "){
+       return;
+       }
+       }
+      Skip2 = "ja"
+      PosiLoop('+')};
+
+    //Loop -
+    if (key == 38){
+      LoopMark = LoopMark-2;
+      PosiLoop('-')};
+
+     //Loop ++
+    if (key == 39){
+       suchidmd = doc.getElementById("Infomeld");
+       leer4 = "!"+suchidmd+"!";
+       if (leer4 != "!null!"){
+       suchidmd1 = suchidmd.getFirstChild();
+       suchidmd2 = suchidmd1.getData();
+       if (suchidmd2=="P: Letzte "){
+       PosiLoopresetall();
+       }else{
+       PosiLoop('++');}
+       return;}
+       PosiLoop('+');
+       PosiLoop('++')};
+
+    //Loop --
+    if (key == 37){
+      PosiLoop('--')};
+
+    //key F fixieren
+    if (key == 70){
+      Masters()};
+
+    //key G font size
+    if (key == 71){
+      Schriftgross()};
+      
+    //not for SNC key Leer Ersatztypen
+    if (key == 32){
+    // Ersatz()
+    };
+      
+    //key Q QData
+    if (key == 81){
+     // QDaten("0")
+     };
+
+    //key M measure
+    if (key == 77){
+      Drehen(0);
+      reseten();
+      Meldung1("Measure ! - only rotate 0 -","#000");
+      MessenOn = "On";}
+      
+    //key H help
+    if (key == 72){
+      Hilfe()};
+
+
+      
+}
+
+//mouse position
+function pcb_locate_drag(evt) {
+    //alert("bullshit")
+    pcX0 = evt.getClientX() ;
+    pcY0 = evt.getClientY() ;
+
+    //alert(pcX0)
+ 
+// measure   
+ //if ( rota == 0 && 1 == 0){   
+    //if (  1 == 0){
+  //set.svgBox Pixel 
+    svg1.setAttribute("width", svg1Vwidth);
+    svg1.setAttribute("height", svg1Vheight);
+    
+  //readout window data
+    trans3m =  svg1.getCurrentTranslate();
+    getxm = trans3m.getX();
+    getym = trans3m.getY();
+    getsm = svg1.getCurrentScale();
+    //alert(getxm)
+  //readout scale from DB-Daten  
+	//  alert(doc);
+    //var TScaleid = doc.getElementById("SCALE");
+	//alert(TScaleid);
+    //var TScaleid = TScaleid.getFirstChild();
+    //var TScalei = Number (TScaleid.getData());
+	//alert(TScalei);
+    
+  //recalculate x y data from DB-daten 
+    pcX0m = (svg1Vx+(pcX0-getxm)/getsm-krotax);
+    //alert(svg1Vx+":" + pcX0 +":"+ getxm+":"+getsm+":"+krotax);
+   //if (si == 0){
+       pcY0m = ((svg1Vy+(pcY0-getym)/getsm-krotay))-5;
+    //   }else{ 
+    //   pcY0m = (((svg1Vy-(pcY0-getym)/getsm-krotay)+svg1Vheight))-5;
+    //   } 
+       
+  //format x y display  
+    pcX0ma =  String(pcX0m).substring(0,(String(pcX0m).indexOf("."))+4);
+    pcY0ma =  String(pcY0m).substring(0,(String(pcY0m).indexOf("."))+4);
+    
+    
+  //x y display
+    mtext = "x:"+pcX0ma+" y:"+pcY0ma;
+    
+    Meldung(mtext,'#F44')
+      minfo = doc.getElementById("Infomeld");
+      minfo.setAttribute('style', "text-anchor:middle;fill:#F44")
+      minfo.setAttribute('y', (svg1Vy+(pcY0+20-getym)/getsm));
+      minfo.setAttribute('x', (svg1Vx+(pcX0-getxm)/getsm));
+  //}
+
+    
+}
+
+
+//add move function
+function Down(evt)
+{
+  lastX = evt.clientX
+  lastY = evt.clientY
+  down = true;
+    //alert("x:"+lastX + " y:" +lastY);
+}
+
+function Up(evt)
+{
+	
+  down = false;
+ 
+}
+
+function Move(evt)
+{
+  if( down==false )
+    return;
+ 
+  var x = evt.clientX
+  var y = evt.clientY
+  var dx = x - lastX
+  var dy = y - lastY
+  lastX = x
+  lastY = y
+  if( evt.shiftKey )
+  {
+    document.rootElement.currentTranslate.x += dx
+    document.rootElement.currentTranslate.y += dy
+  }
+  else
+  {
+  	dx = dx / 150;
+  	dy = dy / 150;
+    tx += dx
+    ty += dy
+    g.setAttribute( "transform", "translate("+tx+","+ty+")" )
+  }
+}
+
+//display message 
+function Meldung(Infotext,Infotextc){
+      Meldungsreset()
+
+      var texta = doc.createElement('text');
+      texta.setAttribute('y', svg1Vy+10);
+      texta.setAttribute('x', svg1Vx+5);
+      texta.setAttribute('id', "Infomeld");
+  /* CSS set */
+      texta.setAttribute('style', "font-family:Arial;font-size:"+ 1.1*11/svg1.getCurrentScale()+" pt;fill:#000;stroke:"+Infotextc+";stroke-width:0.5")
+  /* Text set */
+      textai = doc.createTextNode(Infotext);
+      texta.appendChild(textai);
+  /* Knoten zum Baum hinzufuegen */
+      var parent = doc.getDocumentElement();
+      parent.appendChild(texta);
+}
+
+//reset display message 
+function Meldungsreset(){
+       suchidan = doc.getElementById("Infomeld");
+       leer4 = "!"+suchidan+"!";
+       if (leer4 == "!null!"){return;}
+       Knoten = suchidan.getParentNode();
+       Knoten.removeChild(suchidan);
+}
+
+
+

@@ -1,10 +1,12 @@
 package com.vi.action;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -67,10 +69,13 @@ public class ShowInterfaceAction extends ActionSupport {
 	private FormData formData;
 	private FailureReportData failureReportData;
 	private TabTestedId tabTestedId=new TabTestedId();
-	private final String v_machType = "PVI******";
-    private static String v_side;
-    private static String v_mach_id;
+	private String v_machType = "PVI******";
+    private String v_side;
+    private String v_mach_id;
 	//private TabTested testedFID = new TabTested();
+    
+    public ShowInterfaceAction(){
+    }
 	
 	/**
 	 * Action for linking to the interface page
@@ -194,11 +199,12 @@ public class ShowInterfaceAction extends ActionSupport {
 	 */
 	public String fillWorkstationDescription() {
 		//use Hibernate to get data
-		if (!formData.getWorkstationNr().equals("")) {
+		if (formData.getWorkstationNr() != null && !formData.getWorkstationNr().equals("")) {
 			TabWorkstation tabWorkstation = tabWorkstationDAO
 					.findById(formData.getWorkstationNr());
 			if (tabWorkstation != null) {
 				formData.setWorkstationDescription( tabWorkstation.getEquipContent());
+				v_machType = tabWorkstation.getMachType();
 			} else {
 				formData.setWorkstationDescription( null);
 			}
@@ -243,7 +249,7 @@ public class ShowInterfaceAction extends ActionSupport {
 	 * @return Result which will be processed by Struts2
 	 */
 	public String changeOperatorID(){
-		if (!formData.getPoNo().isEmpty()){
+		if (formData.getPoNo() != null && !formData.getPoNo().isEmpty()){
 			try{
 	            Date   now   =   new   Date(); 
 	            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
@@ -331,36 +337,55 @@ public class ShowInterfaceAction extends ActionSupport {
 				e.printStackTrace();
 				//e.getCause();
 			}
-			if ( testedFID == null && vFidHist != null && vFidHist.getPoNo().equals(formData.getPoNo())){
+			if ( testedFID == null ){
 				Connection conn = null;
 				CallableStatement coll = null;
 				try {
-					conn = dataSource.getConnection();
-					//calling the stored procedure which stores the PO/test
-		            coll = conn.prepareCall("{call JERRY.FID_management_pkg.job_distrubute_main(?,?,?)}");
-					//prepare input and output arguments
 		            Date   now   =   new   Date(); 
 		            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
-		            HttpServletRequest request= ServletActionContext.getRequest();
-		            String msg_in = request.getRemoteAddr().concat("               ").substring(0,15)
-		            +"GREQ 1.00 PVI******" + v_mach_id +" VE    inspeteste '" + formData.getCurrentFid()+"' '"
-    				+ dateFormat.format(now) + "' 'P' '" + v_side + "'";
-		            //System.out.println(formData.getWorkstationNr()+":"+msg_in);
-					coll.setString(1, msg_in);
-					coll.setInt(2, msg_in.length());
-					coll.registerOutParameter(3, OracleTypes.VARCHAR);
-					coll.execute();	
-		            String msg_out = coll.getString(3);
-
-		            //System.out.println("msg_out:"+msg_out);
-					if (!msg_out.contains("NACK")){
-						formData.setFailed(true);
-						errorOutput=formData.getCurrentFid()+ ErrMessage.passFID;
-					}else{
-						formData.setFailed(false);
-						errorOutput=msg_out.substring(msg_out.indexOf("NACK"));
-						//errorOutput=msg_out;
+					VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
+					testedFID = new Vtested(vtestedId);
+					testedFID.setArticleNo(formData.getItemNr());
+					testedFID.setRevision(formData.getVersionAS());
+					testedFID.setTestResult("P");
+					testedFID.setEventTime( new Timestamp(new Date().getTime()));
+					testedFID.setMsg1("0");
+					testedFID.setTransferBit("0");
+					testedFID.setConfirm("N");
+					//testedFID.setEventTime(dateFormat2.format(now));
+					testedFID.setMachId(v_mach_id);
+					testedFID.setMachTime(dateFormat.format(now));
+					formData.setFailed(true);
+					if ( vFidHist == null ){
+						errorOutput= formData.getCurrentFid() + ":" + ErrMessage.FidNotExist;
+					}else if ( !vFidHist.getPoNo().equals(formData.getPoNo()) ){
+						errorOutput=vFidHist.getPoNo() + ":" + ErrMessage.PoNotMatch;
+					}else {
+						testedFID.setEstand(vFidHist.getEstand());
+						testedFID.setPsw(vFidHist.getPsw());
+						errorOutput= formData.getCurrentFid() + ":" + ErrMessage.passFID;
 					}
+					
+					vtestedDAO.attachDirty(testedFID);
+
+					VPoId vPoId = new VPoId(vFidHist.getPoNo(), vFidHist.getArticleNo(), vtestedId.getMachType());
+					VPo	  vPo = vPoDAO.findById(vPoId);
+					if (vPo != null) {
+						vPo.setQtyProduce(vPo.getQtyProduce());
+						vPo.setEventTime(new Timestamp(new Date().getTime()));
+						vPo.setTransferBit("0");
+					}else {
+						vPo = new VPo(vPoId);
+						vPo.setQtyProduce(BigDecimal.valueOf(1));
+						vPo.setQtyPlan(BigDecimal.valueOf(Integer.valueOf(vFidHist.getQuantity())));
+						vPo.setEstand(vFidHist.getEstand());
+						vPo.setFirstTime(new Timestamp(new Date().getTime()));
+						vPo.setEventTime(new Timestamp(new Date().getTime()));
+						vPo.setRevision(vFidHist.getRevision());
+						vPo.setTransferBit("0");
+					}
+					vPoDAO.attachDirty(vPo);
+					
 				} catch (Exception e) {
 					formData.setFailed(false);
 					errorOutput=ErrMessage.failInsertFID;
@@ -388,29 +413,29 @@ public class ShowInterfaceAction extends ActionSupport {
 						}
 					}
 				} 
-			}else if ( vFidHist == null ){
-				formData.setFailed(false);
-				errorOutput= formData.getCurrentFid() + ":" + ErrMessage.FidNotExist;
-			}else if ( !vFidHist.getPoNo().equals(formData.getPoNo()) ){
-				formData.setFailed(false);
-				errorOutput=vFidHist.getPoNo() + ":" + ErrMessage.PoNotMatch;
-			}else if(testedFID.getTestResult().equals("P")){
-				if (testedFID.getConfirm().equals("Y")){
-					formData.setFailed(true);
-					errorOutput = formData.getCurrentFid() + ErrMessage.pastFID +"," + ErrMessage.Confirmed;
-				}else {
-					formData.setFailed(true);
-					errorOutput=formData.getCurrentFid() + ErrMessage.pastFID + "," + ErrMessage.NotConfirmed;
-				}
-			}else{
-				if (testedFID.getConfirm().equals("Y")){
+			}else{ 
+				try {
+					if(testedFID.getTestResult().equals("P")){
+						formData.setFailed(true);
+						if (testedFID.getConfirm().equals("Y")){
+							errorOutput = formData.getCurrentFid() + ErrMessage.pastFID +"," + ErrMessage.Confirmed;
+						}else {
+							errorOutput=formData.getCurrentFid() + ErrMessage.pastFID + "," + ErrMessage.NotConfirmed;
+						}
+					}else{
+						formData.setFailed(false);
+						if (testedFID.getConfirm().equals("Y")){
+							errorOutput=formData.getCurrentFid() + ErrMessage.failedFID +"," + ErrMessage.Confirmed;
+						}else {
+							errorOutput=formData.getCurrentFid() + ErrMessage.failedFID + "," + ErrMessage.NotConfirmed;
+						}
+		
+					}
+				}catch (Exception e) {
 					formData.setFailed(false);
-					errorOutput=formData.getCurrentFid() + ErrMessage.failedFID +"," + ErrMessage.Confirmed;
-				}else {
-					formData.setFailed(false);
-					errorOutput=formData.getCurrentFid() + ErrMessage.failedFID + "," + ErrMessage.NotConfirmed;
+					errorOutput=ErrMessage.failInsertFID;
+					e.printStackTrace();
 				}
-
 			}
 		
 		}else{
