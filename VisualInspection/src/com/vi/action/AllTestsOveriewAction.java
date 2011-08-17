@@ -11,6 +11,8 @@ import oracle.jdbc.driver.OracleTypes;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.dao.TabFailureDAO;
+import com.vi.dao.TabTestedDAO;
 import com.vi.dao.TabWorkstationDAO;
 import com.vi.dao.VFailureDAO;
 import com.vi.dao.VtestedDAO;
@@ -19,6 +21,10 @@ import com.vi.data.FailureInformation;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.Tested;
+import com.vi.pojo.TabFailure;
+import com.vi.pojo.TabFailureId;
+import com.vi.pojo.TabTested;
+import com.vi.pojo.TabTestedId;
 import com.vi.pojo.VFailure;
 import com.vi.pojo.VFailureId;
 import com.vi.pojo.Vtested;
@@ -32,9 +38,8 @@ public class AllTestsOveriewAction extends ActionSupport{
 	
 	private FormData formData;
 	private FailureReportData failureReportData;
-	private VtestedDAO vtestedDAO;
-	private VFailureDAO vFailureDAO;
 	private TabWorkstationDAO tabWorkstationDAO;
+	private TabTestedDAO	tabTestedDAO;
 	//lists for storing the database query results
 	//so they can be iterated by Struts2
 	private ArrayList<Tested> passedList;
@@ -293,10 +298,9 @@ public class AllTestsOveriewAction extends ActionSupport{
 	Connection conn = null;
 	CallableStatement coll = null;
 	try {
-		
-		VtestedId	vtestedId = new VtestedId(fid, this.getMachType(), this.getSide());
-		Vtested		vtested	=	vtestedDAO.findById(vtestedId);
-		if (vtested.getConfirm().equals("Y")){
+		TabTestedId tabTestedId=new TabTestedId(this.getFid(), this.getWorkstationNr());
+		TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+		if (tabTested.getFake().equals("N")){
 			errorOutput = ErrMessage.ConfirmedFid;
 		}else{
 		conn = dataSource.getConnection();
@@ -349,9 +353,9 @@ public class AllTestsOveriewAction extends ActionSupport{
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			VFailureId vFailureId = new VFailureId(fid, this.getMachType(), this.getSide(), partname, positionNr, failureCode);
-			VFailure vFailure = vFailureDAO.findById(vFailureId);
-			if (vFailure.getConfirm().equals("Y")){
+			TabTestedId tabTestedId=new TabTestedId(this.getFid(), this.getWorkstationNr());
+			TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+			if (tabTested.getFake().equals("N")){
 				errorOutput = ErrMessage.ConfirmedFid;
 			}else{
 				conn = dataSource.getConnection();
@@ -405,9 +409,9 @@ public class AllTestsOveriewAction extends ActionSupport{
 	 */
 	public String goToEditFailureInformation() {
 		oldFailureCode=failureCode;
-		VFailureId vFailureId = new VFailureId(fid, this.getMachType(), this.getSide(), partname, positionNr, failureCode);
-		VFailure vFailure = vFailureDAO.findById(vFailureId);
-		if (vFailure.getConfirm().equals("Y")){
+		TabTestedId tabTestedId=new TabTestedId(this.getFid(), this.getWorkstationNr());
+		TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+		if (tabTested.getFake().equals("N")){
 			errorOutput = ErrMessage.ConfirmedFid;
 			return ERROR;
 		}else{
@@ -655,32 +659,18 @@ public class AllTestsOveriewAction extends ActionSupport{
 		this.confirmation = confirmation;
 	}
 
-	/**
-	 * @return the vtestedDAO
-	 */
-	public VtestedDAO getVtestedDAO() {
-		return vtestedDAO;
-	}
 
 	/**
-	 * @param vtestedDAO the vtestedDAO to set
+	 * @return the tabTestedDAO
 	 */
-	public void setVtestedDAO(VtestedDAO vtestedDAO) {
-		this.vtestedDAO = vtestedDAO;
+	public TabTestedDAO getTabTestedDAO() {
+		return tabTestedDAO;
 	}
-
 	/**
-	 * @return the vFailureDAO
+	 * @param tabTestedDAO the tabTestedDAO to set
 	 */
-	public VFailureDAO getvFailureDAO() {
-		return vFailureDAO;
-	}
-
-	/**
-	 * @param vFailureDAO the vFailureDAO to set
-	 */
-	public void setvFailureDAO(VFailureDAO vFailureDAO) {
-		this.vFailureDAO = vFailureDAO;
+	public void setTabTestedDAO(TabTestedDAO tabTestedDAO) {
+		this.tabTestedDAO = tabTestedDAO;
 	}
 	/**
 	 * @return the tabWorkstationDAO
@@ -723,6 +713,5 @@ public class AllTestsOveriewAction extends ActionSupport{
 	public void setSide(String side) {
 		this.side = side;
 	}
-			
 	
 }

@@ -27,7 +27,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   <body>
  	<s:form>
 	    <div>
-	    	<table border="1">
+	    	<table border="1" width="100%" style="background-color:beige">
 	    		<tr>
 	    			<td colspan="4"><s:textfield key="formData.poNo"  labelposition="left" readonly="true"/></td>
 	    			<td colspan="2"><s:textfield key="formData.itemNr" labelposition="left" readonly="true"/></td>
@@ -43,16 +43,20 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    		</tr>
 	    		<tr>
 	    		    		
-	    			<td colspan="4"><s:submit key="closeWindow" onclick="window.opener=null;window.close();"/></td>    			
+	    			<td colspan="12"><s:submit align="center" key="closeWindow" onclick="window.opener=null;window.close();"/></td>    			
 	    		</tr>
 	    	</table>
 	    </div>
 	    <div>
-	    	<s:text name="errorDetailsList"/>	       
 	    </div>		
 	    <div>
-	    	<table border="1">
+	    	<table width="100%">
 	    		<tr>
+	    		<td style="background-color:#FF0033" align="center" colspan="9">
+	    		<s:text name="errorDetailsList"/>
+	    		</td>
+	    		</tr>	       
+	    		<tr style="background-color:#A5ABFF">
 	    			<th></th>
 	    			<th></th>
 	    			<th><s:text name="fidText"/></th>
@@ -64,7 +68,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<th><s:text name="timeText"/></th>
 	    		</tr>
 			   
-			    <s:iterator value="itemFailureList">
+			    <s:iterator value="itemFailureList" status="stuts">
 			    
 		    	<s:url id="editUrl" action="goToEditFailureReport">
 					<s:param name="formData.currentFid" value="fid" />
@@ -82,7 +86,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<s:param name="failureReportData.failureCode" value="failureCode" />
 				</s:url>	
 			
-				<tr>
+				<s:if test="#stuts.odd == true">
+				<tr  style="background-color:#EBEDFF">
 			    	<td><s:a href="%{editUrl}"   ><s:text name="editText"/></s:a></td>
 			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
 				    <td><s:property value="fid"/></td>
@@ -94,6 +99,18 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    <td><s:property value="time"/></td>
 		
 			    </tr>
+			    </s:if>
+			    <s:else>
+			    	<td><s:a href="%{editUrl}"   ><s:text name="editText"/></s:a></td>
+			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
+				    <td><s:property value="fid"/></td>
+				    <td><s:property value="pieceLocation"/></td>
+				    <td><s:property value="componentLocation"/></td>
+				    <td><s:property value="failureCode"/></td>
+				    <td><s:property value="failureDefinition"/></td>
+				    <td><s:property value="failureDescription"/></td>
+				    <td><s:property value="time"/></td>
+			    </s:else>
 			    </s:iterator>
 		    </table>
 	

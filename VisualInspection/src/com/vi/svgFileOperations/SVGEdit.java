@@ -136,7 +136,7 @@ public class SVGEdit  {
 				String Y1 = location[3];
 				String Y2 = location[4];
 				//Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
-				Double fontSize= (Math.abs(Double.valueOf(Y2)+Double.valueOf(Y1)))*0.03;
+				Double fontSize= (Math.abs(Double.valueOf(Y2)+Double.valueOf(Y1)))*0.02;
 				String textSize=fontSize.toString();
 				Double W = Double.valueOf(X1)*2 + Double.valueOf(Y1);
 				//Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
@@ -157,12 +157,15 @@ public class SVGEdit  {
 				//draft.insertBefore(newChild, refChild)
 				//mirror the SS side
 				String transform = draft.getAttribute("transform");
-				if (transform != null && transform.equals("matrix(1 0 0 -1 0 0)") && initSide.equals("SS")){
-					
-					transform = "matrix(-1 0 0 -1 "+ W.toString()+ " 0)";
-					//transform = "matrix(1 0 0 1 0 " + H.toString() + ")";
-					draft.setAttribute("transform", transform);
-					
+				if (transform != null ){
+					if(transform.equals("matrix(1 0 0 -1 0 0)") && initSide.equals("SS")){
+						transform = "matrix(-1 0 0 -1 "+ W.toString()+ " 0)";
+						//transform = "matrix(1 0 0 1 0 " + H.toString() + ")";
+						draft.setAttribute("transform", transform);
+					}
+					//for rotation
+					//transform = "rotate(0 " +	Double.valueOf(X1) + Double.valueOf(Y1)/2 + ","
+					// 					  +	Double.valueOf(X2) + Double.valueOf(Y2)/2 + ")";
 				}
 
 				//get text size that matches size of the other stuff, get the size from the A5E...-label			
@@ -180,11 +183,10 @@ public class SVGEdit  {
 
 				//Double textSize = (Double) expr
 				//		.evaluate(doc, XPathConstants.NUMBER);
-				//this will be needed many times:
 				Element text = doc.createElement("text");
-				text.setAttribute("color", "rgb(0,255,255)");
+				text.setAttribute("color", "rgb(0,0,255)");
 				text.setAttribute("display", "none");
-				text.setAttribute("font-size",textSize.toString());
+				text.setAttribute("font-size",textSize);
 				text.setAttribute("text-anchor", "middle");
 				text.setAttribute("writing-mode", "lr-tb");
 				text.setAttribute("fill", "currentColor");
@@ -192,7 +194,6 @@ public class SVGEdit  {
 				text.setAttribute("pointer-events", "none");
 				//text.getAttribute("fill").
 				Element tspan = doc.createElement("tspan");
-				tspan.setAttribute("font-size", textSize.toString());
 
 				//prepare node for label
 				Node textNode = doc.createTextNode("");
@@ -211,11 +212,38 @@ public class SVGEdit  {
 
 				//id_0.setAttribute("stoke-width", "0.01px");
 				findDraftChildren = null;
-
-				//get the part information from the database
-				//Connection conn = null;
 				CallableStatement coll = null;
+				
+				//Add the empty PCB panel tag with id="#LP"
+				Element panel = doc.createElement("g");
+				panel.setAttribute("stroke-width", String.valueOf(fontSize/20));
+				panel.setAttribute("id", "#LP");
+				panel.setAttribute("onclick", "aMouseClick(evt)");
+				//TO create a rectangle for picture moving
+				Element panelRect = doc.createElement("rect");
+				Double panelWidth = Double.valueOf(Y1)*0.05;
+				Double panelHeight = Double.valueOf(Y2)*0.05;
+				//Integer panelX=X1;
+				Double panelY = -Double.valueOf(X2)-panelHeight;
+				panelRect.setAttribute("x", X1);
+				panelRect.setAttribute("y", panelY.toString());
+				panelRect.setAttribute("width",panelWidth.toString());
+				panelRect.setAttribute("height",panelHeight.toString());
+				panelRect.setAttribute("fill", "white");
+				panelRect.setAttribute("fill-opacity", "0");
+				textNode.setNodeValue("PCB");
+				
+				Element panelText=(Element)text.cloneNode(true);
+				panelText.setAttribute("font-size", String.valueOf(fontSize/2));
+				panelText.setAttribute("text-anchor", "left");
+				panelText.setAttribute("transform", "translate("+X1+" "+panelY.toString()+") scale(1 -1)");
+				panelText.setAttribute("display", "inline");
+				panel.appendChild(panelRect);
+				panel.appendChild(panelText);
+				draftChildren.item(0).getParentNode().insertBefore(panel, draftChildren.item(0));
 
+				tspan.setAttribute("font-size", textSize);
+				//get the part information from the database
 				//query DB for each element
 				//calling the stored procedure which gets the label
 				coll = conn.prepareCall("{call PCBVI.PKG_GET_LABEL.GET_LABEL(?,?,?)}",
@@ -228,7 +256,6 @@ public class SVGEdit  {
 
 				coll.execute();
 				ResultSet rsLabel = (ResultSet) coll.getObject(3);
-
 				while(rsLabel.next()){
 					for (int i = 0; i < draftChildren.getLength(); i++) {
 						Element element = (Element) draftChildren.item(i);
@@ -265,7 +292,7 @@ public class SVGEdit  {
 								//String abcString=firstChild2.getAttribute("stroke-width");
 								//double stoke=Float.parseFloat(abcString);
 								//firstChild2.setAttribute("stroke-width",String.valueOf(10* Float.parseFloat(firstChild2.getAttribute("stroke-width"))));
-								firstChild2.setAttribute("stroke-width","0.01px");
+								firstChild2.setAttribute("stroke-width",String.valueOf(fontSize/20));
 								
 								//get display position
 								String transformVal = firstChild2.getAttribute("transform");

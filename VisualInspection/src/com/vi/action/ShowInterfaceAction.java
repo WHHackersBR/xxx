@@ -10,8 +10,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-
 import oracle.jdbc.driver.OracleTypes;
 
 import org.apache.commons.dbcp.BasicDataSource;
@@ -19,29 +17,29 @@ import org.apache.struts2.ServletActionContext;
 
 import com.opensymphony.xwork2.ActionSupport;
 import com.vi.dao.SvgFileDAO;
+import com.vi.dao.TabFailureDAO;
+import com.vi.dao.TabTestedDAO;
 import com.vi.dao.TabViPoDAO;
 import com.vi.dao.TabWorkstationDAO;
-import com.vi.dao.VFailureDAO;
 import com.vi.dao.VFidHistDAO;
 import com.vi.dao.VPoDAO;
-import com.vi.dao.VtestedDAO;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.ErrMessage;
+import com.vi.data.PositionNr;
 import com.vi.pojo.SvgFile;
 import com.vi.pojo.SvgFileId;
+import com.vi.pojo.TabFailure;
+import com.vi.pojo.TabFailureId;
+import com.vi.pojo.TabTested;
 import com.vi.pojo.TabTestedId;
 import com.vi.pojo.TabViPo;
 import com.vi.pojo.TabViPoId;
 import com.vi.pojo.TabWorkstation;
-import com.vi.pojo.VFailure;
-import com.vi.pojo.VFailureId;
 import com.vi.pojo.VFidHist;
 import com.vi.pojo.VFidHistId;
 import com.vi.pojo.VPo;
 import com.vi.pojo.VPoId;
-import com.vi.pojo.Vtested;
-import com.vi.pojo.VtestedId;
 
 @SuppressWarnings("serial")
 public class ShowInterfaceAction extends ActionSupport {
@@ -57,24 +55,24 @@ public class ShowInterfaceAction extends ActionSupport {
 	
 	// DAOs
 	private TabWorkstationDAO tabWorkstationDAO;
-	private VtestedDAO	vtestedDAO;
+	private TabTestedDAO	tabTestedDAO;
+	private TabFailureDAO tabFailureDAO;
 	private VPoDAO	vPoDAO;
-	private VFailureDAO vFailureDAO;
-	private VFidHistDAO vFidHistDAO;
 	private TabViPoDAO	tabViPoDAO;
 	private SvgFileDAO	svgFileDAO;
+	private VFidHistDAO vFidHistDAO;
 	//private 
 	
 
 	private FormData formData;
 	private FailureReportData failureReportData;
 	private TabTestedId tabTestedId=new TabTestedId();
-	private String v_machType = "PVI******";
+	private String v_machType;
     private String v_side;
-    private String v_mach_id;
 	//private TabTested testedFID = new TabTested();
     
     public ShowInterfaceAction(){
+
     }
 	
 	/**
@@ -204,9 +202,10 @@ public class ShowInterfaceAction extends ActionSupport {
 					.findById(formData.getWorkstationNr());
 			if (tabWorkstation != null) {
 				formData.setWorkstationDescription( tabWorkstation.getEquipContent());
-				v_machType = tabWorkstation.getMachType();
+				v_machType = "SCT"+tabWorkstation.getCode();
 			} else {
 				formData.setWorkstationDescription( null);
+				v_machType = "SCTVITEMP";
 			}
 			return SUCCESS;
 
@@ -226,6 +225,17 @@ public class ShowInterfaceAction extends ActionSupport {
 		//use Hibernate to get data
 		//List vPo<VPo>;
 		try {
+			if (formData.getWorkstationNr() != null) {
+				TabWorkstation tabWorkstation = tabWorkstationDAO
+						.findById(formData.getWorkstationNr());
+				if (tabWorkstation != null) {
+					formData.setWorkstationDescription( tabWorkstation.getEquipContent());
+					v_machType = "SCT"+tabWorkstation.getCode();
+				} else {
+					formData.setWorkstationDescription( null);
+					v_machType = "SCTVITEMP";
+				}
+			}
 			VPoId vPoId = new VPoId(formData.getPoNo(),formData.getItemNr(),v_machType);
 			VPo vPo = vPoDAO.findById(vPoId);
 			 if (vPo != null){
@@ -249,7 +259,7 @@ public class ShowInterfaceAction extends ActionSupport {
 	 * @return Result which will be processed by Struts2
 	 */
 	public String changeOperatorID(){
-		if (formData.getPoNo() != null && !formData.getPoNo().isEmpty()){
+		/*if (formData.getPoNo() != null && !formData.getPoNo().isEmpty()){
 			try{
 	            Date   now   =   new   Date(); 
 	            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
@@ -261,7 +271,7 @@ public class ShowInterfaceAction extends ActionSupport {
 				// TODO: handle exception
 				e.printStackTrace();
 			}
-		}
+		}*/
 		return SUCCESS;
 	}
 	
@@ -292,7 +302,7 @@ public class ShowInterfaceAction extends ActionSupport {
 			if (formData.getVersionAS()==null || formData.getVersionAS().equals("")){
 				errorOutput=errorOutput+ErrMessage.NullVersion+ "<br>";
 			}
-			if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
+			if( formData.getWorkstationDescription()==null || formData.getWorkstationDescription().equals("") ){
 				errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
 			}
 			if (formData.getSide()==null || formData.getSide().equals("")){
@@ -307,8 +317,7 @@ public class ShowInterfaceAction extends ActionSupport {
 			}
 			formData.setCurrentFid(formData.getFid());
 			formData.setFid("");
-			Vtested testedFID = new Vtested();
-			VFidHist vFidHist = new VFidHist();
+			TabTested	tabTested = new TabTested();
 			//System.out.println();
 			try {
 	    		if (!formData.getWorkstationNr().equals("")) {
@@ -316,77 +325,82 @@ public class ShowInterfaceAction extends ActionSupport {
 	    					.findById(formData.getWorkstationNr());
 	    			//System.out.println(tabWorkstation.getMachId()+":"+tabWorkstation);
 	    			if (tabWorkstation != null && tabWorkstation.getMachId()!=null) {
-	    				v_mach_id = tabWorkstation.getMachId();
+	    				//v_mach_id = tabWorkstation.getMachId();
 	    				v_side = tabWorkstation.getSide();
+	    				v_machType = "SCT"+tabWorkstation.getCode();
 	    			} else {
-		    			v_mach_id = formData.getWorkstationNr();
+		    			//v_mach_id = formData.getWorkstationNr();
 		    			v_side = formData.getSide();
+	    				v_machType = "SCTVITEMP";
 	    			}
 	    		}else {
-	    			v_mach_id = formData.getWorkstationNr();
+	    			//v_mach_id = formData.getWorkstationNr();
 	    			v_side = formData.getSide();
 	    		}
-				VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
-				testedFID = vtestedDAO.findById(vtestedId);
+	    		TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+				tabTested = tabTestedDAO.findById(tabTestedId);
 
-				// try to compare PO number with the one in the jerry.fid_hist
-				VFidHistId vFidHistId = new VFidHistId(formData.getCurrentFid());
-				vFidHist = vFidHistDAO.findById(vFidHistId);
 			}catch (Exception e) {
 				// TODO: handle exception
 				e.printStackTrace();
 				//e.getCause();
 			}
-			if ( testedFID == null ){
+			if ( tabTested == null ){
 				Connection conn = null;
 				CallableStatement coll = null;
 				try {
-		            Date   now   =   new   Date(); 
+					Date   now   =   new   Date(); 
 		            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
-					VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
-					testedFID = new Vtested(vtestedId);
-					testedFID.setArticleNo(formData.getItemNr());
-					testedFID.setRevision(formData.getVersionAS());
-					testedFID.setTestResult("P");
-					testedFID.setEventTime( new Timestamp(new Date().getTime()));
-					testedFID.setMsg1("0");
-					testedFID.setTransferBit("0");
-					testedFID.setConfirm("N");
-					//testedFID.setEventTime(dateFormat2.format(now));
-					testedFID.setMachId(v_mach_id);
-					testedFID.setMachTime(dateFormat.format(now));
-					formData.setFailed(true);
-					if ( vFidHist == null ){
-						errorOutput= formData.getCurrentFid() + ":" + ErrMessage.FidNotExist;
-					}else if ( !vFidHist.getPoNo().equals(formData.getPoNo()) ){
-						errorOutput=vFidHist.getPoNo() + ":" + ErrMessage.PoNotMatch;
-					}else {
-						testedFID.setEstand(vFidHist.getEstand());
-						testedFID.setPsw(vFidHist.getPsw());
-						errorOutput= formData.getCurrentFid() + ":" + ErrMessage.passFID;
-					}
+					TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+					tabTested=new TabTested(tabTestedId, "P", formData.getItemNr(), formData.getVersionAS(), formData.getPoNo(), "Y", v_side);
+					tabTested.setEventTime(new Timestamp(new Date().getTime()));
+					tabTested.setMachTime(dateFormat.format(now));
+					tabTested.setOperatorId(formData.getOperatorID());
 					
-					vtestedDAO.attachDirty(testedFID);
+					formData.setFailed(true);
+					errorOutput= formData.getCurrentFid() + ":" + ErrMessage.passFID;
+					
 
-					VPoId vPoId = new VPoId(vFidHist.getPoNo(), vFidHist.getArticleNo(), vtestedId.getMachType());
+					VPoId vPoId = new VPoId(formData.getPoNo(), formData.getItemNr(), v_machType);
 					VPo	  vPo = vPoDAO.findById(vPoId);
 					if (vPo != null) {
-						vPo.setQtyProduce(vPo.getQtyProduce());
+						vPo.setQtyProduce(BigDecimal.valueOf(vPo.getQtyProduce().intValue()+1));
 						vPo.setEventTime(new Timestamp(new Date().getTime()));
 						vPo.setTransferBit("0");
 					}else {
 						vPo = new VPo(vPoId);
 						vPo.setQtyProduce(BigDecimal.valueOf(1));
-						vPo.setQtyPlan(BigDecimal.valueOf(Integer.valueOf(vFidHist.getQuantity())));
-						vPo.setEstand(vFidHist.getEstand());
+
+						conn = dataSource.getConnection();
+						coll = conn.prepareCall("{call PCBVI.PKG_GET_PO.GET_PO(?,?)}");
+						//prepare input and output arguments 
+						coll.setString(1, formData.getPoNo());
+						coll.registerOutParameter(2, OracleTypes.CURSOR);
+						coll.execute();
+						//get cursor
+						ResultSet rs = (ResultSet) coll.getObject(2);
+						//and process data
+						while(rs.next()){
+							if(rs.getString(2).equals(formData.getItemNr())){
+								vPo.setQtyPlan(BigDecimal.valueOf(Integer.valueOf(rs.getString(4))));
+							}
+							else {
+								vPo.setQtyPlan(BigDecimal.valueOf(Integer.valueOf(0)));
+							}
+						}
+						vPo.setEstand("00");
 						vPo.setFirstTime(new Timestamp(new Date().getTime()));
 						vPo.setEventTime(new Timestamp(new Date().getTime()));
-						vPo.setRevision(vFidHist.getRevision());
+						vPo.setRevision(formData.getVersionAS());
 						vPo.setTransferBit("0");
+						rs.close();
+						
 					}
 					vPoDAO.attachDirty(vPo);
+					tabTestedDAO.attachDirty(tabTested);
 					
 				} catch (Exception e) {
+					
 					formData.setFailed(false);
 					errorOutput=ErrMessage.failInsertFID;
 					e.printStackTrace();
@@ -396,35 +410,31 @@ public class ShowInterfaceAction extends ActionSupport {
 							conn.close();
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
-							formData.setFailed(false);
-							errorOutput=ErrMessage.failInsertFID;
 							e.printStackTrace();
 						}
 					}
-	
+
 					if (coll != null) {
 						try {
 							coll.close();
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
-							formData.setFailed(false);
-							errorOutput=ErrMessage.failInsertFID;
 							e.printStackTrace();
 						}
 					}
-				} 
+				}
 			}else{ 
 				try {
-					if(testedFID.getTestResult().equals("P")){
+					if(tabTested.getTestResult().equals("P")){
 						formData.setFailed(true);
-						if (testedFID.getConfirm().equals("Y")){
+						if (tabTested.getFake().equals("N")){
 							errorOutput = formData.getCurrentFid() + ErrMessage.pastFID +"," + ErrMessage.Confirmed;
 						}else {
 							errorOutput=formData.getCurrentFid() + ErrMessage.pastFID + "," + ErrMessage.NotConfirmed;
 						}
 					}else{
 						formData.setFailed(false);
-						if (testedFID.getConfirm().equals("Y")){
+						if (tabTested.getFake().equals("N")){
 							errorOutput=formData.getCurrentFid() + ErrMessage.failedFID +"," + ErrMessage.Confirmed;
 						}else {
 							errorOutput=formData.getCurrentFid() + ErrMessage.failedFID + "," + ErrMessage.NotConfirmed;
@@ -472,7 +482,7 @@ public class ShowInterfaceAction extends ActionSupport {
 		if (formData.getVersionAS()==null || formData.getVersionAS().equals("")){
 			errorOutput=errorOutput+ErrMessage.NullVersion+ "<br>";
 		}
-		if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
+		if( formData.getWorkstationDescription()==null || formData.getWorkstationDescription().equals("") ){
 			errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
 		}
 		if (formData.getSide()==null || formData.getSide().equals("")){
@@ -482,7 +492,9 @@ public class ShowInterfaceAction extends ActionSupport {
 			errorOutput=errorOutput+ErrMessage.NullOperatorID+"<br>";
 		}
 		try{
-            Date   now   =   new   Date(); 
+            formData.setCurrentFid("");
+            formData.setFid("");
+			Date   now   =   new   Date(); 
             SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
 			TabViPoId tabViPoId=new TabViPoId(formData.getPoNo(), formData.getWorkstationNr(), formData.getItemNr(), 
 					formData.getVersionAS(), formData.getSide(), formData.getOperatorID(),dateFormat.format(now));
@@ -508,16 +520,18 @@ public class ShowInterfaceAction extends ActionSupport {
 	public String goToFailureReport() {
 		//get and set partname
 		String partname=ServletActionContext.getRequest().getParameter("partname");
+		//String partname=ServletActionContext.getRequest().QueryString[
 		failureReportData.setPartname(partname);
 		failureReportData.setFailureDescription(null);
 		failureReportData.setPositionNr(null);
+		failureReportData.setFailureCode(null);
 		if((formData.getCurrentFid()==null || formData.getCurrentFid().isEmpty()) ){
 			errorOutput=ErrMessage.NullFID+ "<br>";
 		}
 		if (formData.getPoNo()==null || formData.getPoNo().equals("")){
 			errorOutput=ErrMessage.NullPO+ "<br>";
 		}
-		if( formData.getWorkstationNr()==null || formData.getWorkstationNr().equals("") ){
+		if( formData.getWorkstationDescription()==null || formData.getWorkstationDescription().equals("") ){
 			errorOutput=errorOutput+ErrMessage.NullWS+"<br>";
 		}
 		if (formData.getSide()==null || formData.getSide().equals("")){
@@ -526,12 +540,44 @@ public class ShowInterfaceAction extends ActionSupport {
 		if (formData.getOperatorID()==null || formData.getOperatorID().equals("")){
 			errorOutput=errorOutput+ErrMessage.NullOperatorID+"<br>";
 		}
+		//failureReportData.getFailureCodes().clear();
+		//failureReportData.init(dataSource);
 
+		Connection conn = null;
+		CallableStatement coll = null;
 		try {
-			VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
-			Vtested vtested = vtestedDAO.findById(vtestedId);
-			if (vtested != null && vtested.getConfirm().equals("N") ){
-				if( !vtested.getTestResult().equals("F") ){
+			conn=dataSource.getConnection();
+			coll = conn.prepareCall("{call PCBVI.PKG_GET_FAILURECODES.GET_POSITIONNRS(?,?)}");			
+			//prepare input and output arguments
+			coll.setString(1, formData.getItemNr());
+			coll.registerOutParameter(2, OracleTypes.VARCHAR);
+			
+			coll.execute();
+			
+			//get data and process it
+			failureReportData.getPositionNrs().clear();
+			PositionNr positionNr;
+			for (int quantity = 1; quantity <= coll.getInt(2); quantity++) {
+				int positionAbbr=quantity;
+				int positionDefinition=quantity;
+				
+				//System.out.println(formData.getItemNr()+":"+rs.getString(1));
+				// add the values
+				positionNr=new PositionNr();
+				positionNr.setPositionNrAbbr(String.valueOf(positionAbbr));
+				positionNr.setPositionNrName(String.valueOf(positionDefinition));
+				failureReportData.getPositionNrs().add(positionNr);
+			}
+			positionNr=new PositionNr();
+			positionNr.setPositionNrAbbr(String.valueOf(-1));
+			positionNr.setPositionNrName(ErrMessage.singlePanel);
+			failureReportData.getPositionNrs().add(positionNr);
+
+			TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+			TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+			
+			if (tabTested != null && tabTested.getFake().equals("Y") ){
+				if( !tabTested.getTestResult().equals("F") ){
 					formData.setFailed(true);		
 					errorOutput = ErrMessage.setFIDfail;
 				}
@@ -541,6 +587,23 @@ public class ShowInterfaceAction extends ActionSupport {
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+			if (coll != null) {
+				try {
+					coll.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		} 
 		
 		
@@ -564,21 +627,20 @@ public class ShowInterfaceAction extends ActionSupport {
 		
 		errorOutput="";
 		
-		//Connection conn = null;
-		//CallableStatement coll = null;
 		try {
-					VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), v_machType, v_side
-							,failureReportData.getPartname(),failureReportData.getPositionNr(),failureReportData.getFailureCode());
-					VFailure vFailure = new VFailure(vFailureId);
-					vFailure.setMachId(v_mach_id);
-		            Date   now   =   new   Date(); 
-		            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
-					vFailure.setMachTime(dateFormat.format(now));
-					vFailure.setTolerance(formData.getWorkstationNr());
-					vFailure.setDescription(failureReportData.getFailureDescription());
-					vFailure.setConfirm("N");
-					vFailureDAO.attachDirty(vFailure);
-					formData.setFailed(false);		
+			TabFailureId tabFailureId=new TabFailureId(formData.getCurrentFid(),formData.getWorkstationNr(),
+					failureReportData.getPositionNr(), failureReportData.getPartname(),failureReportData.getFailureCode());
+			TabFailure tabFailure = new TabFailure(tabFailureId);
+            Date   now   =   new   Date();
+            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
+            tabFailure.setMachTime(dateFormat.format(now));
+            tabFailure.setEventTime(new Timestamp(new Date().getTime()));
+            tabFailure.setFailureDescription(failureReportData.getFailureDescription());
+            tabFailure.setSide(v_side);
+            tabFailure.setTransferBit(BigDecimal.valueOf(0));
+            tabFailureDAO.attachDirty(tabFailure);
+            
+			formData.setFailed(false);		
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -595,11 +657,12 @@ public class ShowInterfaceAction extends ActionSupport {
 		
 		errorOutput = "";
 		try {
-			VtestedId vtestedId=new VtestedId(formData.getCurrentFid(), v_machType,v_side);
-			Vtested vtested = vtestedDAO.findById(vtestedId);
-			if (vtested != null && vtested.getConfirm().equals("N") ){
-				vtested.setTestResult("F");
-				vtested = vtestedDAO.merge(vtested);
+			TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+			TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+			
+			if (tabTested != null && tabTested.getFake().equals("Y") ){
+				tabTested.setTestResult("F");
+				tabTested = tabTestedDAO.merge(tabTested);
 				formData.setFailed(false);		
 			}else {
 				errorOutput = ErrMessage.ConfirmedFid;
@@ -691,33 +754,6 @@ public class ShowInterfaceAction extends ActionSupport {
 	}
 
 	/**
-	 * @return the vtestedDAO
-	 */
-	public VtestedDAO getVtestedDAO() {
-		return vtestedDAO;
-	}
-
-	/**
-	 * @param vtestedDAO the vtestedDAO to set
-	 */
-	public void setVtestedDAO(VtestedDAO vtestedDAO) {
-		this.vtestedDAO = vtestedDAO;
-	}
-
-	/**
-	 * @return the vFidHistDAO
-	 */
-	public VFidHistDAO getvFidHistDAO() {
-		return vFidHistDAO;
-	}
-
-	/**
-	 * @param vFidHistDAO the vFidHistDAO to set
-	 */
-	public void setvFidHistDAO(VFidHistDAO vFidHistDAO) {
-		this.vFidHistDAO = vFidHistDAO;
-	}
-	/**
 	 * @return the vPoDAO
 	 */
 	public VPoDAO getvPoDAO() {
@@ -731,19 +767,6 @@ public class ShowInterfaceAction extends ActionSupport {
 		this.vPoDAO = vPoDAO;
 	}
 
-	/**
-	 * @return the vFailureDAO
-	 */
-	public VFailureDAO getvFailureDAO() {
-		return vFailureDAO;
-	}
-
-	/**
-	 * @param vFailureDAO the vFailureDAO to set
-	 */
-	public void setvFailureDAO(VFailureDAO vFailureDAO) {
-		this.vFailureDAO = vFailureDAO;
-	}
 
 	/**
 	 * @return the tabViPoDAO
@@ -771,6 +794,34 @@ public class ShowInterfaceAction extends ActionSupport {
 	 */
 	public void setSvgFileDAO(SvgFileDAO svgFileDAO) {
 		this.svgFileDAO = svgFileDAO;
+	}
+
+	/**
+	 * @return the tabTestedDAO
+	 */
+	public TabTestedDAO getTabTestedDAO() {
+		return tabTestedDAO;
+	}
+
+	/**
+	 * @param tabTestedDAO the tabTestedDAO to set
+	 */
+	public void setTabTestedDAO(TabTestedDAO tabTestedDAO) {
+		this.tabTestedDAO = tabTestedDAO;
+	}
+
+	/**
+	 * @return the tabFailureDAO
+	 */
+	public TabFailureDAO getTabFailureDAO() {
+		return tabFailureDAO;
+	}
+
+	/**
+	 * @param tabFailureDAO the tabFailureDAO to set
+	 */
+	public void setTabFailureDAO(TabFailureDAO tabFailureDAO) {
+		this.tabFailureDAO = tabFailureDAO;
 	}
 
 }

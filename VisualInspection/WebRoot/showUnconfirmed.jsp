@@ -27,28 +27,40 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   <body>
  	<s:form>
 	    <div>
-	    	<s:submit key="closeWindow" onclick="window.opener=null;window.close();"/>
 	    </div>
 	    <div>
-	    	<s:text name="unconfirmedText"/>	       
 	    </div>		
 	    <div>
-	    	<table border="1">
+	    	<table width="100%">
 	    		<tr>	    			
+		    	<td colspan="4"><s:submit align="center" key="closeWindow" onclick="window.opener=null;window.close();"/></td>
+		    	</tr>
+	    		<tr style="background-color:beige">	    			
+			    	<td align="center" colspan="4"><s:text name="unconfirmedText"/></td>	       
+		    	</tr>
+	    		<tr style="background-color:#A5ABFF">	    			
 	    			<th><s:text name="poNoText"/></th>
 	    			<th><s:text name="workstationNrText"/></th>
 	    			<th><s:text name="workstationDescriptionText"/></th>	    			
 	    			<th><s:text name="side"/></th>	    			
 	    		</tr>
 			   
-			    <s:iterator value="unconfirmedList">			    		    	
+			    <s:iterator value="unconfirmedList" status="stuts">			    		    	
 			
-				<tr>			    	
-				    <td><s:property value="poNo"/></td>
-				    <td><s:property value="workstationNr"/></td>
-				    <td><s:property value="workstationDescription"/></td>				   		
-				    <td><s:property value="side"/></td>				   		
+				<s:if test="#stuts.odd == true">
+				<tr style="background-color:#EBEDFF">			    	
+				    <td align="center"><s:property value="poNo"/></td>
+				    <td align="center"><s:property value="workstationNr"/></td>
+				    <td align="center"><s:property value="workstationDescription"/></td>				   		
+				    <td align="center"><s:property value="side"/></td>				   		
 			    </tr>
+			    </s:if>
+			    <s:else>
+				    <td align="center"><s:property value="poNo"/></td>
+				    <td align="center"><s:property value="workstationNr"/></td>
+				    <td align="center"><s:property value="workstationDescription"/></td>				   		
+				    <td align="center"><s:property value="side"/></td>				   		
+			    </s:else>
 			    </s:iterator>
 		    </table>
 	

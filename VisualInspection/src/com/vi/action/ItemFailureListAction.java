@@ -11,24 +11,22 @@ import oracle.jdbc.driver.OracleTypes;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import com.opensymphony.xwork2.ActionSupport;
+import com.vi.dao.TabFailureDAO;
+import com.vi.dao.TabTestedDAO;
 import com.vi.dao.TabWorkstationDAO;
-import com.vi.dao.VFailureDAO;
-import com.vi.dao.VtestedDAO;
 import com.vi.data.ErrMessage;
 import com.vi.data.FailureReportData;
 import com.vi.data.FormData;
 import com.vi.data.ItemFailure;
+import com.vi.pojo.TabTested;
+import com.vi.pojo.TabTestedId;
 import com.vi.pojo.TabWorkstation;
-import com.vi.pojo.VFailure;
-import com.vi.pojo.VFailureId;
-import com.vi.pojo.Vtested;
-import com.vi.pojo.VtestedId;
 
 public class ItemFailureListAction extends ActionSupport {
 	//DataSource
 	private BasicDataSource dataSource;
-	private VtestedDAO vtestedDAO;
-	private VFailureDAO vFailureDAO;
+	private TabTestedDAO tabTestedDAO;
+	private TabFailureDAO tabFailureDAO;
 	private TabWorkstationDAO tabWorkstationDAO;
 	
 	private FormData formData;
@@ -84,9 +82,9 @@ public class ItemFailureListAction extends ActionSupport {
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			VtestedId	vtestedId = new VtestedId(formData.getCurrentFid(), this.getMachType(), this.getSide());
-			Vtested		vtested	=	vtestedDAO.findById(vtestedId);
-			if (vtested.getConfirm().equals("Y")){
+			TabTestedId tabTestedId = new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+			TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+			if (tabTested.getFake().equals("N")){
 				errorOutput = ErrMessage.ConfirmedFid;
 			}else{
 				conn = dataSource.getConnection();
@@ -150,12 +148,9 @@ public class ItemFailureListAction extends ActionSupport {
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), this.getMachType(), this.getSide(), 
-					failureReportData.getPartname(), failureReportData.getPositionNr(), failureReportData.getFailureCode());
-			//System.out.println(formData.getCurrentFid()+":"+this.getMachType()+":"+this.getSide()+":"+failureReportData.getPartname()
-			//		+":"+failureReportData.getPositionNr()+":"+failureReportData.getFailureCode());
-			VFailure vFailure = vFailureDAO.findById(vFailureId);
-			if (vFailure.getConfirm().equals("Y")){
+			TabTestedId tabTestedId = new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+			TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+			if (tabTested.getFake().equals("N")){
 				errorOutput = ErrMessage.ConfirmedFid;
 			}else{
 				conn = dataSource.getConnection();
@@ -212,10 +207,9 @@ public class ItemFailureListAction extends ActionSupport {
 	public String goToEditFailureReport() {
 		
 		oldFailureCode=failureReportData.getFailureCode();
-		VFailureId vFailureId = new VFailureId(formData.getCurrentFid(), this.getMachType(), this.getSide(), 
-				failureReportData.getPartname(), failureReportData.getPositionNr(), failureReportData.getFailureCode());
-		VFailure vFailure = vFailureDAO.findById(vFailureId);
-		if (vFailure.getConfirm().equals("Y")){
+		TabTestedId tabTestedId = new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+		TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+		if (tabTested.getFake().equals("N")){
 			errorOutput = ErrMessage.ConfirmedFid;
 			return ERROR;
 		}else{
@@ -401,32 +395,33 @@ public class ItemFailureListAction extends ActionSupport {
 		this.oldFailureCode = oldFailureCode;
 	}
 
+
 	/**
-	 * @return the vtestedDAO
+	 * @return the tabTestedDAO
 	 */
-	public VtestedDAO getVtestedDAO() {
-		return vtestedDAO;
+	public TabTestedDAO getTabTestedDAO() {
+		return tabTestedDAO;
 	}
 
 	/**
-	 * @param vtestedDAO the vtestedDAO to set
+	 * @param tabTestedDAO the tabTestedDAO to set
 	 */
-	public void setVtestedDAO(VtestedDAO vtestedDAO) {
-		this.vtestedDAO = vtestedDAO;
+	public void setTabTestedDAO(TabTestedDAO tabTestedDAO) {
+		this.tabTestedDAO = tabTestedDAO;
 	}
 
 	/**
-	 * @return the vFailureDAO
+	 * @return the tabFailureDAO
 	 */
-	public VFailureDAO getvFailureDAO() {
-		return vFailureDAO;
+	public TabFailureDAO getTabFailureDAO() {
+		return tabFailureDAO;
 	}
 
 	/**
-	 * @param vFailureDAO the vFailureDAO to set
+	 * @param tabFailureDAO the tabFailureDAO to set
 	 */
-	public void setvFailureDAO(VFailureDAO vFailureDAO) {
-		this.vFailureDAO = vFailureDAO;
+	public void setTabFailureDAO(TabFailureDAO tabFailureDAO) {
+		this.tabFailureDAO = tabFailureDAO;
 	}
 
 	/**

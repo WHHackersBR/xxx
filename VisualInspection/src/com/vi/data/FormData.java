@@ -47,7 +47,7 @@ public class FormData {
 	}
 	
 	public String getPoNo() {
-		return poNo;
+		return poNo==null?poNo:poNo.trim();
 	}
 	public void setPoNo(String poNo) {
 		this.poNo = poNo;
@@ -83,7 +83,7 @@ public class FormData {
 		this.side = side;
 	}
 	public String getOperatorID() {
-		return operatorID;
+		return operatorID==null?operatorID:operatorID.trim();
 	}
 	public void setOperatorID(String operatorID) {
 		this.operatorID = operatorID;
@@ -109,7 +109,7 @@ public class FormData {
 	}
 
 	public String getFid() {
-		return fid;
+		return fid==null?fid:fid.trim();
 	}
 
 	public void setFid(String fid) {

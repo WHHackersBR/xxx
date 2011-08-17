@@ -2,13 +2,6 @@
 		     <!-- Sichtpruefungs menue -->
 <menu>		
      	<header>Adobe SVG Viewer</header>
-		<menu id="side">
-			<header>零件面显示</header>
-			<item id="csSide" checked="no" onactivate="chooseSide('CS')"> CS </item>
-			<item id="ssSide" checked="no" onactivate="chooseSide('SS')"> SS </item>
-			<item id="Side" checked="no" onactivate="chooseSide('AB')"> ALL </item>
-			<separator/>
-		</menu>
 		<menu id="technology">
 			<header>选择 SMD/THT</header>
 			<item id="SMD" checked="no" onactivate="chooseTech('SMD')"> SMD </item>
@@ -16,6 +9,15 @@
 			<item id="SMDTHT" checked="no" onactivate="chooseTech('ALL')"> Show All </item>
 			<separator/>
 		</menu>
+		<menu id="side">
+			<header>零件面显示</header>
+			<item id="csSide" checked="no" onactivate="chooseSide('CS')"> CS </item>
+			<item id="ssSide" checked="no" onactivate="chooseSide('SS')"> SS </item>
+			<item id="Side" checked="no" onactivate="chooseSide('AB')"> ALL </item>
+			<separator/>
+		</menu>
+		<!--item id="#LP" checked="no" onactivate="panelError(evt)">Panel error</item-->
+		<separator/>
 		<menu id="layer">
 			<header>层选择 </header>
 			<item id="layer01" checked="no" onactivate="chooseLayer('layer01')"> replaced by layer name of SVG file </item>
@@ -36,7 +38,7 @@
 		<menu id="rotation">
 			<header>旋转 </header>
 			<item  checked="no" onactivate="rotate('0')"> rotate   0 </item>
-			<item  checked="no" onactivate="rotate('90')"> rotate  90 </item>
+			<item  checked="no" onactivate="rotate('90')"> rotate 90 </item>
 			<item  checked="no" onactivate="rotate('180')"> rotate 180 </item>
 			<item  checked="no" onactivate="rotate('270')"> rotate 270 </item>
 		</menu>

@@ -60,6 +60,7 @@ function Init(evt,absURL,layerListA,layerListB,initSide) {
 	layerListSS=layerListB.substring(1,layerListB.length-1).split(",");
 	
 	chooseSide(initSide);
+	
 }
 // load the right click menus
 function menuLoaded(xmlDoc)
@@ -111,11 +112,12 @@ function ShowMyTooltip(evt,display) {
 			//only change it once/ the first time it's touched
 			//otherwise storkeWidth would get huge quickly	
 			if(!isOriginal){
-				useTag.setAttribute( "color", "rgb(0,0,255)");
+				useTag.setAttribute( "color", "rgb(0,255,255)");
+				//useTag.setAttribute( "box-shadow", "rgb(0,255,255)");
 				
-				originalStrokeWidth=useTag.getAttribute( "stroke-width" );
+				originalStrokeWidth=useTag.getAttribute("stroke-width");
 				var newStrokeWidth=Number(originalStrokeWidth);
-				useTag.setAttribute( "stroke-width", String(newStrokeWidth) );
+				useTag.setAttribute( "stroke-width", String(newStrokeWidth*3) );
 				
 				//display the part info
 				partInfo.setAttribute( "display", "inline");
@@ -136,18 +138,15 @@ function ShowMyTooltip(evt,display) {
 			
 			isOriginal=false;
 		}
-		
-				
-		
-		
 	}
 	catch (er) {
 	}
 }
 
+
 function searchComp(keyword){
 	element = document.getElementById("ID_0");
-	if (element != null && keyword != "clearHighlight"){
+	if (element != null){
 		
 		elementUse = element.getElementsByTagName("use");
 		if (elementUse != null ){
@@ -512,7 +511,7 @@ function aMouseClick(evt) {
       		//alert("abc"+ window);
       		//parent.open(absoluteURL);
       		//dataWin=parent.open("http://" + location.host +"/VisualInspection/goToFailureReport.action?partname="+  evt.currentTarget.id);
-      		dataWin=parent.open(absoluteURL + "/goToFailureReport.action?partname="+  evt.currentTarget.id, 
+      		dataWin=parent.open(absoluteURL + "/goToFailureReport.action?partname="+  encodeURIComponent(evt.currentTarget.id), 
       							"failureReportWindow",  
 		         				"width=600, height=500, left=400, top=0, scrollbars=no, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
 			
@@ -533,7 +532,19 @@ function aMouseClick(evt) {
     	}
 }
 
-function rotate(angle){
+function panelError(evt){
+  		if (dataWin!==null) {
+  			dataWin.close();
+  		} 
+  		dataWin=parent.open(absoluteURL + "/goToFailureReport.action?partname=" + encodeURIComponent("#LP"), 
+  							"failureReportWindow",  
+	         				"width=600, height=500, left=400, top=0, scrollbars=no, toolbar=no,location=no, menubar=no, resizable=yes, status=yes");
+		
+  		//make sure the popup has the correct parent set
+  		
+		if (dataWin == null) {
+			alert("Cannot open new window");
+		}
 	
 }
 
@@ -548,28 +559,31 @@ function rtrim(str){  //删除右边的空格
 }
 
 //drawing rotate
-function rotate(rotein){
-//reseten()
-rota =  rotein;
+function rotate(degree){
 
   //calculate  and rotate image position 
-  Zgross = doc.getElementById("Hinter");
-  //Zgrossf = "resetdatar()";
-  Zgrossx  = svg1Vx;
-  Zgrossy  = svg1Vy;
-  Zgrossw  = svg1Vwidth;
-  Zgrossh  = svg1Vheight;
-  //calculate image center 
-  krotax = Zgrossw/2;
-  krotay = Zgrossh;
  //rotate position
-  rotx =  (Zgrossw/2);
-  roty =  (Zgrossh/2);
-
+  rotx =  svg1Vx+(svg1Vwidth/2);
+  roty =  svg1Vy+(svg1Vheight/2);
+  
   //rotate image
   rott = doc.getElementById("draft");
   transform = rott.getAttribute('transform');
-  rott.setAttribute('transform', transform + "translate("+(krotax)+" "+(krotay)+") rotate("+(rota)+" "+(rotx)+" "+(roty)+")");
+  transform = transform.substring(transform.indexOf("matrix"),transform.length);
+  rott.setAttribute('transform', "rotate("+ degree +" "+ rotx +" "+ roty +")" + transform);
+	element = document.getElementById("ID_0");
+	if (element != null){
+		var transformTxt;
+		elementTxt = element.getElementsByTagName("text");
+		if (elementTxt != null ){
+			for(var m=1; m < elementTxt.length; m = m+1 ){
+				transformTxt = elementTxt.item(m).getAttribute("transform");
+				transformTxt = transformTxt.substring(0,
+						(transformTxt.indexOf("rotate")==-1 ? transformTxt.length : transformTxt.indexOf("rotate")));
+				elementTxt.item(m).setAttribute("transform", transformTxt + "rotate(" + -degree +")");
+			}
+		}
+	}
 
   //LabelWinkel customize
  /*       var gover = doc.getElementsByTagName("g");

@@ -25,11 +25,13 @@ public class FailureReportData {
 	private String failureDescription;
 	
 	private ArrayList<FailureCode> failureCodes;
+	private ArrayList<PositionNr> positionNrs;
 	private boolean initialized=false;
 	 
 	public FailureReportData(){
 		//initialize list
-		failureCodes=new ArrayList<FailureCode>();			
+		failureCodes=new ArrayList<FailureCode>();
+		positionNrs=new ArrayList<PositionNr>();
 	
 	}
 
@@ -39,6 +41,18 @@ public class FailureReportData {
 			Connection conn = null;
 			CallableStatement coll = null;
 			try {
+
+				for (int quantity = 1; quantity <= 16; quantity++) {
+					int positionAbbr=quantity;
+					int positionDefinition=quantity;
+					
+					// add the values
+					PositionNr positionNr=new PositionNr();
+					positionNr.setPositionNrAbbr(String.valueOf(positionAbbr));
+					positionNr.setPositionNrName(String.valueOf(positionDefinition));
+					getPositionNrs().add(positionNr);
+				}
+
 				conn = dataSource.getConnection();
 				//calling the stored procedure which gets the failure codes
 				//PROCEDURE GET_FAILURECODES(v_cursor_failurecodes OUT CURSOR_PO);
@@ -63,6 +77,8 @@ public class FailureReportData {
 					failure.setFailurCodeName(codeAbbr + " - " + codeDefinition);
 					failureCodes.add(failure);
 				}
+				
+				
 	
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -129,6 +145,20 @@ public class FailureReportData {
 
 	public void setFailureCodes(ArrayList<FailureCode> failureCodes) {
 		this.failureCodes = failureCodes;
+	}
+
+	/**
+	 * @return the positionNrs
+	 */
+	public ArrayList<PositionNr> getPositionNrs() {
+		return positionNrs;
+	}
+
+	/**
+	 * @param positionNrs the positionNrs to set
+	 */
+	public void setPositionNrs(ArrayList<PositionNr> positionNrs) {
+		this.positionNrs = positionNrs;
 	}
 	
 }

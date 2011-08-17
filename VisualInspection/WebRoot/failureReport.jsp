@@ -43,10 +43,10 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	 window.opener=null;window.close();
 	});
 	function checkInput(){
-		if(document.getElementById("inputPOS").value==""){
+		if(document.getElementById("inputPOS").value=="-2"){
 		alert("请输入子板位置");
 		return false;
-		}else if(document.getElementById("inputFailCode").value=="9999"){
+		}else if(document.getElementById("inputFailCode").value=="-1"){
 		alert("请选择错误代码");
 		return false;
 		}else{
@@ -59,7 +59,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
      <div id="content">
 	   <s:form theme="xhtml" id="frm_failureReport" action="addFailureReport_Interface" onsubmit="return checkInput();">
 	   		
-				<table border="0">			
+				<table width="100%">			
 				<s:textfield key="formData.poNo" readonly="true" />
 				<s:textfield key="formData.itemNr" readonly="true"  />
 				<s:textfield key="formData.versionAS" readonly="true"   />
@@ -67,15 +67,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				<s:textfield key="formData.workstationNr" readonly="true"  />
 				<s:textfield key="formData.side" readonly="true"  />
 				<s:textfield key="failureReportData.partname" readonly="true"  />
-				<s:textfield id="inputPOS" key="failureReportData.positionNr" />
+				<s:select key="failureReportData.positionNr" list="failureReportData.positionNrs" required="true"
+					listKey="positionNrAbbr" listValue="positionNrName" headerKey="-2" headerValue="请选择子板号" id="inputPOS"/>
 				<s:textfield key="formData.operatorID" readonly="true"  />
-				<s:select 	key="failureReportData.failureCode" list="failureReportData.failureCodes" 
-							listKey="failureCodeAbbr" listValue="failurCodeName" headerKey="9999" headerValue="请选择错误代码" id="inputFailCode"/>
+				<s:select 	key="failureReportData.failureCode" list="failureReportData.failureCodes" required="true"
+							listKey="failureCodeAbbr" listValue="failurCodeName" headerKey="-1" headerValue="请选择错误代码" id="inputFailCode"/>
 				<s:textarea key="failureReportData.failureDescription" />
 			    <tr>				    				    
 				    <td><sx:submit key="buttonSave" /></td>
 				    <td><sx:submit key="buttonConfirm" afterNotifyTopics="/afterAddedReport"  /></td>
-				    <td><s:reset key="buttonCancel" onclick="window.opener.parent.focus();window.opener.parent.setFocusFID();window.opener=null;window.close();" /></td>				   
+				    <td>&nbsp;<s:reset key="buttonCancel" onclick="window.opener.parent.focus();window.opener.parent.setFocusFID();window.opener=null;window.close();" /></td>				   
 			    </tr>
 				</table>					
 			

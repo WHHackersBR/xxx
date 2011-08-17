@@ -27,32 +27,38 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   <body>
  	<s:form>
 	    <div>
-	    	<table border="1">
+	    	<table style="background-color:beige" width="100%">
 	    		<tr>
-	    			<td colspan="2"><s:textfield key="formData.poNo"  labelposition="left" readonly="true"/></td>
-	    			<td colspan="2"><s:textfield key="formData.itemNr" labelposition="left" readonly="true"/></td>
-	    			<td colspan="2"><s:textfield key="formData.versionAS" labelposition="left" readonly="true"/></td>
+	    			<td colspan="1"><s:textfield key="formData.poNo"  labelposition="left" readonly="true"/></td>
+	    			<td colspan="1"><s:textfield key="formData.itemNr" labelposition="left" readonly="true"/></td>
+	    			<td colspan="1"><s:textfield key="formData.versionAS" labelposition="left" readonly="true"/></td>
 	    		</tr>
 	    		<tr>
-	    			<td><s:textfield key="formData.workstationNr" labelposition="left" readonly="true"/></td>
-	    			<td><s:textfield key="formData.workstationDescription" labelposition="left" readonly="true"/></td>    			
+	    			<td colspan="1"><s:textfield key="formData.workstationNr" labelposition="left" readonly="true"/></td>
+	    			<td colspan="2"><s:textfield cssStyle="width:8cm;" key="formData.workstationDescription" labelposition="left" readonly="true"/></td>    			
 	    		</tr>
 	    		<tr>
 	    			<td><s:textfield key="nrOfPassed" labelposition="left" readonly="true"/></td>
 	    			<td><s:textfield key="nrOfFailed" labelposition="left" readonly="true"/></td>    			
 	    		</tr>	    		
 	    		<tr>
-	    		    <td colspan="4"><s:submit key="confirmAll" action="confirmAll_AllTestsOverview"/></td>   		
-	    			<td colspan="4"><s:submit key="closeWindow" onclick="window.opener.parent.setFocusFID();window.opener=null;window.close();"/></td>    			
+	    		    <td colspan="1">
+	    		    <s:submit key="confirmAll" action="confirmAll_AllTestsOverview"/></td>   		
+	    			<td colspan="1">
+	    			<s:submit key="closeWindow" onclick="window.opener.parent.setFocusFID();window.opener=null;window.close();"/></td>    			
 	    		</tr>
 	    	</table>
 	    </div>
 	    <div>
-	    	<s:text name="passedListText"/>	       
 	    </div>		
 	    <div>
-	    	<table border="1">
+	    	<table width="100%">
 	    		<tr>	    			
+	    			<td style="background-color:lime" colspan="5" align="center">
+	    			<s:text name="passedListText"/> 
+	    			</td>	       
+	    		</tr>	    			
+	    		<tr style="background-color:#A5ABFF">	    			
 	    			<th><s:text name="operationText"/></th>
 	    			<th><s:text name="fidText"/></th>
 	    			<th><s:text name="operatorIdText"/></th>
@@ -60,25 +66,36 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<th><s:text name="confirmationText"/></th>	    				    			
 	    		</tr>
 			   
-			    <s:iterator value="passedList">
+			    <s:iterator value="passedList"  status="stuts">
 			    		    	
 	   			<s:url id="removeUrl" action="deleteTested_AllTestsOverview">
 					<s:param name="fid" value="fid" />
 					<s:param name="workstationNr" value="formData.workstationNr" />					
 				</s:url>	
 			
-				<tr>			    	
+				<s:if test="#stuts.odd == true">
+				<tr style="background-color:#EBEDFF">			    	
 			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
 				    <td><s:property value="fid"/></td>
 				    <td><s:property value="operatorID"/></td>
 				    <td><s:property value="time"/></td>
 				    <td><s:property value="confirmation"/></td>		
 			    </tr>
+			    </s:if>
+			    <s:else>
+			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
+				    <td><s:property value="fid"/></td>
+				    <td><s:property value="operatorID"/></td>
+				    <td><s:property value="time"/></td>
+				    <td><s:property value="confirmation"/></td>		
+			    </s:else>
 			    </s:iterator>
 		   		<tr>
-		   		<td><s:text name="preTreatmentErrorText"/></td>		   		
+		   		<td style="background-color:yellow" colspan="5" align="center">
+		   		<s:text name="preTreatmentErrorText"/>
+		   		</td>		   		
 		   		</tr>	    		    
-	    		<tr>	    			
+	    		<tr style="background-color:#A5ABFF">	    			
 	    			<th><s:text name="operationText"/></th>
 	    			<th><s:text name="fidText"/></th>
 	    			<th><s:text name="operatorIdText"/></th>
@@ -86,31 +103,41 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<th><s:text name="confirmationText"/></th>	    				    			
 	    		</tr>
 			   
-			    <s:iterator value="preTreatmentErrorList">
+			    <s:iterator value="preTreatmentErrorList" status="stuts">
 			    		    	
 	   			<s:url id="removeUrl" action="deleteTested_AllTestsOverview">
 					<s:param name="fid" value="fid" />
 					<s:param name="workstationNr" value="formData.workstationNr" />					
 				</s:url>	
 			
-				<tr>			    	
+				<s:if test="#stuts.odd == true">
+				<tr style="background-color:#EBEDFF">			    	
 			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
 				    <td><s:property value="fid"/></td>
 				    <td><s:property value="operatorID"/></td>
 				    <td><s:property value="time"/></td>
 				    <td><s:property value="confirmation"/></td>		
 			    </tr>
+			    </s:if>
+			    <s:else>
+			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
+				    <td><s:property value="fid"/></td>
+				    <td><s:property value="operatorID"/></td>
+				    <td><s:property value="time"/></td>
+				    <td><s:property value="confirmation"/></td>		
+			    </s:else>
 			    </s:iterator>
 		    </table>
 		</div>
 		<div>
-	    	<s:text name="failedListText"/>	       
 	    </div>	
 		<div>
-	    	<table border="1">
+	    	<table width="100%">
 	    		<tr>
-	    			<th></th>
-	    			<th></th>
+			    	<td style="background-color:#FF0033" colspan="11" align="center"><s:text name="failedListText"/></td>	       
+	    		</tr>
+	    		<tr style="background-color:#A5ABFF">
+	    			<th colspan="2"><s:text name="operationText"/></th>
 	    			<th><s:text name="fidText"/></th>
 	    			<th><s:text name="pieLocText"/></th>
 	    			<th><s:text name="compLocText"/></th>
@@ -122,7 +149,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    			<th><s:text name="confirmationText"/></th>
 	    		</tr>
 			   
-			    <s:iterator value="failedList">
+			    <s:iterator value="failedList"  status="stuts">
 			    
 		    	<s:url id="editUrl" action="goToEditFailureInformation">
 					<s:param name="fid" value="fid" />
@@ -142,7 +169,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<s:param name="failureCode" value="failureCode" />
 				</s:url>	
 			
-				<tr>
+				<s:if test="#stuts.odd == true">
+				<tr  style="background-color:#EBEDFF">
 			    	<td><s:a href="%{editUrl}"   ><s:text name="editText"/></s:a></td>
 			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
 				    <td><s:property value="fid"/></td>
@@ -155,6 +183,20 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    <td><s:property value="operatorID"/></td>
 				    <td><s:property value="confirmation"/></td>	
 			    </tr>
+			    </s:if>
+			    <s:else>
+			    	<td><s:a href="%{editUrl}"   ><s:text name="editText"/></s:a></td>
+			    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
+				    <td><s:property value="fid"/></td>
+				    <td><s:property value="pieceLocation"/></td>
+				    <td><s:property value="componentLocation"/></td>
+				    <td><s:property value="failureCode"/></td>
+				    <td><s:property value="failureDefinition"/></td>
+				    <td><s:property value="failureDescription"/></td>
+				    <td><s:property value="time"/></td>
+				    <td><s:property value="operatorID"/></td>
+				    <td><s:property value="confirmation"/></td>	
+			    </s:else>
 			    </s:iterator>
 		    </table>
 	

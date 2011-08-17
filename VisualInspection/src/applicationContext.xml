@@ -40,7 +40,8 @@
 				<value>com/vi/pojo/VPo.hbm.xml</value>
 				<value>com/vi/pojo/VFidHist.hbm.xml</value>
 				<value>com/vi/pojo/TabViPo.hbm.xml</value>
-				<value>com/vi/pojo/SvgFile.hbm.xml</value></list>
+				<value>com/vi/pojo/SvgFile.hbm.xml</value>
+				<value>com/vi/pojo/TabFailure.hbm.xml</value></list>
 		</property></bean>
 	<bean id="tabWorkstationDAO"
 		class="com.vi.dao.TabWorkstationDAO"
@@ -87,6 +88,11 @@
 		</property>
 	</bean>
 	<bean id="svgFileDAO" class="com.vi.dao.SvgFileDAO" scope="session">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="tabFailureDAO" class="com.vi.dao.TabFailureDAO" scope="session">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
 		</property>

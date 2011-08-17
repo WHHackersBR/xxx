@@ -28,11 +28,11 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
  	<s:form>
  		<s:text name="viList"/>
 	    <div>
-	    	<table border="1">
-	    		<tr>
-	    			<td colspan="5" align="center"><s:text name="poPlanInformation"/></td>	    			
+	    	<table width="100%">
+	    		<tr style="background-color:#A5ABFF">
+	    			<td colspan="8" align="center"><s:text name="poPlanInformation"/></td>	    			
 	    		</tr>
-	    		<tr>
+	    		<tr style="background-color:#CBD1FF">
 				    <td><s:text name="poNo"/></td>
 				    <td><s:text name="articleNo"/></td>
 				    <td><s:text name="as"/></td>
@@ -40,7 +40,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    <td><s:text name="releaseDate"/></td>
 	    		</tr>
 	    		<s:iterator value="poPlanInfoList">
-	    		<tr>
+	    		<tr style="background-color:#EBEDFF">
 				    <td><s:property value="poNo"/></td>
 				    <td><s:property value="itemNo"/></td>
 				    <td><s:property value="as_"/></td>
@@ -48,11 +48,12 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				    <td><s:property value="releaseDate"/></td>
 	    		</tr>
 	    		</s:iterator>
-	    		
-	    		<tr>
-	    			<td colspan="7" align="center"><s:text name="testInfo"/></td>	    			
+	    	</table>
+	    	<table width="100%">
+	    		<tr style="background-color:#A5ABFF">
+	    			<td colspan="8" align="center"><s:text name="testInfo"/></td>	    			
 	    		</tr>
-	    		<tr>
+	    		<tr style="background-color:#CBD1FF">
 	    			<th><s:text name="articleNo"/></th>
 	    			<th><s:text name="as"/></th>
 	    			<th><s:text name="workstNr"/></th>
@@ -64,7 +65,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	    		</tr>
 			          
 			    <s:iterator value="poInformationList">			   		    			
-				<tr>			    	
+				<tr style="background-color:#EBEDFF">			    	
 				    <td><s:property value="itemNr"/></td>
 				    <td><s:property value="versionAS"/></td>
 				    <td><s:property value="workstationNr"/></td>
@@ -78,7 +79,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			    </s:iterator>
 			    
 	    		<tr>	    		    		
-	    			<td colspan="4"><s:submit key="closeWindow" onclick="window.opener=null;window.close();"/></td>    			
+	    			<td colspan="8"><s:submit align="center" key="closeWindow" onclick="window.opener=null;window.close();"/></td>    			
 	    		</tr>
 	    	</table>
 	    </div>

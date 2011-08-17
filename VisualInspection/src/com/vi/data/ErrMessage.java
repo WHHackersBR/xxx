@@ -6,7 +6,7 @@ public class ErrMessage {
 	public static String NullVersion="PCB版本号不存在";
 	public static String WrongPO="订单无效";
 	public static String NullFID="请输入PCB序列号";
-	public static String NullWS="请输入工位号";
+	public static String NullWS="工位号不存在";
 	public static String NullSIDE="请选择装配面";
 	public static String NullOperatorID="请填写工号";
 	public static String wrongFID="无效序列号";
@@ -21,5 +21,6 @@ public class ErrMessage {
 	public static String ConfirmedFid = "此序列号已经被确认";
 	public static String Confirmed = "确认";
 	public static String NotConfirmed = "未确认";
+	public static String singlePanel = "单拼版";
 	
 }
