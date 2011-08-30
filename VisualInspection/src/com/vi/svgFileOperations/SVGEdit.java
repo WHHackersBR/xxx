@@ -137,7 +137,7 @@ public class SVGEdit  {
 				String Y2 = location[4];
 				//Double fontSize= (Math.abs(Double.valueOf(Y2)-Double.valueOf(Y1))+Math.abs(Double.valueOf(X2)-Double.valueOf(X1)))*0.03;
 				Double fontSize= (Math.abs(Double.valueOf(Y2)+Double.valueOf(Y1)))*0.02;
-				String textSize=fontSize.toString();
+				String textSize=String.valueOf(fontSize*0.75);
 				Double W = Double.valueOf(X1)*2 + Double.valueOf(Y1);
 				//Double H = Double.valueOf(X2)*(2) + Double.valueOf(Y2);
 
@@ -190,6 +190,8 @@ public class SVGEdit  {
 				text.setAttribute("text-anchor", "middle");
 				text.setAttribute("writing-mode", "lr-tb");
 				text.setAttribute("fill", "currentColor");
+				//text.setAttribute("textLength", "1");
+				//text.setAttribute("lengthAdjust", "1");
 				//let it ignore events
 				text.setAttribute("pointer-events", "none");
 				//text.getAttribute("fill").

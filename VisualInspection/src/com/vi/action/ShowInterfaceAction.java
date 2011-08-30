@@ -356,6 +356,7 @@ public class ShowInterfaceAction extends ActionSupport {
 					tabTested.setEventTime(new Timestamp(new Date().getTime()));
 					tabTested.setMachTime(dateFormat.format(now));
 					tabTested.setOperatorId(formData.getOperatorID());
+					tabTested.setTransferBit(BigDecimal.valueOf(0));
 					
 					formData.setFailed(true);
 					errorOutput= formData.getCurrentFid() + ":" + ErrMessage.passFID;
@@ -628,20 +629,25 @@ public class ShowInterfaceAction extends ActionSupport {
 		errorOutput="";
 		
 		try {
-			TabFailureId tabFailureId=new TabFailureId(formData.getCurrentFid(),formData.getWorkstationNr(),
-					failureReportData.getPositionNr(), failureReportData.getPartname(),failureReportData.getFailureCode());
-			TabFailure tabFailure = new TabFailure(tabFailureId);
-            Date   now   =   new   Date();
-            SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
-            tabFailure.setMachTime(dateFormat.format(now));
-            tabFailure.setEventTime(new Timestamp(new Date().getTime()));
-            tabFailure.setFailureDescription(failureReportData.getFailureDescription());
-            tabFailure.setSide(v_side);
-            tabFailure.setTransferBit(BigDecimal.valueOf(0));
-            tabFailureDAO.attachDirty(tabFailure);
-            
-			formData.setFailed(false);		
-		} catch (Exception e) {
+			TabTestedId tabTestedId=new TabTestedId(formData.getCurrentFid(), formData.getWorkstationNr());
+			TabTested tabTested = tabTestedDAO.findById(tabTestedId);
+			
+			if (tabTested != null){
+				TabFailureId tabFailureId=new TabFailureId(formData.getCurrentFid(),formData.getWorkstationNr(),
+						failureReportData.getPositionNr(), failureReportData.getPartname(),failureReportData.getFailureCode());
+				TabFailure tabFailure = new TabFailure(tabFailureId);
+	            //Date   now   =   new   Date();
+	            //SimpleDateFormat   dateFormat   =   new   SimpleDateFormat("yyyyMMddHHmmss");
+	            tabFailure.setMachTime(tabTested.getMachTime());
+	            tabFailure.setEventTime(new Timestamp(new Date().getTime()));
+	            tabFailure.setFailureDescription(failureReportData.getFailureDescription());
+	            tabFailure.setSide(formData.getSide());
+	            tabFailure.setTransferBit(BigDecimal.valueOf(0));
+	            tabFailureDAO.attachDirty(tabFailure);
+				formData.setFailed(false);		
+	
+				}
+			} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 		} 
