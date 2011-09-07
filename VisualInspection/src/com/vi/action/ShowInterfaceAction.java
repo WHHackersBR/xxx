@@ -60,7 +60,6 @@ public class ShowInterfaceAction extends ActionSupport {
 	private VPoDAO	vPoDAO;
 	private TabViPoDAO	tabViPoDAO;
 	private SvgFileDAO	svgFileDAO;
-	private VFidHistDAO vFidHistDAO;
 	//private 
 	
 
@@ -116,6 +115,8 @@ public class ShowInterfaceAction extends ActionSupport {
 		errorOutput="";
 		formData.getItemList().clear();
 		formData.getVersionASList().clear();
+		formData.setItemNr("");
+		formData.setVersionAS("");
 		if(formData.getPoNo().equals("") ){
 			errorOutput=ErrMessage.NullPO;
 			return ERROR;
@@ -124,8 +125,6 @@ public class ShowInterfaceAction extends ActionSupport {
 		Connection conn = null;
 		CallableStatement coll = null;
 		try {
-			formData.setItemNr("");
-			formData.setVersionAS("");
 			//query database for the information			
 			conn = dataSource.getConnection();
 			//calling the stored procedure which returns a cursor to the data
@@ -141,6 +140,9 @@ public class ShowInterfaceAction extends ActionSupport {
 			ResultSet rs = (ResultSet) coll.getObject(2);
 			//and process data
 			
+			//get available item number/version that has been defined
+			SvgFileId svgFileId;
+			SvgFile	svgFile=null;
 			while (rs.next()) {
 				//System.out.println(rs.getString(1)); // po_no
 				//System.out.println(rs.getString(2)); // a5e... article_no
@@ -149,12 +151,21 @@ public class ShowInterfaceAction extends ActionSupport {
 				//System.out.println(rs.getString(4)); // quantity
 
 				// add the values
-				formData.getItemList().add(rs.getString(2));
-				formData.getVersionASList().add(rs.getString(3));
-				formData.setItemNr(rs.getString(2));
-				formData.setVersionAS(rs.getString(3));
-			}
+				//get available item number/version that has been defined
+				svgFileId = new SvgFileId(rs.getString(2),rs.getString(3), "0");
+				svgFile = svgFileDAO.findById(svgFileId);
+				if (svgFile != null ){
+					formData.getItemList().add(rs.getString(2));
+					formData.getVersionASList().add(rs.getString(3));
+					formData.setItemNr(rs.getString(2));
+					formData.setVersionAS(rs.getString(3));
+					break;
+				}
 
+			}
+			if (svgFile == null ){
+				errorOutput=ErrMessage.noItem;
+			}
 
 		} catch (Exception e) {
 			if (!e.getMessage().equals("Cursor is closed.")){

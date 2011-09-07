@@ -291,14 +291,23 @@ function searchComp(keyword){
 }
 
 function chooseSide(side) {
-	//var colorIndex=0;
-	var pathTag=document.getElementsByTagName("path");
-	var circleTag=document.getElementsByTagName("circle");
+	var pathTag;
+	var circleTag;
+	var textTag;
+	element = document.getElementsByTagName("defs");
+	if (element != null){
+		var pathTag=element.item(0).getElementsByTagName("path");
+		var circleTag=element.item(0).getElementsByTagName("circle");
+		var textTag=element.item(0).getElementsByTagName("text");
+	}
   	for(var i = 0; i < pathTag.length;i=i+1 ) {
 	  	pathTag.item(i).setAttribute("display","none");
   	}
   	for(var i = 0; i < circleTag.length;i=i+1 ) {
 	  	circleTag.item(i).setAttribute("display","none");
+  	}
+  	for(var i = 0; i < textTag.length;i=i+1 ) {
+	  	textTag.item(i).setAttribute("display","none");
   	}
 	switch (side){
 	case "CS":
@@ -314,11 +323,15 @@ function chooseSide(side) {
 		  	}
 		  	}
 		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
-			  	//alert("CSC: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
 		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
 			  	circleTag.item(i).setAttribute("display","inline");
 			  	circleTag.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CSinC: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
+		  	}
+		  	}
+		  	for(var i = 0; i < textTag.length;i=i+1 ) {
+		  	if(textTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+		  		textTag.item(i).setAttribute("display","inline");
+		  		textTag.item(i).setAttribute("color",layerListCS[j+1]);
 		  	}
 		  	}
 		}
@@ -335,13 +348,17 @@ function chooseSide(side) {
 		  	}
 		  	}
 		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
-		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
-			  	circleTag.item(i).setAttribute("display","inline");
-			  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
-		  	}
-		  	}
+			  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+				  	circleTag.item(i).setAttribute("display","inline");
+				  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	}
+			  	}
+		  	for(var i = 0; i < textTag.length;i=i+1 ) {
+			  	if(textTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  		textTag.item(i).setAttribute("display","inline");
+			  		textTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	}
+			  	}
 		}
 		break;
 	case "AB":
@@ -356,15 +373,19 @@ function chooseSide(side) {
 			  	pathTag.item(i).setAttribute("display","inline");
 			  	pathTag.item(i).setAttribute("color",layerListCS[j+1]);
 			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
-		  	}
+		  		}
 		  	}
 		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
-			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListCS[j]);
 		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
 			  	circleTag.item(i).setAttribute("display","inline");
 			  	circleTag.item(i).setAttribute("color",layerListCS[j+1]);
-			  	//alert("CS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
+		  		}
 		  	}
+		  	for(var i = 0; i < textTag.length;i=i+1 ) {
+			  	if(textTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListCS[j].replace(/ /g,"")){
+			  		textTag.item(i).setAttribute("display","inline");
+			  		textTag.item(i).setAttribute("color",layerListCS[j+1]);
+			  	}
 		  	}
 		}
 		for(var j=0;j<layerListSS.length-1;j=j+2){
@@ -378,13 +399,17 @@ function chooseSide(side) {
 		  	}
 		  	}
 		  	for(var i = 0; i < circleTag.length;i=i+1 ) {
-			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+layerListSS[j]);
 		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
 			  	circleTag.item(i).setAttribute("display","inline");
 			  	circleTag.item(i).setAttribute("color",layerListSS[j+1]);
-			  	//alert("SS: "+ i+":"+pathTag.item(i).getAttribute("layer")+":"+pathTag.item(i).getAttribute("color"));
 		  	}
 		  	}
+		  	for(var i = 0; i < textTag.length;i=i+1 ) {
+			  	if(textTag.item(i).getAttribute("layer").replace(/ /g,"")==layerListSS[j].replace(/ /g,"")){
+			  		textTag.item(i).setAttribute("display","inline");
+			  		textTag.item(i).setAttribute("color",layerListSS[j+1]);
+			  	}
+			  	}
 		}
 		break;
 	default:
@@ -392,12 +417,17 @@ function chooseSide(side) {
 		  	if(pathTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
 			  	pathTag.item(i).setAttribute("display","inline");
 		  	}
-		  	}
+	  	}
 	  	for(var i = 0; i < circleTag.length;i=i+1 ) {
 		  	if(circleTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
 			  	circleTag.item(i).setAttribute("display","inline");
 		  	}
+	  	}
+	  	for(var i = 0; i < textTag.length;i=i+1 ) {
+		  	if(textTag.item(i).getAttribute("layer").replace(/ /g,"")==side){
+		  		textTag.item(i).setAttribute("display","inline");
 		  	}
+	  	}
 	}
 }
 
@@ -584,88 +614,6 @@ function rotate(degree){
 			}
 		}
 	}
-
-  //LabelWinkel customize
- /*       var gover = doc.getElementsByTagName("g");
-        var anzahlid = gover.getLength();
-        for (var i=0;i<anzahlid;i++){
-        var aktid = gover.item(i);
-        goverid = aktid.getAttribute("id");
-                if  (goverid == "") {} else {
-                gkz = goverid.substr(0,1);
-                gkz1 = goverid.substr(1,10);
-                gkz2 = goverid.substr(1,1);
-                if  (gkz2 <= "9") {continue;}
-                    if  (gkz == "_") {
-                   EP = gkz+gkz1;
-
-                   setzt = doc.getElementById(goverid);
-                   rottag=setzt.getFirstChild();
-                   rottrans = rottag.getAttribute("transform");
-
-              var rottrans = rottrans.split(" ");
-              rottransw1 = String(rottrans[6]);
-              var rottransw2 = rottransw1.split("(");
-              rottransw = Number(rottransw2[1]);
-              rottransx = String(rottrans[7]);
-              rottransw1 = String(rottrans[8]);
-              var rottransw2 = rottransw1.split(")");
-              rottransy = Number(rottransw2[0]);
-              rottransue = ((rottrans[0])+" "+(rottrans[1])+" "+(rottrans[2])+" "+(rottrans[3])+" "+(rottrans[4])+" "+(rottrans[5]));
-
-              if (rota == 0)    {if (rottransw == 270){rottransw = 90}; if (rottransw == 180){rottransw = 0}  }
-              if (rota == 90)   {if (rottransw == 90){rottransw = 270}; if (rottransw == 180){rottransw = 0}   }
-              if (rota == 180)  {if (rottransw == 90){rottransw = 270}; if (rottransw == 0){rottransw = 180}   }
-              if (rota == 270)  {if (rottransw == 270){rottransw = 90}; if (rottransw == 0){rottransw = 180}   }
-
-              rottag.setAttribute("transform",""+rottransue+" rotate("+rottransw+" "+rottransx+" "+rottransy+")");
-                    }
-                }
-        }
-
-
-  //calculate scale 
-        rotscale1 = svg1Vheight/Zgrossw;
-        rotscale2 = svg1Vwidth/Zgrossh;
-        if (rotscale1 <= rotscale2) {rotscale = rotscale1} else {rotscale = rotscale2}
-        if  (rotscale > 1.1) {krotv = "-"}
-        if  (rotscale < 0.9) {krotv = "+"}
-        if  (rotscale >= 0.9 && rotscale <= 1.1){krotv = "-";}
-
-  //customize view window 
-      if (rotscale == 1){}else{
-         
-       if (rota == 90 || rota == 270){
-       var deltaf = (svg1Vwidth-svg1Vheight)/2
-       svg1.setCurrentScale(rotscale*0.95);
-       trans1 =  svg1.getCurrentTranslate();
-       trans1.setX(krotv+deltaf*rotscale);
-       trans1.setY(krotv+deltaf*rotscale);
-       }
-       if (rota == 0 || rota == 180){
-       
-        if (AeLage == 1){
-           svg1.setCurrentScale(0.9);
-           trans1 =  svg1.getCurrentTranslate();
-           trans1.setX((Zgrossw-Zgrossw*0.9)/2 );
-           trans1.setY((Zgrossh-Zgrossh*0.9)/2 );
-           }else{
-           svg1.setCurrentScale(1);
-           trans1 =  svg1.getCurrentTranslate();
-           trans1.setX(0);
-           trans1.setY(0);
-           }
-       }
-      }
-
-
-  //edit kontext menue 
-        layaerst1 = ("Drehen"+rota);
-        UpdateMenu(null, layaerst1, 'enabled', 'Dreh', false);
-        UpdateMenu(null, layaerst2, 'enabled', 'Dreh', false);
-        layaerst2 = layaerst1;
-
-*/
 }
 
 //key events

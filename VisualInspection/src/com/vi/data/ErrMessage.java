@@ -22,5 +22,6 @@ public class ErrMessage {
 	public static String Confirmed = "确认";
 	public static String NotConfirmed = "未确认";
 	public static String singlePanel = "单拼版";
+	public static String noItem = "图形文件未上传";
 	
 }
