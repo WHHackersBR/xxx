@@ -27,17 +27,36 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
   </head>
   
   <body>
+    <%
+  String role=(String)session.getAttribute("role");
+  %>
      <div>
      <table>
     <s:form action="uploadManual" id="uploadManual" method ="POST" enctype ="multipart/form-data">
      <tr>
-		<td><s:textfield labelposition="left" key="pageLabel.partNo"></s:textfield></td>
-		<td><s:textfield cssStyle="width:1cm" labelposition="left" key="pageLabel.partAs"></s:textfield></td>
+		<td><s:textfield labelposition="left" key="pageLabel.partNo" readonly="true"></s:textfield></td>
+		<td><s:textfield cssStyle="width:1cm" labelposition="left" key="pageLabel.partAs" readonly="true"></s:textfield></td>
 		<td><s:reset value="关闭窗口" onclick="window.close();" align="middle"/></td>
     </tr>
+    <tr>
+		<td><s:textfield key="pageLabel.creator" readonly="true"></s:textfield></td>
+		<td><s:textfield key="pageLabel.createDate" readonly="true"></s:textfield></td>
+		<td><s:textfield key="pageLabel.approver" readonly="true"></s:textfield></td>
+		<td><s:textfield key="pageLabel.approveDate" readonly="true"></s:textfield></td>
+		<td><s:textfield key="pageLabel.active" readonly="true"></s:textfield></td>
+    </tr>
+
 	<tr>
+		<%
+		if(role.equalsIgnoreCase("creator"))
+		{
+		%>
 		<td><s:file labelposition="left" key="pageLabel.viDocument"/></td> 
 		<td><s:submit cssStyle="width:1.5cm;" key="buttonUpload"/></td>
+		<%
+		}
+		%>
+		
 	</tr>
 	</s:form>
 	</table>
@@ -51,10 +70,16 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		
 	</tr-->
 	    <s:iterator value="manualList">
-	    
-  			<s:url id="removeUrl" action="delManualFile">
-			<s:param name="viDocReview" value="viDocReal" />
-		</s:url>	
+	    <%
+		if(role.equalsIgnoreCase("creator"))
+		{
+		%>
+		<s:url id="removeUrl" action="delManualFile" >
+		<s:param name="viDocReview" value="viDocReal" />
+		</s:url>
+		<%
+		}
+		%>
 	
 		<tr style="background-color:beige;">
 	    	<td><s:a href="%{removeUrl}" ><s:text name="delText"/></s:a></td>
@@ -75,7 +100,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		allowSelectAll="false"
 	
 	/-->
-
 	</s:form>
 	</table>		
 	</div>
@@ -83,9 +107,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	<br/>
 	<br/>
 	说明:<br/>
-	1,目检附件将被从I盘上传到服务器上,由于服务器上的文件可能丢失,请保证I盘上文件的正确以作为备份<br/>
-	2,上传的目检附件不支持中文文件名(可以上传但无法浏览)<br/>
-	3,上传的目检附件不大于2M,仅可以传一个文件(请用office的嵌入功能将其他文件嵌入到一个文档中)<br/>
+	1,目检附件将被从本地盘上传到服务器上,请保留本地盘文件一周<br/>
+	2,上传的目检附件不支持中文文件名(可以上传但无法浏览也无法删除)<br/>
+	3,上传的目检附件不大于2M,可以传多个个文件<br/>
 	
   </body>
 </html>
