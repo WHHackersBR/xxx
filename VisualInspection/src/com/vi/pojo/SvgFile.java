@@ -15,9 +15,7 @@ public class SvgFile implements java.io.Serializable {
 	private Blob sourcefile;
 	private String userManual;
 	private String modifier;
-	//private String articleNo;
-	//private String estand;
-	//private String side;
+	private String active;
 
 	// Constructors
 
@@ -82,6 +80,20 @@ public class SvgFile implements java.io.Serializable {
 	 */
 	public void setModifier(String modifier) {
 		this.modifier = modifier;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(String active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public String getActive() {
+		return active;
 	}
 
 

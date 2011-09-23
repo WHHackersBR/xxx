@@ -23,5 +23,6 @@ public class ErrMessage {
 	public static String NotConfirmed = "未确认";
 	public static String singlePanel = "单拼版";
 	public static String noItem = "图形文件未上传";
+	public static String notApproved = "目检文件未批准";
 	
 }

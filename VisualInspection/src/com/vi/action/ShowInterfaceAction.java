@@ -165,6 +165,8 @@ public class ShowInterfaceAction extends ActionSupport {
 			}
 			if (svgFile == null ){
 				errorOutput=ErrMessage.noItem;
+			}else if (!svgFile.getActive().equals("T")){
+				errorOutput = ErrMessage.notApproved;
 			}
 
 		} catch (Exception e) {
