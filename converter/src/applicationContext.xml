@@ -2,12 +2,11 @@
 <beans
 	xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 
 	<bean id="dataSource"
-		class="org.apache.commons.dbcp.BasicDataSource">
+		class="org.apache.commons.dbcp.BasicDataSource" scope="session">
 		<property name="driverClassName"
 			value="oracle.jdbc.driver.OracleDriver">
 		</property>
@@ -18,7 +17,7 @@
 		<property name="password" value="pv70d3450"></property>
 	</bean>
 	<bean id="sessionFactory"
-		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean" scope="session">
 		<property name="dataSource">
 			<ref bean="dataSource" />
 		</property>
@@ -34,44 +33,50 @@
 				<value>com/converter/SvgFile.hbm.xml</value>
 				<value>com/converter/SvgSide.hbm.xml</value>
 				<value>com/converter/TabWorkstation.hbm.xml</value>
-				<value>com/converter/TabComponentInfo.hbm.xml</value></list>
+				<value>com/converter/TabComponentInfo.hbm.xml</value>
+				<value>com/converter/TabLogin.hbm.xml</value></list>
 		</property></bean>
-	<bean id="svgFileDAO" class="com.converter.dao.SvgFileDAO">
+	<bean id="svgFileDAO" class="com.converter.dao.SvgFileDAO" scope="session">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
 		</property>
 	</bean>
-	<bean id="uploadaction" class="com.converter.action.uploadAction"> 
+	<bean id="uploadaction" class="com.converter.action.uploadAction" scope="session"> 
 		<property name="uploadfiledao">
 			<ref bean="svgFileDAO"/>
 		</property>
 		<property name="savesidedao">
-			<ref bean="SvgSideDAO"/>
+			<ref bean="svgSideDAO"/>
 		</property>
 		<property name="dataSource">
 			<ref bean="dataSource" />
 		</property>
 	</bean>
-	<bean id="sideContentaction" class="com.converter.action.uploadAction"> 
+	<bean id="sideContentaction" class="com.converter.action.uploadAction" scope="session"> 
 		<property name="savesidedao">
-			<ref bean="SvgSideDAO"/>
+			<ref bean="svgSideDAO"/>
 		</property>
 	</bean>
-	<bean id="pageLabel" class="com.converter.data.PageLabel"/>
-	<bean id="SvgSideDAO" class="com.converter.dao.SvgSideDAO">
+	<bean id="pageLabel" class="com.converter.data.PageLabel" scope="session"/>
+	<bean id="svgSideDAO" class="com.converter.dao.SvgSideDAO" scope="session">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
 		</property>
 	</bean>
 	<bean id="tabWorkstationDAO"
-		class="com.converter.TabWorkstationDAO">
+		class="com.converter.TabWorkstationDAO" scope="session">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
 		</property>
 	</bean>
 
 	<bean id="tabComponentInfoDAO"
-		class="com.converter.dao.TabComponentInfoDAO">
+		class="com.converter.dao.TabComponentInfoDAO" scope="session">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="tabLoginDAO" class="com.converter.dao.TabLoginDAO" scope="session">
 		<property name="sessionFactory">
 			<ref bean="sessionFactory" />
 		</property>

@@ -3,12 +3,29 @@
 <struts>
 	<constant name="struts.objectFactory" value="spring" />
 		<package name="struts2springhibernate" extends="struts-default">
+			<action name="preLogin" class="com.converter.action.LoginAction" method="preLogin">
+				<result name="success">login.jsp</result>
+				<result name="error">login.jsp</result>
+			</action>
+			<action name="login" class="com.converter.action.LoginAction" method="login">
+				<result name="success">converter.jsp</result>
+				<result name="error">login.jsp</result>
+			</action>
+			<action name="approve" class="com.converter.action.LoginAction" method="approve">
+				<result name="success">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+				<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+			</action>
+			<action name="unApprove" class="com.converter.action.LoginAction" method="unApprove">
+				<result name="success">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+				<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+			</action>
+		
 			<action name="*Action" class="uploadaction" method="{1}">
-				<result name="success">index.jsp</result>
-				<result name="failed"> /WEB-INF/ajax_dojo/showErrMessage.jsp</result>
+				<result name="success">converter.jsp</result>
+				<result name="error"> /WEB-INF/ajax_dojo/showErrMessage.jsp</result>
 			</action>
 			<action name="loadSvg" class="com.converter.action.uploadAction" method="loadSvg">					  
-	  			<result name="loadsvg">/WEB-INF/ajax_dojo/getSvg.jsp</result>
+	  			<result name="success">/WEB-INF/ajax_dojo/getSvg.jsp</result>
 	  			<result name="error">/WEB-INF/ajax_dojo/showErrMessage.jsp</result>
 			</action>
 			<action name="userManual" class="com.converter.action.uploadAction" method="userManual">					  
@@ -24,7 +41,7 @@
 				<result name="error">showErrMessage.jsp</result>
 			</action>
 			<action name="sideContentaction" class="sideContentaction" method="sideContentaction" >
-				<result name="success">index.jsp</result>
+				<result name="success">converter.jsp</result>
 				<result name="error">showErrMessage.jsp</result>
 			</action>
 			<action name="delManualFile" class="com.converter.action.uploadAction" method="delManualFile">					  

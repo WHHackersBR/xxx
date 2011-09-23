@@ -26,5 +26,17 @@
         <property name="modifier" type="java.lang.String">
             <column name="MODIFIER" length="16" />
         </property>
+        <property name="modify_date" type="java.sql.Timestamp">
+            <column name="MODIFY_DATE" length="7" />
+        </property>
+        <property name="approver" type="java.lang.String">
+            <column name="APPROVER" length="16" />
+        </property>
+        <property name="approve_date" type="java.sql.Timestamp">
+            <column name="APPROVE_DATE" length="7" />
+        </property>
+        <property name="active" type="java.lang.String">
+            <column name="ACTIVE" length="1" />
+        </property>
     </class>
 </hibernate-mapping>

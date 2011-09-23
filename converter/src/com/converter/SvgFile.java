@@ -1,6 +1,7 @@
 package com.converter;
 
 import java.sql.Blob;
+import java.sql.Timestamp;
 
 //import oracle.sql.BLOB;
 
@@ -17,9 +18,10 @@ public class SvgFile implements java.io.Serializable {
 	private Blob sourcefile;
 	private String userManual;
 	private String modifier;
-	//private String articleNo;
-	//private String estand;
-	//private String side;
+	private Timestamp modify_date;
+	private String approver;
+	private Timestamp approve_date;
+	private String active;
 
 	// Constructors
 
@@ -84,6 +86,44 @@ public class SvgFile implements java.io.Serializable {
 	 */
 	public void setModifier(String modifier) {
 		this.modifier = modifier;
+	}
+
+	public void setModify_date(Timestamp modify_date) {
+		this.modify_date = modify_date;
+	}
+
+	public Timestamp getModify_date() {
+		return modify_date;
+	}
+
+	public void setApprover(String approver) {
+		this.approver = approver;
+	}
+
+	public String getApprover() {
+		return approver;
+	}
+
+	public void setApprove_date(Timestamp approve_date) {
+		this.approve_date = approve_date;
+	}
+
+	public Timestamp getApprove_date() {
+		return approve_date;
+	}
+
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(String active) {
+		this.active = active;
+	}
+
+	/**
+	 * @return the active
+	 */
+	public String getActive() {
+		return active;
 	}
 
 

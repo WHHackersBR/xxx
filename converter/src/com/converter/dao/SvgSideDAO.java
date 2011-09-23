@@ -1,6 +1,5 @@
 package com.converter.dao;
 
-import java.math.BigDecimal;
 import java.util.List;
 import org.hibernate.LockMode;
 import org.slf4j.Logger;

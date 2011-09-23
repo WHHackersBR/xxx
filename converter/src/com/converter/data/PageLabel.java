@@ -1,6 +1,7 @@
 package com.converter.data;
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class PageLabel {
@@ -19,6 +20,11 @@ public class PageLabel {
 	private Boolean chooseSs;
 	private String contentType;
 	private String fileName;
+	private String creator;
+	private Timestamp createDate;
+	private String approver;
+	private Timestamp approveDate;
+	private String active;
 	
 
 
@@ -77,10 +83,10 @@ public class PageLabel {
 		this.partAs = partAs;
 	}
 	public String getPartNo() {
-		return partNo;
+		return partNo.toUpperCase();
 	}
 	public void setPartNo(String partNo) {
-		this.partNo = partNo;
+		this.partNo = partNo.toUpperCase();
 	}
 	public String getSide() {
 		return side;
@@ -159,6 +165,66 @@ public class PageLabel {
 	 */
 	public void setViDocReal(String viDocReal) {
 		this.viDocReal = viDocReal;
+	}
+	/**
+	 * @param creator the creator to set
+	 */
+	public void setCreator(String creator) {
+		this.creator = creator;
+	}
+	/**
+	 * @return the creator
+	 */
+	public String getCreator() {
+		return creator;
+	}
+	/**
+	 * @param createDate the createDate to set
+	 */
+	public void setCreateDate(Timestamp createDate) {
+		this.createDate = createDate;
+	}
+	/**
+	 * @return the createDate
+	 */
+	public Timestamp getCreateDate() {
+		return createDate;
+	}
+	/**
+	 * @param approver the approver to set
+	 */
+	public void setApprover(String approver) {
+		this.approver = approver;
+	}
+	/**
+	 * @return the approver
+	 */
+	public String getApprover() {
+		return approver;
+	}
+	/**
+	 * @param approveDate the approveDate to set
+	 */
+	public void setApproveDate(Timestamp approveDate) {
+		this.approveDate = approveDate;
+	}
+	/**
+	 * @return the approveDate
+	 */
+	public Timestamp getApproveDate() {
+		return approveDate;
+	}
+	/**
+	 * @param active the active to set
+	 */
+	public void setActive(String active) {
+		this.active = active;
+	}
+	/**
+	 * @return the active
+	 */
+	public String getActive() {
+		return active;
 	}
 
 }

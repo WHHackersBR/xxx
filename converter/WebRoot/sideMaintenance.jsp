@@ -45,6 +45,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 
   	
   <body>
+  
      <div id="content">
 	   <s:form action="sideContentaction">
      <tr>
